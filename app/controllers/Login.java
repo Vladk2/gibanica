@@ -31,10 +31,7 @@ public class Login extends Controller {
         User created = new User();
         created.email = requestData.get("email");
         created.password = requestData.get("password");
-        session("connected", created.email);
-        session("connectedFName", "Ime");
-        session("connectedLName", "Prezime");
-        String loggedUser = session("connected");
+
 
         Database database = Databases.createFrom(
                 "baklava",
@@ -51,15 +48,27 @@ public class Login extends Controller {
             /*ResultSet set = connection.prepareStatement("Select email, password from users where email="
                     + "\"" + created.email + "\"" + " and password=" + "\"" + created.password
                     + "\"" + ";").executeQuery();*/
-            ResultSet set = connection.prepareStatement("Select password, email from users where password="
+            ResultSet set = connection.prepareStatement("Select password, email, name, surname, type from users where password="
                     + "\"" + created.password + "\" and email=" + "\"" + created.email + "\"" + ";").executeQuery();
             String email = "";
             String pw = "";
+            String tip = "";
+            String ime = "";
+            String prezime = "";
             while(set.next()){
                 pw = set.getString(1);
                 email = set.getString(2);
+                ime = set.getString(3);
+                prezime = set.getString(4);
+                tip = set.getString(5);
             }
             if(pw.equals(created.password) && email.equals(created.email)) {
+                session("connected", email);
+                session("connectedFName", ime);
+                session("connectedLName", prezime);
+                session("connectedPass", pw);
+                session("userType", tip);
+                String loggedUser = session("connected");
                 return ok(home.render("Welcome",new play.twirl.api.Html("<center>Welcome, " + loggedUser + "!</center>") )); // login succedded
             }
             //listaObjekata = (String []) rowValues.toArray(new String[rowValues.size()]);

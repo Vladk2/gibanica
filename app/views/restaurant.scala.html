@@ -1,0 +1,56 @@
+@(managerEmail: String)
+
+
+@home("Restaurants"){
+
+  <div>
+    <i style="float:right;margin-right:40px;">logged in: <b>@managerEmail</b> </i> <br> <br>
+      <center>
+
+        <div class="floating-box"   style="width:400px;display: inline-block; height:500px;margin:20px; ">
+          <b style="font-size:18pt;font-family: 'Chaparral Pro'"> ADD A RESTAURANT</b> <br> <br>
+          <form method="post" action="/restaurant/" accept-charset="UTF-8">
+            <label for="rname">Restaurant Name:</label> <br>
+            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text" placeholder="" name="rname" >
+            <label for="rdesc">About a restaurant (eg. Vegan, Chinese food...):</label> <br>
+            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text" placeholder="" name="rdesc" >
+            <label for="meals">Select meals(hold shift to select multiple):</label> <br>
+            <select class="selectpicker" multiple id="meals" >
+              <option>Jelo1</option>
+              <option>Jelo2</option>
+            </select> <br> <br>
+            <label for="drinks">Select drinks(hold shift to select multiple):</label> <br>
+            <select class="selectpicker" multiple id="drinks" style="width:450px;">
+              <option>Pice1</option>
+              <option>Pice2</option>
+            </select> <br> <br>
+            <input class="btn btn-warning btn-block" type="submit" id="sign-in" value="REGISTER A NEW RESTAURANT" style="width: 250px">
+
+          </form>
+        </div>
+
+        <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+          <b style="font-size:18pt;font-family: 'Chaparral Pro'"> ADD A MANAGER</b> <br> <br>
+          <form method="post" action="/restaurant/" accept-charset="UTF-8">
+            <label for="email">E-mail:</label> <br>
+            <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text" placeholder="" name="email" >
+            <label for="pass">Password:</label> <br>
+            <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text" placeholder="" name="pass" >
+            <label for="name">First name:</label> <br>
+            <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text" placeholder="" name="fname" >
+            <label for="lname">Last name :</label> <br>
+            <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text" placeholder="" name="lname" >
+            <label for="forRest">Restaurant :</label> <br>
+            <select class="form-control" id="forRest" style="width:250px;">
+              <option>Odje idu restorani</option>
+            </select> <br>
+
+            <input class="btn btn-warning btn-block" type="submit" id="sign-in" value="REGISTER A NEW MANAGER" style="width: 250px">
+          </form>
+
+        </div>
+      </center>
+
+  </div>
+
+}

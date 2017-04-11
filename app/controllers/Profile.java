@@ -37,60 +37,61 @@ public class Profile extends Controller {
     public static Result editProfile() {
         String loggedUser = session("connected");
 
-        DynamicForm requestData = Form.form().bindFromRequest();
-        String old_pw = requestData.get("old_password");
-        String new_pw = requestData.get("new_password");
 
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
+               DynamicForm requestData = Form.form().bindFromRequest();
+               String old_pw = requestData.get("old_password");
+                String new_pw = requestData.get("new_password");
 
-        Connection connection = database.getConnection();
+                        Database database = Databases.createFrom(
+                                "baklava",
+                                "com.mysql.jdbc.Driver",
+                                "jdbc:mysql://localhost/baklava",
+                                ImmutableMap.of(
+                                                "user", "root",
+                                                "password", "gibanica"
+                                                )
+                                );
 
-        try{
-            ResultSet set = connection.prepareStatement("Select password, email from users where password="
-                    + "\"" + old_pw + "\" and email=" + "\"" + loggedUser + "\"" + ";").executeQuery();
+                        Connection connection = database.getConnection();
 
-            String email = "";
-            String pw = "";
+                       try{
+                        ResultSet set = connection.prepareStatement("Select password, email from users where password="
+                                        + "\"" + old_pw + "\" and email=" + "\"" + loggedUser + "\"" + ";").executeQuery();
 
-            while(set.next()){
-                pw = set.getString(1);
-                email = set.getString(2);
-            }
+                                String email = "";
+                        String pw = "";
 
-            if(pw.equals(old_pw) && email.equals(loggedUser)) {
+                               while(set.next()){
+                                pw = set.getString(1);
+                                email = set.getString(2);
+                            }
 
-                if(connection.prepareStatement("Update users" +
-                        " set password=" + "\"" + new_pw + "\"" +
-                        " Where email=" + "\"" + loggedUser + "\"" + ";").execute()){
-                    System.out.println("Password successfully changed !");
-                }
+                                if(pw.equals(old_pw) && email.equals(loggedUser)) {
 
-
-                return ok("Password successfully changed !");
-            }
+                                        if(connection.prepareStatement("Update users" +
+                                                " set password=" + "\"" + new_pw + "\"" +
+                                               " Where email=" + "\"" + loggedUser + "\"" + ";").execute()){
+                                        System.out.println("Password successfully changed !");
+                                   }
 
 
-        } catch (SQLException e){
-            e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException q){
-                    q.printStackTrace();
-                }
-            }
-        }
+                                    return ok(home.render("Welcome",new play.twirl.api.Html("<center>Good job, <b>" + loggedUser + "</b>, password has been changed!</center>") ));
+                            }
 
-        return ok("Wrong password.");
+
+                                    } catch (SQLException e){
+                        e.printStackTrace();
+                    } finally {
+                       if(connection != null){
+                               try {
+                                        connection.close();
+                                    } catch (SQLException q){
+                                        q.printStackTrace();
+                                    }
+                            }
+                    }
+
+        return ok("Wrong password");
     }
 
 }

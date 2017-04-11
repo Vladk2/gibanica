@@ -71,7 +71,11 @@ public class Register extends Controller {
                     }
                 }
             }
-
+            session("connected", created.email);
+            session("connectedFName", created.name);
+            session("connectedLName", created.surname);
+            session("connectedPass", created.password);
+            session("userType", created.type);
             return ok(submit.render(created));
 
         }

@@ -39,6 +39,8 @@ public class Application extends Controller {
                 }
                 //listaObjekata = (String []) rowValues.toArray(new String[rowValues.size()]);
                 //   System.out.println(rowValues.get(0));
+
+
             } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
