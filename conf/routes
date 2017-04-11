@@ -4,9 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET     /login/                     controllers.Login.login_form()
-POST     /login/                    controllers.Login.submit()
+POST    /login/                     controllers.Login.submit()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-    
