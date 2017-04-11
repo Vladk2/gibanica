@@ -10,6 +10,7 @@ import play.db.Database;
 
 import play.mvc.Controller;
 import play.mvc.Result;
+import views.html.home;
 import views.html.index;
 import views.html.submit;
 
@@ -30,6 +31,10 @@ public class Login extends Controller {
         User created = new User();
         created.email = requestData.get("email");
         created.password = requestData.get("password");
+        session("connected", created.email);
+        session("connectedFName", "Ime");
+        session("connectedLName", "Prezime");
+        String loggedUser = session("connected");
 
         Database database = Databases.createFrom(
                 "baklava",
@@ -55,7 +60,7 @@ public class Login extends Controller {
                 email = set.getString(2);
             }
             if(pw.equals(created.password) && email.equals(created.email)) {
-                return ok("You're logged in !");
+                return ok(home.render("Welcome",new play.twirl.api.Html("<center>Welcome, " + loggedUser + "!</center>") )); // login succedded
             }
             //listaObjekata = (String []) rowValues.toArray(new String[rowValues.size()]);
         } catch (SQLException e){
@@ -73,4 +78,11 @@ public class Login extends Controller {
 
         return ok("Wrong email or password.");
     }
+
+    public static Result logout() {
+        session().remove("connected");
+        return ok(index.render("bla"));
+    }
 }
+
+

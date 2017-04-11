@@ -1,0 +1,65 @@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    @* Here's where we render the page title `String`. *@
+    <title>@title</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <style>
+    .form-control { width:70%; text-align:center }
+
+    .form-control:focus{
+      border-color: orange;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+    }
+    .formText { color: white }
+    </style>
+
+  </head>
+  <body>
+      <!--  Top Menu Bar -->
+    <nav class="navbar navbar-inverse"  >
+      <div class="container" >
+
+          <!--  logo  -->
+        <div class="navbar-header" >
+          <button type="button" class ="navbar-toggle"
+          data-toggle="collapse" data-target="#mainNavBar">
+            <span class="icon-bar">  </span>
+            <span class="icon-bar">  </span>
+            <span class="icon-bar">  </span>
+          </button>
+
+          <a href="#" title="Gibanica home" class="navbar-brand" style="color:#f47441; font-size:200%;font-family:Verdana"> <b><i>gibanica.com</i></b> </a>
+
+        </div>
+
+          <!--  Menu items -->
+        <div class="collapse navbar-collapse" id=mainNavBar >
+          <ul class="nav navbar-nav navbar-right" >
+
+
+            <li> <a  href="/profile/"><b style="font-size:130%;color: #f47441"> Profile </b></a>       </li>
+           <li> <a  href="#" ><b style="font-size:130%;color: #f47441"> Restaurants </b></a></li>
+            <li> <a  href="#" ><b style="font-size:130%;color: #f47441"> Friends </b></a></li>
+            <li class="divider" style="background-color: white"></li>
+            <li> <a  href="/logout/"><b style="font-size:130%;color: #f47441"> Log out </b></a></li>
+
+          </ul>
+        </div>
+
+      </div>
+
+    </nav>
+    @* And here's where we render the `Html` object containing
+    * the page content. *@
+    @content
+  </body>
+</html>

@@ -75,7 +75,7 @@ public class Register extends Controller {
             return ok(submit.render(created));
 
         }
-        else return ok(index.render("olalaaa"));
+        else return ok("Password does not match the confirm password");
 
     }
 }
