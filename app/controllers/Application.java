@@ -32,12 +32,21 @@ public class Application extends Controller {
             ResultSet set = connection.prepareStatement("Select * from usertypes;").executeQuery();
             List rowValues = new ArrayList();
             while(set.next()){
+                System.out.println(set.getString(1));
                 rowValues.add(set.getString(1));
             }
             //listaObjekata = (String []) rowValues.toArray(new String[rowValues.size()]);
-         //   System.out.println(rowValues.get(0));
+            //   System.out.println(rowValues.get(0));
         } catch (SQLException e){
             e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return ok(index.render("Your new application is ready."));
     }

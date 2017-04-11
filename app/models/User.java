@@ -8,6 +8,6 @@ public class User {
     public String surname;
     public String email;
     public String password;
-    //public String type;
-    //public boolean verified;
+    public String type;
+    public int verified;
 }
