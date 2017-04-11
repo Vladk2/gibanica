@@ -3,6 +3,7 @@ package controllers;
 import com.google.common.collect.ImmutableMap;
 import models.User;
 import play.*;
+import play.data.DynamicForm;
 import play.data.Form;
 import play.db.Databases;
 import play.db.Database;
@@ -10,7 +11,6 @@ import play.db.Database;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
-import views.html.login_form;
 import views.html.submit;
 
 /**
@@ -19,15 +19,15 @@ import views.html.submit;
 
 public class Login extends Controller {
 
-    final static Form<User> loginForm = Form.form(User.class);
-
     public static Result login_form(){
-        return ok(login_form.render(loginForm));
+        return ok(views.html.login_form.render());
     }
 
     public static Result submit(){
-        Form<User> filledForm = Form.form(User.class).bindFromRequest(); // loginForm.bindFromRequest();
-        User created = filledForm.get();
+        DynamicForm requestData = Form.form().bindFromRequest();
+        User created = new User();
+        created.email = requestData.get("email");
+        created.password = requestData.get("password");
         System.out.print(created.email);
 
         return ok(submit.render(created));

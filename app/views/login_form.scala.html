@@ -1,10 +1,5 @@
-@(userForm: Form[User])
-
-@main("Login"){
-    <h1>Login here</h1>
-    @helper.form(action = routes.Login.submit(), 'id -> "loginForm", 'method -> "POST"){
-        @helper.inputText(userForm("email"))
-        @helper.inputText(userForm("password"))
-        <input type="submit" class="btn primary" value="Login">
-    }
-}
+<form action="/login/" method="post">
+    <input type="text" name="email">
+    <input type="password" name="password">
+    <input type="submit" value="Login">
+</form>

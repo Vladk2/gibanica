@@ -1,4 +1,5 @@
 import org.junit.*;
+import org.junit.Assert;
 
 import play.mvc.*;
 import play.test.*;
