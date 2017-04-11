@@ -90,7 +90,7 @@ public class Profile extends Controller {
             }
         }
 
-        return ok("This function must edit profile, not yet implemented");
+        return ok("Wrong password.");
     }
 
 }
