@@ -1,85 +1,85 @@
 @*
- * This template takes a single argument, a String containing a
- * message to display.
- *@
+* This template takes a single argument, a String containing a
+* message to display.
+*@
 @(message: String)
 
-@*
- * Call the `main` template with two arguments. The first
- * argument is a `String` with the title of the page, the second
- * argument is an `Html` object containing the body of the page.
- *@
-@main("Gibanica") {
-
     @*
-    * body part for welcome screen
-     *@
+    * Call the `main` template with two arguments. The first
+    * argument is a `String` with the title of the page, the second
+    * argument is an `Html` object containing the body of the page.
+    *@
+    @main("Gibanica") {
 
-    <!--  Top Menu Bar -->
-    <nav class="navbar navbar-inverse"  >
-        <div class="container" >
+        @*
+        * body part for welcome screen
+        *@
 
-                <!--  logo  -->
-            <div class="navbar-header" >
-                <button type="button" class ="navbar-toggle"
-                data-toggle="collapse" data-target="#mainNavBar">
-                    <span class="icon-bar">  </span>
-                    <span class="icon-bar">  </span>
-                    <span class="icon-bar">  </span>
-                </button>
+        <!--  Top Menu Bar -->
+        <nav class="navbar navbar-inverse"  >
+            <div class="container" >
 
-                <a href="#" title="Gibanica home" class="navbar-brand" style="color:#f47441; font-size:200%;font-family:Verdana"> <b><i>gibanica.com</i></b> </a>
+                    <!--  logo  -->
+                <div class="navbar-header" >
+                    <button type="button" class ="navbar-toggle"
+                    data-toggle="collapse" data-target="#mainNavBar">
+                        <span class="icon-bar">  </span>
+                        <span class="icon-bar">  </span>
+                        <span class="icon-bar">  </span>
+                    </button>
+
+                    <a href="#" title="Gibanica home" class="navbar-brand" style="color:#f47441; font-size:200%;font-family:Verdana"> <b><i>gibanica.com</i></b> </a>
+
+                </div>
+
+                    <!--  Menu items -->
+                <div class="collapse navbar-collapse" id=mainNavBar >
+                    <ul class="nav navbar-nav navbar-right" >
+
+                        <li><a href="#" >  </a></li>
+                        <li class="dropdown" style="">
+                            <a class="dropdown-toggle" href="#" data-toggle="dropdown"><b style="font-size:130%;color: #f47441"> Login </b></a>
+                            <div class="dropdown-menu" style="padding: 15px;opacity: 0.8; padding-bottom: 25px; background-color: black">
+
+                                <form method="post" action="/login/" accept-charset="UTF-8">
+                                    <input style="margin-bottom: 15px;" type="text" placeholder="E-mail" id="logUname" name="email">
+                                    <input style="margin-bottom: 15px;" type="password" placeholder="Password" id="logPass" name="password">
+                                    <input class="btn btn-warning btn-block" type="submit" id="sign-in" value="LOG IN">
+
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
 
             </div>
 
-                <!--  Menu items -->
-            <div class="collapse navbar-collapse" id=mainNavBar >
-            <ul class="nav navbar-nav navbar-right" >
+        </nav>
+        <div style="background-image: url(@routes.Assets.versioned("images/rana.jpg")) ; opacity:1; background-size:cover; margin-top: -20px; height: 900px; width: 100%">
 
-                <li><a href="#" >  </a></li>
-                <li class="dropdown" style="">
-                    <a class="dropdown-toggle" href="#" data-toggle="dropdown"><b style="font-size:130%;color: #f47441"> Login </b></a>
-                    <div class="dropdown-menu" style="padding: 15px;opacity: 0.8; padding-bottom: 25px; background-color: black">
 
-                        <form method="post" action="/login/" accept-charset="UTF-8">
-                            <input style="margin-bottom: 15px;" type="text" placeholder="E-mail" id="logUname" name="email">
-                            <input style="margin-bottom: 15px;" type="password" placeholder="Password" id="logPass" name="password">
-                            <input class="btn btn-warning btn-block" type="submit" id="sign-in" value="LOG IN">
+            <center>
+                <div class="panel panel-inverse"
+                style="width:400px;background: black;opacity:0.8; display:inline-block; margin-top: 100px">
+
+                    <div class="panel-heading"><h3 style="font-family:Comic Sans MS; color:white">Get started with<b style="color:#f47441"> gibanica</b></h3>   </div>
+                    <div class="panel-body">
+                        <form id="regForm" enctype="multipart/form-data" action="/register/" method="post">
+
+                            <b class="formText">First Name:</b> <input type="text" class="form-control" name="fName" required> <br>
+                            <b class="formText">Last Name:</b> <input type="text" class="form-control" name="lName" required> <br>
+                            <b class="formText">E-mail:</b> <input type="text" class="form-control"  name="Regemail" required> <br>
+                            <b class="formText" >Password:</b> <input type="password" class="form-control" name="pass" required> <br>
+                            <b class="formText">Repeat password:</b> <input type="password" class="form-control" name="repPass" required> <br>
+
+                            <input type="submit" class="btn btn-warning btn-block btn-lg" value="REGISTER" style="width:40%">
 
                         </form>
+                        <br>
+                        <p hidden id="resp" style="color:red"> </p>
+
                     </div>
-                </li>
-            </ul>
+                </div>
+            </center>
         </div>
-
-        </div>
-
-    </nav>
-    <div style="background-image: url(@routes.Assets.versioned("images/rana.jpg")) ; opacity:1; background-size:cover; margin-top: -20px; height: 900px; width: 100%">
-
-
-        <center>
-        <div class="panel panel-inverse"
-        style="width:400px;background: black;opacity:0.8; display:inline-block; margin-top: 100px">
-
-            <div class="panel-heading"><h3 style="font-family:Comic Sans MS; color:white">Get started with<b style="color:#f47441"> gibanica</b></h3>   </div>
-            <div class="panel-body">
-                <form id="regForm" enctype="multipart/form-data" method="post">
-
-                    <b class="formText">First Name:</b> <input type="text" class="form-control" name="fName" required> <br>
-                    <b class="formText">Last Name:</b> <input type="text" class="form-control" name="lName" required> <br>
-                    <b class="formText">E-mail:</b> <input type="text" class="form-control"  name="email" required> <br>
-                    <b class="formText" >Password:</b> <input type="password" class="form-control" name="pass" required> <br>
-                    <b class="formText">Repeat password:</b> <input type="password" class="form-control" name="repPass" required> <br>
-
-                    <input type="submit" class="btn btn-warning btn-block btn-lg" value="REGISTER" style="width:40%">
-
-                </form>
-                <br>
-                <p hidden id="resp" style="color:red"> </p>
-
-            </div>
-        </div>
-        </center>
-        </div>
-}
+    }

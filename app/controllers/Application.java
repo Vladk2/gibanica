@@ -35,7 +35,7 @@ public class Application extends Controller {
                 rowValues.add(set.getString(1));
             }
             //listaObjekata = (String []) rowValues.toArray(new String[rowValues.size()]);
-            System.out.println(rowValues.get(0));
+         //   System.out.println(rowValues.get(0));
         } catch (SQLException e){
             e.printStackTrace();
         }
