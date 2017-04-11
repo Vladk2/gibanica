@@ -48,8 +48,8 @@ public class Login extends Controller {
                     + "\"" + ";").executeQuery();*/
             ResultSet set = connection.prepareStatement("Select password, email from users where password="
                     + "\"" + created.password + "\" and email=" + "\"" + created.email + "\"" + ";").executeQuery();
-            String email = null;
-            String pw = null;
+            String email = "";
+            String pw = "";
             while(set.next()){
                 pw = set.getString(1);
                 email = set.getString(2);
