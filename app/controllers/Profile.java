@@ -36,6 +36,60 @@ public class Profile extends Controller {
 
     public static Result editProfile() {
         String loggedUser = session("connected");
+
+        DynamicForm requestData = Form.form().bindFromRequest();
+        String old_pw = requestData.get("old_password");
+        String new_pw = requestData.get("new_password");
+
+        Database database = Databases.createFrom(
+                "baklava",
+                "com.mysql.jdbc.Driver",
+                "jdbc:mysql://localhost/baklava",
+                ImmutableMap.of(
+                        "user", "root",
+                        "password", "gibanica"
+                )
+        );
+
+        Connection connection = database.getConnection();
+
+        try{
+            ResultSet set = connection.prepareStatement("Select password, email from users where password="
+                    + "\"" + old_pw + "\" and email=" + "\"" + loggedUser + "\"" + ";").executeQuery();
+
+            String email = "";
+            String pw = "";
+
+            while(set.next()){
+                pw = set.getString(1);
+                email = set.getString(2);
+            }
+
+            if(pw.equals(old_pw) && email.equals(loggedUser)) {
+
+                if(connection.prepareStatement("Update users" +
+                        " set password=" + "\"" + new_pw + "\"" +
+                        " Where email=" + "\"" + loggedUser + "\"" + ";").execute()){
+                    System.out.println("Password successfully changed !");
+                }
+
+
+                return ok("Password successfully changed !");
+            }
+
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException q){
+                    q.printStackTrace();
+                }
+            }
+        }
+
         return ok("This function must edit profile, not yet implemented");
     }
 
