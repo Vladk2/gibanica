@@ -15,6 +15,7 @@ package controllers;
         import play.mvc.Controller;
         import play.mvc.Result;
 
+        import views.html.home;
         import views.html.restaurant;
 
         import java.sql.Connection;
@@ -24,6 +25,7 @@ package controllers;
 public class Restaurants extends Controller {
 
     public static Result restaurants() {
+
 
         String loggedUser = session("connected");
 
@@ -69,7 +71,7 @@ public class Restaurants extends Controller {
         }
 
 
-        return ok("restoran je registrovan");
+        return ok(home.render("Welcome",new play.twirl.api.Html("<center>Restaurant has been added successfully!</center>") ));
 
     }
 
@@ -117,7 +119,8 @@ public class Restaurants extends Controller {
         }
 
 
-        return ok("restoran je registrovan");
+        return ok(home.render("Welcome",new play.twirl.api.Html("<center>Restaurant manager has been added successfully!</center>") ));
+
 
     }
 

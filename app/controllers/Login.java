@@ -90,6 +90,9 @@ public class Login extends Controller {
 
     public static Result logout() {
         session().remove("connected");
+        session().remove("connectedFName");
+        session().remove("connectedLName");
+        session().remove("userType");
         return ok(index.render("bla"));
     }
 }

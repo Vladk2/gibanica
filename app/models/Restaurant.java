@@ -8,8 +8,7 @@ public class Restaurant {
 
     public String name;
     public String description;
-    public Meal meal;
-    public Beverage beverage;
+
 
 
 
