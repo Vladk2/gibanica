@@ -1,0 +1,26 @@
+@(user: String)
+
+
+@home("Verify account") {
+
+<script>
+        $(document).ready(function() {
+            $("#profile").hide();
+            $("#restaurants").hide();
+            $("#friends").hide();
+        });
+</script>
+
+    <center>
+        <h4> Hello there <b>@user</b>! You must change your password in order to start using your account:</h4> <br>
+
+        <form method="post" action="/verifyPass" accept-charset="UTF-8">
+        <input class="form-control"  style="margin-bottom: 15px;width:250px" type="password" placeholder="Type in old password"  name="old_password"> <br>
+        <input class="form-control" style="margin-bottom: 15px;width:250px" type="password" placeholder="Type in new password"  name="new_password"> <br>
+            <button class="btn btn-warning btn-block" type="submit" style="width: 200px;color:black"> <b>CHANGE PASSWORD</b></button>
+
+        </form>
+
+    </center>
+
+}

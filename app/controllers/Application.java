@@ -18,6 +18,8 @@ public class Application extends Controller {
 
     public static Result index() {
         String loggedUser = session("connected");
+        String verified = session("verified");
+        String tip = session("userType");
         if(loggedUser==null) {
             Database database = Databases.createFrom(
                     "baklava",
@@ -54,7 +56,9 @@ public class Application extends Controller {
             }
             return ok(index.render("Your new application is ready."));
         }
-        else return ok(home.render("Welcome",new play.twirl.api.Html("<center>Welcome, " + loggedUser + "!</center>") ));
+        else if((tip.equals("bidder") || tip.equals("waiter") || tip.equals("chef") || tip.equals("bartender")) && verified.equals("0"))
+            return ok(firstLog.render(loggedUser));
+        else return ok(home.render("Welcome",new play.twirl.api.Html("<center><h2>Welcome, " + loggedUser + "!</h2></center>") ));
     }
 
 }

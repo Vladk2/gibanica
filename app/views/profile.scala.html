@@ -1,4 +1,4 @@
-@(email: String, fname: String, lname: String)
+@(email: String, fname: String, lname: String, userType: String)
 
 
 @home("Profile"){
@@ -6,20 +6,40 @@
   <div>
   <center>
 
-    <form method="post" action="/edit_profile/" accept-charset="UTF-8">
+    <form method="post" action="/edit_profile" accept-charset="UTF-8">
       <label for="fname">First Name:</label> <br>
-      <input style="margin-bottom: 15px;" type="text" placeholder="@fname" name="fname" disabled> <br>
+      <input id="fname" class="form-control" style="margin-bottom: 15px;width:250px" type="text" value="@fname" name="fname" >
         <label for="lname">Last Name:</label> <br>
-      <input style="margin-bottom: 15px;" type="text" placeholder="@lname" name="lname" disabled> <br>
-        <label for="email">E-mail:</label> <br>
-      <input style="margin-bottom: 15px;" type="text" placeholder="@email" name="email" disabled> <br>
-      <input style="margin-bottom: 15px;" type="password" placeholder="Type in old password"  name="old_password"> <br>
-      <input style="margin-bottom: 15px;" type="password" placeholder="Type in new password"  name="new_password"> <br>
-      <input class="btn btn-warning btn-block" type="submit" id="sign-in" value="CHANGE PASSWORD" style="width: 200px">
+      <input id="lname" class="form-control" style="margin-bottom: 15px;width:250px" type="text" value="@lname" name="lname" >
+        <label  for="email">E-mail:</label> <br>
+      <input class="form-control" style="margin-bottom: 15px;width:250px" type="text" placeholder="@email" name="email" disabled>
+      <label for="tip">Role:</label> <br>
+      <input class="form-control" style="margin-bottom: 15px;width:250px" type="text" placeholder="@userType" name="tip" disabled> <br>
+      <input class="form-control"  style="margin-bottom: 15px;width:250px" type="password" placeholder="Type in old password"  name="old_password"> <br>
+      <input id="npass" class="form-control" style="margin-bottom: 15px;width:250px" type="password" placeholder="Type in new password"  name="new_password"> <br>
+        <button id="saveChanges" class="btn btn-warning btn-block" type="submit" id="sign-in"  style="width: 200px;color:black" disabled><b>SAVE CHANGES</b></button>
 
     </form>
 
   </center>
   </div>
+
+    <script>
+            // enable-uj dugme sa SAVE tek kad se promeni neka od vrednosti u text boxevima
+            $(document).ready(function() {
+
+                $("#fname").change(function() {
+                   $("#saveChanges").prop('disabled', false);
+                });
+                $("#lname").change(function() {
+                    $("#saveChanges").prop('disabled', false);
+                });
+                $("#npass").change(function() {
+                    $("#saveChanges").prop('disabled', false);
+                });
+
+            });
+
+    </script>
 
 }

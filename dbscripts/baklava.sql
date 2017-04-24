@@ -14,6 +14,17 @@ create table if not exists baklava.users(
 		foreign key (type) references baklava.usertypes (type)
 );
 
+
+create table if not exists baklava.workers(
+	userId int(5) not null,
+	birthDate varchar(20) not null,
+	clothNo varchar(20) not null,
+	shoesNo varchar(20) not null,
+	constraint `user_id_in_workers`
+		foreign key (userId) references baklava.users (userId)
+	
+	
+);
 -- tabela za goste, za menadzere i za radnike -- posebno, kasnije
 
 -- user types

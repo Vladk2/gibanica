@@ -1,11 +1,12 @@
-package controllers;
+package models;
 
 /**
- * Created by goran on 4/12/17.
+ * Created by vladi on 22-Apr-17.
  */
-public class RestaurantManager {
+public class SystemManager {
     public String name;
     public String surname;
     public String email;
     public String password;
+
 }

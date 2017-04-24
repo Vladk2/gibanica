@@ -1,58 +1,283 @@
-@(managerEmail: String)
+@(userEmail: String)
 
 
 @home("Restaurants"){
 
+
+
   <div>
-    <i style="float:right;margin-right:40px;">logged in: <b>@managerEmail</b> </i> <br> <br>
+    <i style="float:right;margin-right:40px;">logged in: <b>@userEmail</b> </i> <br> <br>
 
-    @if(session.get("userType").equals("system-manager")){
+
       <center>
+        <br>
+        <div style="display: inline-block;">
+        @if(session.get("userType").equals("system-manager")) {
+            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addARestaurant" style="width: 170px;float: left;color: black;margin: 10px;"><b>ADD A RESTAURANT</b></button>
+            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addARestManager" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD A RESTAURANT MANAGER</b></button>
+            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addASysManager" style="width: 210px;float:left;color: black;margin: 10px;"><b>ADD A SYSTEM MANAGER</b></button>
 
-        <div class="floating-box"   style="width:400px;display: inline-block; height:500px;margin:20px; ">
-          <b style="font-size:18pt;font-family: 'Chaparral Pro'"> ADD A RESTAURANT</b> <br> <br>
-          <form method="post" action="/addRestaurant" accept-charset="UTF-8">
-            <label for="rname">Restaurant Name:</label> <br>
-            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text" placeholder="" name="rname" >
-            <label for="rdesc">About a restaurant (eg. Vegan, Chinese food...):</label> <br>
-            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text" placeholder="" name="rdesc" >
-            <label for="meals">Select meals(hold shift to select multiple):</label> <br>
-            <select class="selectpicker" multiple id="meals" >
-              <option>Jelo1</option>
-              <option>Jelo2</option>
-            </select> <br> <br>
-            <label for="drinks">Select drinks(hold shift to select multiple):</label> <br>
-            <select class="selectpicker" multiple id="drinks" style="width:450px;">
-              <option>Pice1</option>
-              <option>Pice2</option>
-            </select> <br> <br> <br> <br> <br>
-            <input class="btn btn-warning btn-block" type="submit" id="sign-in" value="REGISTER A NEW RESTAURANT" style="width: 250px">
-
-          </form>
-        </div>
-
-        <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
-          <b style="font-size:18pt;font-family: 'Chaparral Pro'"> ADD A MANAGER</b> <br> <br>
-          <form method="post" action="/addRestaurantManager" accept-charset="UTF-8"> 
-            <label for="email">E-mail:</label> <br>
-            <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text" placeholder="" name="email" >
-            <label for="pass">Password:</label> <br>
-            <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password" placeholder="" name="pass" >
-            <label for="name">First name:</label> <br>
-            <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text" placeholder="" name="fname" >
-            <label for="lname">Last name :</label> <br>
-            <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text" placeholder="" name="lname" >
-            <label for="forRest">Restaurant :</label> <br>
-            <select class="form-control" id="forRest" style="width:250px;">
-              <option>Odje idu restorani</option>
-            </select> <br>
-
-            <input class="btn btn-warning btn-block" type="submit" id="sign-in" value="REGISTER A NEW MANAGER" style="width: 250px">
-          </form>
-
+        }
+            @if(session.get("userType").equals("rest-manager")) {
+                <div>
+                    <h3> Restaurant: <i>@session.get("myRestName")</i></h3>
+                    <h4> About: <i>@session.get("myRestDesc")</i></h4>
+                    <br>
+                </div>
+                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#editRestaurant" style="width: 240px;float: left;color: black;margin: 10px;"><b>EDIT YOUR RESTAURANT</b></button>
+                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addAnEmployee" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD AN EMPLOYEE</b></button>
+                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addABidder" style="width: 240px;color: black;margin: 10px;"><b>ADD A BIDDER</b></button>
+            }
         </div>
       </center>
-    }
+
   </div>
+
+  <!--- MODAL ZA DODAVANJE RESTORANA -->
+  <center>
+  <div class="modal fade" id="addARestaurant"  >
+  				 	<div class="modal-dialog">
+  				 		<div class="modal-content" >
+  				 			<!--  modal header -->
+  <div class="modal-header">
+    <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A RESTAURANT </h3>
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+  </div>
+    <!--  modal body -->
+
+  <div class="floating-box"   style="width:400px;display: inline-block; height:500px;margin:20px; ">
+
+    <form method="post" action="/addRestaurant" accept-charset="UTF-8">
+      <label for="rname">Restaurant Name:</label> <br>
+      <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rname" required >
+      <label for="rdesc">About a restaurant (eg. Vegan, Chinese food...):</label> <br>
+      <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rdesc" required >
+      <label for="meals">Select victuals:</label> <br>
+      <select class="selectpicker" multiple id="meals" >
+        <option>Jelo1</option>
+        <option>Jelo2</option>
+      </select> <br> <br>
+      <label for="drinks">Select drinks:</label> <br>
+      <select class="selectpicker" multiple id="drinks" style="width:450px;">
+        <option>Pice1</option>
+        <option>Pice2</option>
+      </select> <br> <br> <br> <br> <br>
+      <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW RESTAURANT" style="width: 250px">
+
+    </form>
+  </div>
+
+    <!--  modal footer -->
+  <div class="modal-footer">
+  </div>
+                        </div>
+  </div>
+  </div>
+
+      <!--- MODAL ZA DODAVANJE REST. MENADZERA -->
+    <div class="modal fade" id="addARestManager" >
+      <div class="modal-dialog" >
+        <div class="modal-content" >
+            <!--  modal header -->
+          <div class="modal-header">
+            <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A MANAGER </h3>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+            <!--  modal body -->
+          <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+
+            <form method="post" action="/addRestaurantManager" accept-charset="UTF-8">
+              <label for="email">E-mail:</label> <br>
+              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
+              <label for="pass">Password:</label> <br>
+              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required >
+              <label for="name">First name:</label> <br>
+              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required >
+              <label for="lname">Last name :</label> <br>
+              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required >
+              <label for="forRest">Restaurant :</label> <br>
+              <select class="form-control" id="forRest" name="forRest" style="width:250px;">
+                <option>Amigos</option>
+              </select> <br> <br> <br>
+
+              <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW MANAGER" style="width: 250px">
+            </form>
+
+          </div>
+
+
+            <!--  modal footer -->
+          <div class="modal-footer">
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <!--- MODAL ZA DODAVANJE SYS. MENADZERA -->
+    <div class="modal fade" id="addASysManager" >
+      <div class="modal-dialog" >
+        <div class="modal-content" >
+            <!--  modal header -->
+          <div class="modal-header">
+            <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A SYS. MANAGER </h3>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+            <!--  modal body -->
+          <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+
+            <form method="post" action="/addSystemManager" accept-charset="UTF-8">
+              <label for="email">E-mail:</label> <br>
+              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
+              <label for="pass">Password:</label> <br>
+              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required>
+              <label for="name">First name:</label> <br>
+              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required >
+              <label for="lname">Last name :</label> <br>
+              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required >
+
+               <br> <br> <br>
+
+              <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW MANAGER" style="width: 250px">
+            </form>
+
+          </div>
+
+
+            <!--  modal footer -->
+          <div class="modal-footer">
+          </div>
+        </div>
+      </div>
+    </div>
+
+          <!--- MODAL ZA DODAVANJE BIDDERA -->
+      <div class="modal fade" id="addABidder" >
+          <div class="modal-dialog" >
+              <div class="modal-content" >
+                      <!--  modal header -->
+                  <div class="modal-header">
+                      <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A BIDDER </h3>
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  </div>
+                      <!--  modal body -->
+                  <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+
+                      <form method="post" action="/addBidder" accept-charset="UTF-8">
+                          <label for="email">E-mail:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
+                          <label for="pass">Password:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required>
+                          <label for="name">First name:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required>
+                          <label for="lname">Last name :</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required>
+
+                          <br> <br> <br>
+
+                          <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW BIDDER" style="width: 250px">
+                      </form>
+
+                  </div>
+
+
+                      <!--  modal footer -->
+                  <div class="modal-footer">
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
+          <!--- MODAL ZA DODAVANJE RADNIKA -->
+      <div class="modal fade" id="addAnEmployee" >
+          <div class="modal-dialog" >
+              <div class="modal-content" >
+                      <!--  modal header -->
+                  <div class="modal-header">
+                      <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD AN EMPLOYEE </h3>
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  </div>
+                      <!--  modal body -->
+                  <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+
+                      <form method="post" action="/addEmployee" accept-charset="UTF-8">
+                          <label for="email">E-mail:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
+                          <label for="pass">Password:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required>
+                          <label for="name">First name:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required>
+                          <label for="lname">Last name :</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required>
+                          <label for="birthDate">Date of birth:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="date" max="2005-12-31"  name="birthDate" required>
+                          <label for="clothNo">Clothing size:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="clothNo" required>
+                          <label for="shoesNo">Shoe size:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="shoesNo" required>
+                          <label for="type">Works as:</label> <br>
+                          <select class="form-control"  name="type" style="width:250px;">
+                              <option>bartender</option>
+                              <option>chef</option>
+                              <option>waiter</option>
+                          </select>
+                          <br> <br> <br>
+
+                          <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW EMPLOYEE" style="width: 250px">
+                      </form>
+
+                  </div>
+
+
+                      <!--  modal footer -->
+                  <div class="modal-footer">
+                  </div>
+              </div>
+          </div>
+      </div>
+
+          <!--- MODAL ZA EDITOVANJE RESTORANA -->
+      <div class="modal fade" id="editRestaurant" >
+          <div class="modal-dialog" >
+              <div class="modal-content" >
+                      <!--  modal header -->
+                  <div class="modal-header">
+                      <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> EDIT RESTAURANT'S INFO </h3>
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  </div>
+                      <!--  modal body -->
+                  <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+
+                      <form method="post" action="/editRestaurant" accept-charset="UTF-8">
+                          <label for="rname">Restaurant Name:</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rname" value="@session.get("myRestName")" >
+                          <label for="rdesc">About a restaurant (eg. Vegan, Chinese food...):</label> <br>
+                          <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rdesc"  value="@session.get("myRestDesc")" >
+                          <label for="meals">Select victuals:</label> <br>
+                          <select class="selectpicker" multiple id="meals" disabled >
+                              <option>Jelo1</option>
+                              <option>Jelo2</option>
+                          </select> <br> <br>
+                          <label for="drinks">Select drinks:</label> <br>
+                          <select class="selectpicker" multiple id="drinks" style="width:450px;" disabled>
+                              <option>Pice1</option>
+                              <option>Pice2</option>
+                          </select> <br> <br> <br> <br> <br>
+                          <input class="btn btn-warning btn-block" type="submit"  value="SAVE CHANGES" style="width: 250px">
+
+                      </form>
+
+                  </div>
+
+
+                      <!--  modal footer -->
+                  <div class="modal-footer">
+                  </div>
+              </div>
+          </div>
+      </div>
+
+  </center>
+
 
 }

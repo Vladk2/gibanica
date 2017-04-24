@@ -41,7 +41,7 @@
                             <a class="dropdown-toggle" href="#" data-toggle="dropdown"><b style="font-size:130%;color: #f47441"> Login </b></a>
                             <div class="dropdown-menu" style="padding: 15px;opacity: 0.8; padding-bottom: 25px; background-color: black">
 
-                                <form method="post" action="/login/" accept-charset="UTF-8">
+                                <form method="post" action="/login" accept-charset="UTF-8">
                                     <input style="margin-bottom: 15px; width: 220px;" class="form-control" type="text" placeholder="E-mail" id="logUname" name="email">
                                     <input style="margin-bottom: 15px; width: 220px;" type="password" class="form-control" placeholder="Password" id="logPass" name="password">
                                     <input class="btn btn-warning btn-block" type="submit" id="sign-in" value="LOG IN">
@@ -64,7 +64,7 @@
 
                     <div class="panel-heading"><h3 style="font-family:Comic Sans MS; color:white">Get started with<b style="color:#f47441"> gibanica</b></h3>   </div>
                     <div class="panel-body">
-                        <form id="regForm" enctype="multipart/form-data" action="/register/" method="post">
+                        <form id="regForm" enctype="multipart/form-data" action="/register" method="post">
 
                             <b class="formText">First Name:</b> <input type="text" class="form-control" name="fName" required> <br>
                             <b class="formText">Last Name:</b> <input type="text" class="form-control" name="lName" required> <br>
@@ -72,7 +72,7 @@
                             <b class="formText" >Password:</b> <input type="password" class="form-control" name="pass" required> <br>
                             <b class="formText">Repeat password:</b> <input type="password" class="form-control" name="repPass" required> <br>
 
-                            <input type="submit" class="btn btn-warning btn-block btn-lg" value="REGISTER" style="width:40%">
+                            <button type="submit" class="btn btn-warning btn-block btn-lg" style="color:black;width:40%"><b>REGISTER</b> </button>
 
                         </form>
                         <br>

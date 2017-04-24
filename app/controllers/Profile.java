@@ -10,10 +10,7 @@ import play.db.Database;
 
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.home;
-import views.html.index;
-import views.html.profile;
-import views.html.submit;
+import views.html.*;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -31,7 +28,12 @@ public class Profile extends Controller {
         String loggedUser = session("connected");
         String loggedFName = session("connectedFName");
         String loggedLName = session("connectedLName");
-        return ok(profile.render(loggedUser, loggedFName, loggedLName));
+        String loggedType = session("userType");
+        String verified = session("verified");
+        if(loggedUser == null || verified.equals("0"))
+            return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
+        else
+        return ok(profile.render(loggedUser, loggedFName, loggedLName, loggedType));
     }
 
     public static Result editProfile() {
@@ -40,8 +42,9 @@ public class Profile extends Controller {
 
                DynamicForm requestData = Form.form().bindFromRequest();
                String old_pw = requestData.get("old_password");
-                String new_pw = requestData.get("new_password");
-
+               String new_pw = requestData.get("new_password");
+               String new_fname = requestData.get("fname");
+               String new_lname = requestData.get("lname");
                         Database database = Databases.createFrom(
                                 "baklava",
                                 "com.mysql.jdbc.Driver",
@@ -69,15 +72,27 @@ public class Profile extends Controller {
                                 if(pw.equals(old_pw) && email.equals(loggedUser)) {
 
                                         if(connection.prepareStatement("Update users" +
-                                                " set password=" + "\"" + new_pw + "\"" +
+                                                " set password=" + "\"" + new_pw + "\" ,name=" + "\"" + new_fname + "\" , surname=" + "\"" + new_lname + "\"" +
                                                " Where email=" + "\"" + loggedUser + "\"" + ";").execute()){
-                                        System.out.println("Password successfully changed !");
+
                                    }
+                                    session("connectedFName", new_fname);
+                                    session("connectedLName", new_lname);
+                                    return ok(home.render("Welcome", new play.twirl.api.Html("<center>Good job, <b>" + loggedUser + "</b>, your account info has been changed!</center>")));
 
-
-                                    return ok(home.render("Welcome",new play.twirl.api.Html("<center>Good job, <b>" + loggedUser + "</b>, password has been changed!</center>") ));
                             }
+                                else if((old_pw.equals("")) && (new_pw.equals(""))) {
+                                    if (connection.prepareStatement("Update users" +
+                                            " set name=" + "\"" + new_fname + "\" , surname=" + "\"" + new_lname + "\"" +
+                                            " Where email=" + "\"" + loggedUser + "\"" + ";").execute()) {
 
+                                    }
+
+
+                                    session("connectedFName", new_fname);
+                                    session("connectedLName", new_lname);
+                                    return ok(home.render("Welcome", new play.twirl.api.Html("<center>Good job, <b>" + loggedUser + "</b>, your account info has been changed!</center>")));
+                                }
 
                                     } catch (SQLException e){
                         e.printStackTrace();

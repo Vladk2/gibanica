@@ -10,8 +10,7 @@ import play.db.Database;
 
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.index;
-import views.html.submit;
+import views.html.*;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
