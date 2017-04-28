@@ -5,11 +5,13 @@ package models;
  */
 public class Restaurant {
 
-
     public String name;
     public String description;
 
+    public Restaurant(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 
-
-
+    public Restaurant() { }
 }

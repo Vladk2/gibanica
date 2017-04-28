@@ -40,71 +40,75 @@ public class Profile extends Controller {
         String loggedUser = session("connected");
 
 
-               DynamicForm requestData = Form.form().bindFromRequest();
-               String old_pw = requestData.get("old_password");
-               String new_pw = requestData.get("new_password");
-               String new_fname = requestData.get("fname");
-               String new_lname = requestData.get("lname");
-                        Database database = Databases.createFrom(
-                                "baklava",
-                                "com.mysql.jdbc.Driver",
-                                "jdbc:mysql://localhost/baklava",
-                                ImmutableMap.of(
-                                                "user", "root",
-                                                "password", "gibanica"
-                                                )
-                                );
+        DynamicForm requestData = Form.form().bindFromRequest();
+        String old_pw = requestData.get("old_password");
+        String new_pw = requestData.get("new_password");
+        String new_fname = requestData.get("fname");
+        String new_lname = requestData.get("lname");
 
-                        Connection connection = database.getConnection();
+        Database database = Databases.createFrom(
+                "baklava",
+                "com.mysql.jdbc.Driver",
+                "jdbc:mysql://localhost/baklava",
+                ImmutableMap.of(
+                                "user", "root",
+                                "password", "gibanica"
+                                )
+                );
 
-                       try{
-                        ResultSet set = connection.prepareStatement("Select password, email from users where password="
-                                        + "\"" + old_pw + "\" and email=" + "\"" + loggedUser + "\"" + ";").executeQuery();
+        Connection connection = database.getConnection();
 
-                                String email = "";
-                        String pw = "";
+        try{
+            ResultSet set = connection.prepareStatement("Select password, email from users where password="
+                        + "\"" + old_pw + "\" and email=" + "\"" + loggedUser + "\"" + ";").executeQuery();
 
-                               while(set.next()){
-                                pw = set.getString(1);
-                                email = set.getString(2);
-                            }
+            String email = "";
+            String pw = "";
 
-                                if(pw.equals(old_pw) && email.equals(loggedUser)) {
+            while(set.next()){
+                pw = set.getString(1);
+                email = set.getString(2);
+            }
 
-                                        if(connection.prepareStatement("Update users" +
-                                                " set password=" + "\"" + new_pw + "\" ,name=" + "\"" + new_fname + "\" , surname=" + "\"" + new_lname + "\"" +
-                                               " Where email=" + "\"" + loggedUser + "\"" + ";").execute()){
+            if(pw.equals(old_pw) && email.equals(loggedUser)) {
 
-                                   }
-                                    session("connectedFName", new_fname);
-                                    session("connectedLName", new_lname);
-                                    return ok(home.render("Welcome", new play.twirl.api.Html("<center>Good job, <b>" + loggedUser + "</b>, your account info has been changed!</center>")));
+                if(connection.prepareStatement("Update users" + " set password=" +
+                        "\"" + new_pw + "\" ,name=" + "\"" + new_fname + "\" , surname=" +
+                        "\"" + new_lname + "\"" + " Where email=" + "\"" + loggedUser +
+                        "\"" + ";").execute()){
 
-                            }
-                                else if((old_pw.equals("")) && (new_pw.equals(""))) {
-                                    if (connection.prepareStatement("Update users" +
-                                            " set name=" + "\"" + new_fname + "\" , surname=" + "\"" + new_lname + "\"" +
-                                            " Where email=" + "\"" + loggedUser + "\"" + ";").execute()) {
+                }
 
-                                    }
+                session("connectedFName", new_fname);
+                session("connectedLName", new_lname);
+
+                return ok(home.render("Welcome", new play.twirl.api.Html("<center>Good job, <b>" +
+                        loggedUser + "</b>, your account info has been changed!</center>")));
+
+            }
+            else if((old_pw.equals("")) && (new_pw.equals(""))) {
+                if (connection.prepareStatement("Update users" +
+                        " set name=" + "\"" + new_fname + "\" , surname=" + "\"" + new_lname + "\"" +
+                        " Where email=" + "\"" + loggedUser + "\"" + ";").execute()) {
+
+                }
 
 
-                                    session("connectedFName", new_fname);
-                                    session("connectedLName", new_lname);
-                                    return ok(home.render("Welcome", new play.twirl.api.Html("<center>Good job, <b>" + loggedUser + "</b>, your account info has been changed!</center>")));
-                                }
-
-                                    } catch (SQLException e){
-                        e.printStackTrace();
-                    } finally {
-                       if(connection != null){
-                               try {
-                                        connection.close();
-                                    } catch (SQLException q){
-                                        q.printStackTrace();
-                                    }
-                            }
-                    }
+                session("connectedFName", new_fname);
+                session("connectedLName", new_lname);
+                return ok(home.render("Welcome", new play.twirl.api.Html("<center>Good job, <b>" + loggedUser + "</b>, your account info has been changed!</center>")));
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+           if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException q){
+                    q.printStackTrace();
+                }
+            }
+        }
 
         return ok("Wrong password");
     }

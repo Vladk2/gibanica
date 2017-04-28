@@ -3,25 +3,28 @@
 package controllers;
 
 
-        import com.google.common.collect.ImmutableMap;
-        import models.Restaurant;
-        import models.RestaurantManager;
-        import models.User;
-        import models.Employee;
-        import play.*;
+import com.google.common.collect.ImmutableMap;
+import models.Restaurant;
+import models.RestaurantManager;
+import models.User;
+import models.Employee;
+import play.*;
 
 
-        import play.data.DynamicForm;
-        import play.data.Form;
-        import play.db.Database;
-        import play.db.Databases;
-        import play.mvc.Controller;
-        import play.mvc.Result;
-        import views.html.*;
+import play.data.DynamicForm;
+import play.data.Form;
+import play.db.Database;
+import play.db.Databases;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.*;
 
-        import java.sql.Connection;
-        import java.sql.ResultSet;
-        import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class Restaurants extends Controller {
@@ -30,9 +33,49 @@ public class Restaurants extends Controller {
 
         String loggedUser = session("connected");
         String verified = session("verified");
-        if(loggedUser == null || verified.equals("0"))
+
+        List<Restaurant> restaurants = new ArrayList<Restaurant>();
+
+        //if(loggedUser == null || verified.equals("0"))
+        if(5 == 6)
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
-        else return ok(restaurant.render(loggedUser));
+        else {
+            Database database = Databases.createFrom (
+                "baklava",
+                "com.mysql.jdbc.Driver",
+                "jdbc:mysql://localhost/baklava",
+                ImmutableMap.of(
+                        "user", "root",
+                        "password", "gibanica"
+                )
+            );
+
+            Connection connection = database.getConnection();
+            try {
+                String query = "Select name, description from restaurants";
+                ResultSet set = connection.prepareStatement(query).executeQuery();
+
+                while(set.next()){
+                    Restaurant restaurant =
+                    new Restaurant(set.getString(1), set.getString(2));
+
+                    restaurants.add(restaurant);
+                }
+
+            } catch (SQLException e){
+                e.printStackTrace();
+            } finally {
+                if(connection != null){
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return ok(restaurant.render(loggedUser, restaurants));
+        }
     }
 
 
