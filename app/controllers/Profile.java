@@ -1,12 +1,8 @@
 package controllers;
 
-import com.google.common.collect.ImmutableMap;
-import models.User;
-import play.*;
 import play.data.DynamicForm;
 import play.data.Form;
-import play.db.Databases;
-import play.db.Database;
+import play.db.DB;
 
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -15,8 +11,6 @@ import views.html.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by stefan on 4/11/17.
@@ -46,17 +40,7 @@ public class Profile extends Controller {
         String new_fname = requestData.get("fname");
         String new_lname = requestData.get("lname");
 
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                                "user", "root",
-                                "password", "gibanica"
-                                )
-                );
-
-        Connection connection = database.getConnection();
+        Connection connection = DB.getConnection();
 
         try{
             ResultSet set = connection.prepareStatement("Select password, email from users where password="

@@ -5,6 +5,7 @@ import models.User;
 import play.*;
 import play.data.DynamicForm;
 import play.data.Form;
+import play.db.DB;
 import play.db.Databases;
 import play.db.Database;
 
@@ -36,17 +37,8 @@ public class Register extends Controller {
         created.type = "guest";
         String verPass = requestData.get("repPass");
         if(verPass.equals(requestData.get("pass"))) {
-            Database database = Databases.createFrom(
-                    "baklava",
-                    "com.mysql.jdbc.Driver",
-                    "jdbc:mysql://localhost/baklava",
-                    ImmutableMap.of(
-                            "user", "root",
-                            "password", "gibanica"
-                    )
-            );
 
-            Connection connection = database.getConnection();
+            Connection connection = DB.getConnection();
 
             try {
                 if(connection.prepareStatement("Insert into users (name, surname, email, password, type, verified) " +

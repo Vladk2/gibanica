@@ -13,6 +13,7 @@ import play.*;
 
 import play.data.DynamicForm;
 import play.data.Form;
+import play.db.DB;
 import play.db.Database;
 import play.db.Databases;
 import play.mvc.Controller;
@@ -23,7 +24,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -40,17 +40,7 @@ public class Restaurants extends Controller {
         if(5 == 6)
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
         else {
-            Database database = Databases.createFrom (
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-            );
-
-            Connection connection = database.getConnection();
+            Connection connection = DB.getConnection();
             try {
                 String query = "Select name, description from restaurants";
                 ResultSet set = connection.prepareStatement(query).executeQuery();
@@ -86,21 +76,9 @@ public class Restaurants extends Controller {
         created.name = requestData.get("rname");
         created.description = requestData.get("rdesc");
 
-        //TODO: staticko polje database, pravi se konekcija prilikom pokretanja aplikacije.
-        // posto driver ima connection pool, moze na vise mesta da se radi get connection
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
-
-        Connection connection = database.getConnection();
+        Connection connection = DB.getConnection();
         try {
-            if(connection.prepareStatement("Insert into restaurants (name, description) " +
+            if (connection.prepareStatement("Insert into restaurants (name, description) " +
                     "values (" + "\"" + created.name + "\""
                     + ", \"" + created.description + "\")" + ";").execute()) {
                 System.out.println("Success");
@@ -131,19 +109,8 @@ public class Restaurants extends Controller {
         created.password = requestData.get("pass");
         created.restaurant = requestData.get("forRest");
         System.out.println("\n " + created.restaurant + "\ngfsdgfdgsfsf");
-        //TODO: staticko polje database, pravi se konekcija prilikom pokretanja aplikacije.
-        // posto driver ima connection pool, moze na vise mesta da se radi get connection
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
 
-        Connection connection = database.getConnection();
+        Connection connection = DB.getConnection();
         try {
             if(connection.prepareStatement("Insert into users (name, surname, email, password, verified, type) " +
                     "values (" + "\"" + created.name + "\""
@@ -186,19 +153,7 @@ public class Restaurants extends Controller {
         created.email = requestData.get("email");
         created.password = requestData.get("pass");
 
-        //TODO: staticko polje database, pravi se konekcija prilikom pokretanja aplikacije.
-        // posto driver ima connection pool, moze na vise mesta da se radi get connection
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
-
-        Connection connection = database.getConnection();
+        Connection connection = DB.getConnection();
         try {
             if(connection.prepareStatement("Insert into users (name, surname, email, password, verified, type) " +
                     "values (" + "\"" + created.name + "\""
@@ -234,19 +189,7 @@ public class Restaurants extends Controller {
         created.email = requestData.get("email");
         created.password = requestData.get("pass");
 
-        //TODO: staticko polje database, pravi se konekcija prilikom pokretanja aplikacije
-        // posto driver ima connection pool, moze na vise mesta da se radi get connection
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
-
-        Connection connection = database.getConnection();
+        Connection connection = DB.getConnection();
         try {
             if(connection.prepareStatement("Insert into users (name, surname, email, password, verified, type) " +
                     "values (" + "\"" + created.name + "\""
@@ -287,19 +230,7 @@ public class Restaurants extends Controller {
         created.clothNo = requestData.get("clothNo");
         created.shoeNo = requestData.get("shoesNo");
 
-        //TODO: staticko polje database, pravi se konekcija prilikom pokretanja aplikacije
-        // posto driver ima connection pool, moze na vise mesta da se radi get connection
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
-
-        Connection connection = database.getConnection();
+        Connection connection = DB.getConnection();
         try {
             if(connection.prepareStatement("Insert into users (name, surname, email, password, verified, type) " +
                     "values (" + "\"" + created.name + "\""
@@ -343,27 +274,16 @@ public class Restaurants extends Controller {
         String restName = requestData.get("rname");
         String restDesc = requestData.get("rdesc");
         String oldName = session("myRestName");
-        //TODO: staticko polje database, pravi se konekcija prilikom pokretanja aplikacije
-        // posto driver ima connection pool, moze na vise mesta da se radi get connection
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
 
-        Connection connection = database.getConnection();
+        Connection connection = DB.getConnection();
         try{
 
-                if(connection.prepareStatement("Update restaurants" +
-                        " set name =" + "\"" + restName + "\"" +
-                        ", description =" + "\"" + restDesc + "\" where name = " + "\"" + oldName + "\"" + ";").execute()){
-                    System.out.println("Restaurant's info successfully changed!");
+            if(connection.prepareStatement("Update restaurants" +
+                    " set name =" + "\"" + restName + "\"" +
+                    ", description =" + "\"" + restDesc + "\" where name = " + "\"" + oldName + "\"" + ";").execute()){
+                System.out.println("Restaurant's info successfully changed!");
 
-                }
+            }
 
         } catch (SQLException e){
             e.printStackTrace();
@@ -379,6 +299,7 @@ public class Restaurants extends Controller {
 
         session("myRestName", restName);
         session("myRestDesc", restDesc);
+
         return ok(home.render("Welcome",new play.twirl.api.Html("<center>You have successfully edited your restaurant's info!</center>") ));
     }
 

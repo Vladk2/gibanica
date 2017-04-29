@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.common.collect.ImmutableMap;
 import play.*;
+import play.db.DB;
 import play.db.Databases;
 import play.db.Database;
 import play.mvc.*;
@@ -21,17 +22,17 @@ public class Application extends Controller {
         String verified = session("verified");
         String tip = session("userType");
         if(loggedUser==null) {
-            Database database = Databases.createFrom(
-                    "baklava",
-                    "com.mysql.jdbc.Driver",
-                    "jdbc:mysql://localhost/baklava",
-                    ImmutableMap.of(
-                            "user", "root",
-                            "password", "gibanica"
-                    )
-            );
+//            Database database = Databases.createFrom(
+//                    "baklava",
+//                    "com.mysql.jdbc.Driver",
+//                    "jdbc:mysql://localhost/baklava",
+//                    ImmutableMap.of(
+//                            "user", "root",
+//                            "password", "gibanica"
+//                    )
+//            );
 
-            Connection connection = database.getConnection();
+            Connection connection = DB.getConnection();
             try {
                 ResultSet set = connection.prepareStatement("Select * from usertypes;").executeQuery();
                 List rowValues = new ArrayList();
