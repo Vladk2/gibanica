@@ -3,11 +3,9 @@
 package controllers;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
-import models.Restaurant;
-import models.RestaurantManager;
-import models.User;
-import models.Employee;
+import models.*;
 import play.*;
 
 
@@ -16,6 +14,7 @@ import play.data.Form;
 import play.db.DB;
 import play.db.Database;
 import play.db.Databases;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.*;
@@ -29,6 +28,8 @@ import java.util.List;
 
 public class Restaurants extends Controller {
 
+    public static String addedRestaurantName;
+
     public static Result restaurants() {
 
         String loggedUser = session("connected");
@@ -36,8 +37,8 @@ public class Restaurants extends Controller {
 
         List<Restaurant> restaurants = new ArrayList<Restaurant>();
 
-        //if(loggedUser == null || verified.equals("0"))
-        if(5 == 6)
+        if(loggedUser == null || verified.equals("0"))
+       // if(5 == 6)
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
         else {
             Connection connection = DB.getConnection();
@@ -70,18 +71,49 @@ public class Restaurants extends Controller {
 
 
 
-    public static Result addRestaurant() {
-        DynamicForm requestData = Form.form().bindFromRequest();
-        Restaurant created = new Restaurant();
-        created.name = requestData.get("rname");
-        created.description = requestData.get("rdesc");
+    public static Result addRestInfoAJAX() {
+        JsonNode json = request().body().asJson();
+        Restaurant rest = Json.fromJson(json, Restaurant.class);
+        addedRestaurantName = rest.name;
 
         Connection connection = DB.getConnection();
         try {
             if (connection.prepareStatement("Insert into restaurants (name, description) " +
-                    "values (" + "\"" + created.name + "\""
-                    + ", \"" + created.description + "\")" + ";").execute()) {
-                System.out.println("Success");
+                    "values (" + "\"" + rest.name + "\""
+                    + ", \"" + rest.description + "\")" + ";").execute()) {
+
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return ok();
+    }
+
+    public static Result addVictualAJAX() {
+        JsonNode json = request().body().asJson();
+        VictualAndDrink victual = Json.fromJson(json, VictualAndDrink.class);
+
+        Connection connection = DB.getConnection();
+
+        try {
+
+            if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price) " +
+                    "values (" + "\"" + victual.name + "\""
+                    + ", \"" + victual.description + "\"" + ", \"" + victual.price + "\")" + ";").execute()) {
+            }
+            if(connection.prepareStatement("Insert into victualmenu (restaurantId, victualId) " +
+                    "values (( select restaurantId from restaurants where name ="
+                    + "\"" + addedRestaurantName + "\"),(select victualsAndDrinksId from victualsanddrinks where name ="
+                    + "\"" + victual.name + "\"));").execute()) {
+
             }
         } catch (SQLException e){
             e.printStackTrace();
@@ -95,9 +127,77 @@ public class Restaurants extends Controller {
             }
         }
 
+        return ok(Json.toJson(victual));
+    }
 
-        return ok(home.render("Welcome",new play.twirl.api.Html("<center>Restaurant has been added successfully!</center>") ));
+    public static Result addDrinkAJAX() {
+        JsonNode json = request().body().asJson();
+        VictualAndDrink drink = Json.fromJson(json, VictualAndDrink.class);
 
+        Connection connection = DB.getConnection();
+        try {
+
+            if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price) " +
+                    "values (" + "\"" + drink.name + "\""
+                    + ", \"" + drink.description + "\"" + ", \"" + drink.price + "\")" + ";").execute()) {
+            }
+            if(connection.prepareStatement("Insert into drinkmenu (restaurantId, victualId) " +
+                    "values (( select restaurantId from restaurants where name ="
+                    + "\"" + addedRestaurantName + "\"),(select victualsAndDrinksId from victualsanddrinks where name ="
+                    + "\"" + drink.name + "\"));").execute()) {
+
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return ok(Json.toJson(drink));
+    }
+
+    public static Result restManagerHome() {
+
+        String loggedUser = session("connected");
+        String verified = session("verified");
+
+        List<VictualAndDrink> meals = new ArrayList<>();
+
+        if(loggedUser == null || verified.equals("0"))
+            return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
+        else {
+          /*  Connection connection = DB.getConnection();
+            try {
+                String query = "Select name, description, price from victualsanddrinks";
+                ResultSet set = connection.prepareStatement(query).executeQuery();
+
+                while(set.next()){
+                    Restaurant restaurant =
+                            new Restaurant(set.getString(1), set.getString(2));
+
+                    meals.add(restaurant);
+                }
+
+            } catch (SQLException e){
+                e.printStackTrace();
+            } finally {
+                if(connection != null){
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            } */
+
+            return ok(restManagerHome.render(loggedUser));
+        }
     }
 
     public static Result addRestaurantManager() {

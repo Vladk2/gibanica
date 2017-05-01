@@ -7,7 +7,7 @@ public class Restaurant {
 
     public String name;
     public String description;
-
+    public String bla;
     public Restaurant(String name, String description) {
         this.name = name;
         this.description = description;

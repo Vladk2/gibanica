@@ -2,8 +2,9 @@ create table if not exists baklava.victualsAndDrinks (
 	victualsAndDrinksId int(5) not null primary key auto_increment,
 	name varchar(100) not null ,
 	description varchar(100) not null,
-	price int(6) not null 
+	price double(15) not null
 );
+
 
 create table if not exists baklava.restaurants (
 	restaurantId int(5) not null primary key auto_increment,

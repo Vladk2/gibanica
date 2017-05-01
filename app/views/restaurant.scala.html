@@ -11,7 +11,10 @@
         <br>
         <div style="display: inline-block;">
         @if(session.get("userType").equals("system-manager")) {
-            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addARestaurant" style="width: 170px;float: left;color: black;margin: 10px;"><b>ADD A RESTAURANT</b></button>
+            <div  class="alert alert-success" id="restAddSuccess" style="display: none">
+
+            </div>
+            <button class="btn btn-warning btn-block"  data-toggle="modal" data-target="#addARestaurant" style="width: 170px;float: left;color: black;margin: 10px;"><b>ADD A RESTAURANT</b></button>
             <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addARestManager" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD A RESTAURANT MANAGER</b></button>
             <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addASysManager" style="width: 210px;float:left;color: black;margin: 10px;"><b>ADD A SYSTEM MANAGER</b></button>
 
@@ -26,6 +29,7 @@
             <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addAnEmployee" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD AN EMPLOYEE</b></button>
             <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addABidder" style="width: 240px;color: black;margin: 10px;"><b>ADD A BIDDER</b></button>
         }
+
         @if(session.get("userType").equals("guest")) {
             <div class="container">
     <div class="row">
@@ -89,91 +93,13 @@
             </div>
 
         </div></div></div>
-        }
+        }                         <!-- neki div nije zatvoren, ne mogu provalim koji -- >
 
       </center>
 
   </div>
 
-  <!--- MODAL ZA DODAVANJE RESTORANA -->
-  <center>
-  <div class="modal fade" id="addARestaurant"  >
-  				 	<div class="modal-dialog">
-  				 		<div class="modal-content" >
-  				 			<!--  modal header -->
-  <div class="modal-header">
-    <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A RESTAURANT </h3>
-    <button type="button" class="close" data-dismiss="modal">&times;</button>
-  </div>
-    <!--  modal body -->
 
-  <div class="floating-box"   style="width:400px;display: inline-block; height:500px;margin:20px; ">
-
-    <form method="post" action="/addRestaurant" accept-charset="UTF-8">
-      <label for="rname">Restaurant Name:</label> <br>
-      <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rname" required >
-      <label for="rdesc">About a restaurant (eg. Vegan, Chinese food...):</label> <br>
-      <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rdesc" required >
-      <label for="meals">Select victuals:</label> <br>
-      <select class="selectpicker" multiple id="meals" >
-        <option>Jelo1</option>
-        <option>Jelo2</option>
-      </select> <br> <br>
-      <label for="drinks">Select drinks:</label> <br>
-      <select class="selectpicker" multiple id="drinks" style="width:450px;">
-        <option>Pice1</option>
-        <option>Pice2</option>
-      </select> <br> <br> <br> <br> <br>
-      <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW RESTAURANT" style="width: 250px">
-
-    </form>
-  </div>
-
-    <!--  modal footer -->
-  <div class="modal-footer">
-  </div>
-                        </div>
-  </div>
-  </div>
-
-      <!--- MODAL ZA DODAVANJE REST. MENADZERA -->
-    <div class="modal fade" id="addARestManager" >
-      <div class="modal-dialog" >
-        <div class="modal-content" >
-            <!--  modal header -->
-          <div class="modal-header">
-            <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A MANAGER </h3>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
-            <!--  modal body -->
-          <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
-
-            <form method="post" action="/addRestaurantManager" accept-charset="UTF-8">
-              <label for="email">E-mail:</label> <br>
-              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
-              <label for="pass">Password:</label> <br>
-              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required >
-              <label for="name">First name:</label> <br>
-              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required >
-              <label for="lname">Last name :</label> <br>
-              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required >
-              <label for="forRest">Restaurant :</label> <br>
-              <select class="form-control" id="forRest" name="forRest" style="width:250px;">
-                <option>Amigos</option>
-              </select> <br> <br> <br>
-
-              <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW MANAGER" style="width: 250px">
-            </form>
-
-          </div>
-
-
-            <!--  modal footer -->
-          <div class="modal-footer">
-          </div>
-        </div>
-      </div>
-    </div>
 
       <!--- MODAL ZA DODAVANJE SYS. MENADZERA -->
     <div class="modal fade" id="addASysManager" >
@@ -298,6 +224,139 @@
           </div>
       </div>
 
+        <!--- MODAL ZA DODAVANJE REST. MENADZERA -->
+    <div class="modal fade" id="addARestManager" >
+        <div class="modal-dialog" >
+            <div class="modal-content" >
+                    <!--  modal header -->
+                <div class="modal-header">
+                    <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A MANAGER </h3>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                    <!--  modal body -->
+                <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+
+                    <form method="post" action="/addRestaurantManager" accept-charset="UTF-8">
+                        <label for="email">E-mail:</label> <br>
+                        <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
+                        <label for="pass">Password:</label> <br>
+                        <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required >
+                        <label for="name">First name:</label> <br>
+                        <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required >
+                        <label for="lname">Last name :</label> <br>
+                        <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required >
+                        <label for="forRest">Restaurant :</label> <br>
+                        <select class="form-control" id="forRest" name="forRest" style="width:250px;">
+                        @for(restaurant <- restaurants) {
+                            <option>@restaurant.name</option>
+                        }
+                        </select> <br> <br> <br>
+
+                        <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW MANAGER" style="width: 250px">
+                    </form>
+
+                </div>
+
+
+                    <!--  modal footer -->
+                <div class="modal-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+        <!--- MODAL ZA DODAVANJE RESTORANA -->
+    <center>
+        <div class="modal fade" id="addARestaurant"  >
+            <div class="modal-dialog modal-sm" style="width:700px">
+                <div class="modal-content" >
+                        <!--  modal header -->
+                    <div class="modal-header">
+                        <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A NEW RESTAURANT </h3>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                        <!--  modal body -->
+
+                    <div class="modal-body">
+
+
+                            <label for="rname">Restaurant Name:</label> <br>
+                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rname" id="rname"required >
+                            <label for="rdesc">About a Restaurant (eg. Vegan, Chinese food...):</label> <br>
+                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rdesc" id="rdesc" required > <br>
+                            <p id="stepErrMessage" style="color:red"> </p>
+                            <a class="btn btn-warning" id="nextStepRest" style="width:100px;"> NEXT </a> <br>
+
+                            <div style="display:none" id="secondStepRest">
+
+                            <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+
+                            <label for="vicName">Victual Name:</label> <br>
+                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicName" id="vicName" >
+                            <label for="vicDesc">Victual Description:</label> <br>
+                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicDesc" id="vicDesc"  >
+                            <label for="vicPrice">Victual Price(RSD):</label> <br>
+                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicPrice" id="vicPrice"  >
+                            <p id="vicErrMessage" style="color:red; display:none"> </p>
+                            <a class="btn btn-warning" id="addVictual" style="width:150px"> ADD A VICTUAL </a> <br> <br>
+                            <div style="height:130px;overflow:auto">
+                                <table class="table-bordered table-striped" style="width:630px;float:right">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:250px">Victual Name</th>
+                                            <th style="width:360px">Victual Description</th>
+                                            <th style="width:70px">Price(RSD)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vicList">
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+
+                            <label for="drinkName">Drink Name:</label> <br>
+                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkName"  >
+                            <label for="drinkDesc">Drink Description:</label> <br>
+                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkDesc"  >
+                            <label for="drinkPrice">Drink Price(RSD):</label> <br>
+                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkPrice"  >
+                            <p id="drinkErrMessage" style="color:red"> </p>
+                            <a class="btn btn-warning" id="addDrink" style="width:150px"> ADD A DRINK </a> <br> <br>
+
+                            <div style="height:130px;overflow:auto">
+                                <table class="table-bordered table-striped" style="width:630px;float:right">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:250px">Drink Name</th>
+                                            <th style="width:360px">Drink Description</th>
+                                            <th style="width:70px">Price(RSD)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="drinkList">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+
+                            <button class="btn btn-warning btn-block" id="addRestFinish" style="width: 250px"><b>FINISH</b></button>
+
+                    </div>
+                    </div>
+
+                        <!--  modal footer -->
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
           <!--- MODAL ZA EDITOVANJE RESTORANA -->
       <div class="modal fade" id="editRestaurant" >
           <div class="modal-dialog" >
@@ -328,7 +387,6 @@
                           <input class="btn btn-warning btn-block" type="submit"  value="SAVE CHANGES" style="width: 250px">
 
                       </form>
-
                   </div>
 
 
@@ -341,5 +399,111 @@
 
   </center>
 
+    <script>
+
+            // add Restaurant Info ajax call
+            $("#nextStepRest").click(function() {
+
+                if( !$("#rname").val() ) {
+                    $("#stepErrMessage").html("You must enter a restaurant's name").fadeIn();
+                }
+                else {
+                    var rName = $('#rname').val();
+                    var rDesc = $('#rdesc').val();
+
+                    var restInfo = {
+                        'name': rName, 'description': rDesc
+
+                    };
+                    myJsRoutes.controllers.Restaurants.addRestInfoAJAX().ajax({
+                        data: JSON.stringify(restInfo),
+                        contentType : 'application/json',
+                        success : function() {
+                            $("#rname").prop('disabled', true);
+                            $("#rdesc").prop('disabled', true);
+                            $("#secondStepRest").show();
+                            $("#nextStepRest").hide();
+                        },
+
+                    });
+                }
+            });
+
+        // add Victual ajax call
+            $("#addVictual").click(function() {
+
+
+                var vicName = $('#vicName').val();
+                var vicDesc = $('#vicDesc').val();
+                var vicPrice = $('#vicPrice').val();
+                var victual = {
+                    'name': vicName, 'description': vicDesc,
+                    'price' : vicPrice
+
+                };
+                myJsRoutes.controllers.Restaurants.addVictualAJAX().ajax({
+                    data: JSON.stringify(victual),
+                    contentType : 'application/json',
+                    success : function(jelo) {  $('#vicList').append('<tr> <td>'+ jelo.name + '</td> <td>'
+                            + jelo.description + '</td> <td>'+ jelo.price + '</td> </tr>');
+                             $("#vicErrMessage").html("");
+                             $('#vicName').val("");
+                             $('#vicDesc').val("");
+                             $('#vicPrice').val("");
+                             },
+                    error: function() { $("#vicErrMessage").html("You cannot put letters in the price box").fadeIn();
+                                        $('#vicPrice').val("");  }
+                });
+
+            });
+
+        // add Drink ajax call
+        $("#addDrink").click(function() {
+
+
+            var drinkName = $('#drinkName').val();
+            var drinkDesc = $('#drinkDesc').val();
+            var drinkPrice = $('#drinkPrice').val();
+            var victual = {
+                'name': drinkName, 'description': drinkDesc,
+                'price' : drinkPrice
+
+            };
+            myJsRoutes.controllers.Restaurants.addDrinkAJAX().ajax({
+                data: JSON.stringify(victual),
+                contentType : 'application/json',
+                success : function(jelo) {  $('#drinkList').append('<tr> <td>'+ jelo.name + '</td> <td>'
+                        + jelo.description + '</td> <td>'+ jelo.price + '</td> </tr>');
+                    $("#drinkErrMessage").html("");
+                    $('#drinkName').val("");
+                    $('#drinkDesc').val("");
+                    $('#drinkPrice').val("");
+                },
+                error: function() { $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
+                    $('#drinkPrice').val("");  }
+            });
+
+        });
+
+        // close modal after adding a restaurant
+            $("#addRestFinish").click(function() {
+
+                $('#addARestaurant').modal('toggle');
+                $('#vicList tr').remove();
+                $('#drinkList tr').remove();
+                $("#rname").prop('disabled', false);
+                $("#rdesc").prop('disabled', false);
+                $("#secondStepRest").hide();
+                $("#nextStepRest").show();
+                $('#addARestaurant').find("input")
+                        .val('')
+                        .end();
+                $("#restAddSuccess").html("  <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <strong>Success!</strong> A new restaurant has been added.").fadeIn();
+
+                });
+
+
+
+    </script>
 
 }

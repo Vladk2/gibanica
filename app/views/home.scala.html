@@ -13,6 +13,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="@routes.Application.jsRoutes()"></script>
 
     <style>
     .form-control { width:70%; text-align:center }
@@ -22,8 +23,10 @@
       -webkit-box-shadow: none;
       box-shadow: none;
     }
-    .modal-content {background-color: blanchedalmond }
+    .modal-content {background-color: #fff1cc }
     .formText { color: white }
+
+    .btn { color: black}
 
       .panel-table .panel-body{
         padding:0;
@@ -56,10 +59,13 @@
       .panel-table .panel-body .table-bordered > thead > tr:first-of-type > th{
         border-top: 0px;
       }
+
     </style>
 
   </head>
-  <body style="background-color: blanchedalmond">
+
+
+  <body style="background-color: #fff1cc">
       <!--  Top Menu Bar -->
     <nav class="navbar navbar-inverse"  >
       <div class="container" >
@@ -96,6 +102,7 @@
     </nav>
     @* And here's where we render the `Html` object containing
     * the page content. *@
+
     @content
   </body>
 </html>
