@@ -105,13 +105,13 @@ public class Restaurants extends Controller {
 
         try {
 
-            if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price) " +
+            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price) " +
                     "values (" + "\"" + victual.name + "\""
                     + ", \"" + victual.description + "\"" + ", \"" + victual.price + "\")" + ";").execute()) {
             }
-            if(connection.prepareStatement("Insert into victualmenu (restaurantId, victualId) " +
+            if(connection.prepareStatement("Insert into victualMenu (restaurantId, victualId) " +
                     "values (( select restaurantId from restaurants where name ="
-                    + "\"" + addedRestaurantName + "\"),(select victualsAndDrinksId from victualsanddrinks where name ="
+                    + "\"" + addedRestaurantName + "\"),(select victualsAndDrinksId from victualsAndDrinks where name ="
                     + "\"" + victual.name + "\"));").execute()) {
 
             }
@@ -137,11 +137,11 @@ public class Restaurants extends Controller {
         Connection connection = DB.getConnection();
         try {
 
-            if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price) " +
+            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price) " +
                     "values (" + "\"" + drink.name + "\""
                     + ", \"" + drink.description + "\"" + ", \"" + drink.price + "\")" + ";").execute()) {
             }
-            if(connection.prepareStatement("Insert into drinkmenu (restaurantId, victualId) " +
+            if(connection.prepareStatement("Insert into drinkMenu (restaurantId, victualId) " +
                     "values (( select restaurantId from restaurants where name ="
                     + "\"" + addedRestaurantName + "\"),(select victualsAndDrinksId from victualsanddrinks where name ="
                     + "\"" + drink.name + "\"));").execute()) {

@@ -60,8 +60,13 @@
                     @for(restaurant <- restaurants) {
                        <tr>
                           <td align="center">
-                              <a class="btn btn-success"><em class="fa fa-thumbs-o-up"></em></a>
-                              <a class="btn btn-danger"><em class="fa fa-thumbs-o-down"></em></a>
+                              <select class="selectpicker" data-style="btn-info" style="display: none;">
+                                  <option>Ocaj</option>
+                                  <option>Nije skroz ocajno</option>
+                                  <option>Solidno</option>
+                                  <option>Super ste</option>
+                                  <option>Ekstra</option>
+                              </select>
                           </td>
                           <td>@restaurant.name</td>
                           <td>@restaurant.description</td>
