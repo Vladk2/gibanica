@@ -1,3 +1,4 @@
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -6,6 +7,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.*;
 
+import play.db.DB;
 import play.mvc.*;
 import play.test.*;
 import play.data.DynamicForm;
@@ -28,8 +30,9 @@ import static org.fest.assertions.Assertions.*;
 public class ApplicationTest {
 
     @Test
-    public void simpleCheck() {
-        int a = 1 + 1;
+    public void checkRegistration() {
+        Connection conn = DB.getConnection();
+
         assertThat(a).isEqualTo(2);
     }
 
