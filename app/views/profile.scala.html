@@ -3,7 +3,9 @@
 
 @home("Profile"){
 
-  <div>
+
+
+    <div>
   <center>
 
     <form method="post" action="/edit_profile" accept-charset="UTF-8">
@@ -21,11 +23,21 @@
 
     </form>
 
-      @if(userType.equals("waiter")){
-          <div id='wrap'>
-            <div id='calendar'></div>
-            <div style='clear:both'></div>
+
+      @if(userType.equals("waiter") || userType.equals("chef") || userType.equals("bartender")){
+          <div id="calendar">
+
           </div>
+          <script>
+              var events = [
+                  {'Date': new Date(2017, 4, 1), 'Title': '08:00 - 16:00', 'Link': function(){alert('08:00 - 16:00');}},
+                  {'Date': new Date(2017, 4, 18), 'Title': '08:00 - 16:00', 'Link': function(){alert('08:00 - 16:00');}},
+                  {'Date': new Date(2017, 4, 27), 'Title': '08:00 - 16:00', 'Link': function(){alert('08:00 - 16:00');}},
+              ];
+              var settings = {};
+              var element = $('#calendar')[0];
+              calendar(element, events, settings);
+          </script>
       }
 
   </center>

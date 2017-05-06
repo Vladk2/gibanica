@@ -5,9 +5,9 @@
   <head>
     @* Here's where we render the page title `String`. *@
     <title>@title</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
@@ -16,109 +16,51 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
     <script type="text/javascript" src="@routes.Application.jsRoutes()"></script>
 
+      <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+      <link rel="stylesheet" href="@routes.Assets.at("stylesheets/demo.css")">
+      <link rel="stylesheet" href="@routes.Assets.at("stylesheets/theme2.css")">
+
+      <script src="@routes.Assets.at("javascripts/caleandar.js")"></script>
+
+
 
 
 
     <style>
-    .form-control { width:70%; text-align:center }
-
-    .form-control:focus{
-      border-color: orange;
-      -webkit-box-shadow: none;
-      box-shadow: none;
-    }
-    .modal-content {background-color: #fff1cc }
-    .formText { color: white }
-
-    *{
-    margin: 0;
-    padding: 0;
-    }
-    .rate {
-        float: left;
-        height: 46px;
-        padding: 0 10px;
-    }
-    .rate:not(:checked) > input {
-        position:absolute;
-        top:-9999px;
-    }
-    .rate:not(:checked) > label {
-        float:right;
-        width:1em;
-        overflow:hidden;
-        white-space:nowrap;
-        cursor:pointer;
-        font-size:30px;
-        color:#ccc;
-    }
-    .rate:not(:checked) > label:before {
-        content: '★ ';
-    }
-    .rate > input:checked ~ label {
-        color: #ffc700;
-    }
-    .rate:not(:checked) > label:hover,
-    .rate:not(:checked) > label:hover ~ label {
-        color: #deb217;
-    }
-    .rate > input:checked + label:hover,
-    .rate > input:checked + label:hover ~ label,
-    .rate > input:checked ~ label:hover,
-    .rate > input:checked ~ label:hover ~ label,
-    .rate > label:hover ~ input:checked ~ label {
-        color: #c59b08;
-    }
-
-      #wrap {
-		width: 1100px;
-		margin: 0 auto;
-		}
-
-	#external-events {
-		float: left;
-		width: 150px;
-		padding: 0 10px;
-		text-align: left;
-		}
-
-	#external-events h4 {
-		font-size: 16px;
-		margin-top: 0;
-		padding-top: 1em;
-		}
-
-	.external-event { /* try to mimick the look of a real event */
-		margin: 10px 0;
-		padding: 2px 4px;
-		background: #3366CC;
-		color: #fff;
-		font-size: .85em;
-		cursor: pointer;
-		}
-
-	#external-events p {
-		margin: 1.5em 0;
-		font-size: 11px;
-		color: #666;
-		}
-
-	#external-events p input {
-		margin: 0;
-		vertical-align: middle;
-		}
-
-	#calendar {
-      /* 		float: right; */
-      margin: 0 auto;
-      width: 900px;
-      background-color: #FFFFFF;
-      border-radius: 6px;
-      box-shadow: 0 1px 2px #C3C3C3;
-      -webkit-box-shadow: 0px 0px 21px 2px rgba(0, 0, 0, 0.18);
-      -moz-box-shadow: 0px 0px 21px 2px rgba(0, 0, 0, 0.18);
-      box-shadow: 0px 0px 21px 2px rgba(0, 0, 0, 0.18);
-    }
+        .form-control { width:70%; text-align:center }
+        .form-control:focus{
+            border-color: orange;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+        .modal-content {background-color: #fff1cc }
+        .formText { color: white }
+        .btn { color: black}
+        .panel-table .panel-body{
+            padding:0;
+        }
+        .panel-table .panel-body .table-bordered {
+            border-style: none;
+            margin:0;
+        }
+        .panel-table .panel-body .table-bordered > thead > tr > th:first-of-type {
+            text-align:center;
+            width: 100px;
+        }
+        .panel-table .panel-body .table-bordered > thead > tr > th:last-of-type,
+        .panel-table .panel-body .table-bordered > tbody > tr > td:last-of-type {
+            border-right: 0px;
+        }
+        .panel-table .panel-body .table-bordered > thead > tr > th:first-of-type,
+        .panel-table .panel-body .table-bordered > tbody > tr > td:first-of-type {
+            border-left: 0px;
+        }
+        .panel-table .panel-body .table-bordered > tbody > tr:first-of-type > td{
+            border-bottom: 0px;
+        }
+        .panel-table .panel-body .table-bordered > thead > tr:first-of-type > th{
+            border-top: 0px;
+        }
     </style>
 
   </head>
