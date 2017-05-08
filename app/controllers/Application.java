@@ -40,7 +40,9 @@ public class Application extends Controller {
         return ok(Routes.javascriptRouter("myJsRoutes",
                 routes.javascript.Restaurants.addVictualAJAX(),
                 routes.javascript.Restaurants.addRestInfoAJAX(),
-                routes.javascript.Restaurants.addDrinkAJAX()
+                routes.javascript.Restaurants.addDrinkAJAX(),
+                routes.javascript.Restaurants.saveSeatConf(),
+                routes.javascript.Restaurants.addSeatSection()
                 )
         );
     }

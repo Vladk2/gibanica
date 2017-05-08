@@ -117,7 +117,7 @@
         <div class="modal-content" >
             <!--  modal header -->
           <div class="modal-header">
-            <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A SYS. MANAGER </h3>
+            <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A SYSTEM MANAGER </h3>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
             <!--  modal body -->
@@ -240,7 +240,7 @@
             <div class="modal-content" >
                     <!--  modal header -->
                 <div class="modal-header">
-                    <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A MANAGER </h3>
+                    <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A RESTAURANT MANAGER </h3>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                     <!--  modal body -->
@@ -294,9 +294,27 @@
                             <label for="rname">Restaurant Name:</label> <br>
                             <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rname" id="rname"required >
                             <label for="rdesc">About a Restaurant (eg. Vegan, Chinese food...):</label> <br>
-                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rdesc" id="rdesc" required > <br>
+                        <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rdesc" id="rdesc" required >
+                        <label for="rlocation">Location:</label> <br>
+                        <div class="input-group">
+                            <input type="text" id="rlocation" class="form-control" name="adresa" style="width:240px" required>
+                            <span class="input-group-btn" style="width:50px">
+                                <button id="show_map" class="btn btn-warning" type="button" style="width:60px">Show</button> </span> </div>
+                        <div class = "hidemap" id = "mapa" style="width: 260px; height:220px; background-color:white;"></div> <br>
+
+
+                        <label for="rtel">Telephone Number:</label> <br>
+                        <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rtel" id="rtel" required >
+                            <label for="pickSize">Restaurant Size:</label> <br>
+                           <select class="form-control" id="pickSize"  style="margin-bottom: 15px; width: 300px;">
+                            <option>small(up to 15 tables)</option>
+                            <option>medium(up to 25 tables)</option>
+                            <option>large(up to 45 tables)</option>
+
+                           </select> <br>
                             <p id="stepErrMessage" style="color:red"> </p>
-                            <a class="btn btn-warning" id="nextStepRest" style="width:100px;"> NEXT </a> <br>
+                            <a class="btn btn-warning" id="nextStepRest" title="Manage seating and food/drink menu" style="width:100px;"> NEXT </a>
+                            <a class="btn btn-warning addRestFinish" id="finishWithoutStep" title="Finish and leave it to a restaurant manager"  style="width:100px;"> FINISH </a><br>
 
                             <div style="display:none" id="secondStepRest">
 
@@ -351,8 +369,39 @@
                                 </table>
                             </div>
                             <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+                                <div id="seatConfig" style="height:auto">
+                                <div id="seatInfo" style="float:left;margin-left:20px;">
+                                   <b>Restaurant section name:</b>  <input class = "form-control" type="text" id="sectionName" maxlength="25">
+                                    <b> Section color:</b>     <select class="form-control" id="sectionColor">
+                                        <option value="blue">blue</option>
+                                        <option value="red">red</option>
+                                        <option value="yellow">yellow</option>
+                                        <option value="purple">purple</option>
+                                        <option value="pink">pink</option>
+                                        <option value="green">green</option>
+                                        <option value="brown">brown</option>
+                                        <option value="lightgrey">lightgray</option>
+                                    </select> <br>
+                                        <a class="btn btn-warning" id="addSection" > ADD </a> <br> <br>
+                                   <p><b> LEGEND: </b></p>
+                                Wall: <div class='sectionPicker' id="black"  style="width:32px;height:32px;background-color:black;border: 1px solid orange;"> </div>
 
-                            <button class="btn btn-warning btn-block" id="addRestFinish" style="width: 250px"><b>FINISH</b></button>
+                                </div> <br>
+                                    <p style="margin-left:100px"> <b>Seating plan:</b>  </p>
+                                <div id = "seatTable" class="divTable" style=" width:450px;height:450px; border: 1px solid #dbdbdb;">
+
+                                    <div class="divTableBody">
+                                    @for(x <- 0 until 12) {
+                                        <div class="divTableRow">
+                                            @for(y <- 0 until 12 ) {
+                                                <div id="seat:@x:@y:|none" class="divTableCell"></div>
+                                            }
+                                            <!-- DivTableRow end --> </div>
+                                    }
+                                    </div>
+                                        <!-- DivTable end --></div> <br> <br> <br> <br> <br> <br>
+                                </div> <!-- seat confi end -->
+                            <button class="btn btn-warning btn-block addRestFinish" id="addRestFinish"  style="width: 250px"><b>FINISH</b></button>
 
                     </div>
                     </div>
@@ -411,6 +460,7 @@
 
     <script>
 
+
             // add Restaurant Info ajax call
             $("#nextStepRest").click(function() {
 
@@ -418,12 +468,18 @@
                     $("#stepErrMessage").html("You must enter a restaurant's name").fadeIn();
                 }
                 else {
+                    $("#stepErrMessage").html("");
                     var rName = $('#rname').val();
                     var rDesc = $('#rdesc').val();
+                    var rLocation = $("#rlocation").val();
+                    var rTel = $("#rtel").val();
+                    var sizeComboBox = $("#pickSize").val();
+                    var rSizeSplit =  sizeComboBox.split('(');
+                    var rSize = rSizeSplit[0];
 
                     var restInfo = {
-                        'name': rName, 'description': rDesc
-
+                        'name': rName, 'description': rDesc, 'location': rLocation,
+                        'tel': rTel, 'rSize' : rSize
                     };
                     myJsRoutes.controllers.Restaurants.addRestInfoAJAX().ajax({
                         data: JSON.stringify(restInfo),
@@ -431,9 +487,15 @@
                         success : function() {
                             $("#rname").prop('disabled', true);
                             $("#rdesc").prop('disabled', true);
+                            $("#rlocation").prop('disabled', true);
+                            $("#rtel").prop('disabled', true);
+                            $("#pickSize").prop('disabled', true);
                             $("#secondStepRest").show();
                             $("#nextStepRest").hide();
+                            $("#stepErrMessage").html("");
                         },
+                        error: function() { $("#stepErrMessage").html("Restaurant's name is already in use!").fadeIn();
+                            $('#rname').val(""); }
 
                     });
                 }
@@ -477,7 +539,6 @@
             var victual = {
                 'name': drinkName, 'description': drinkDesc,
                 'price' : drinkPrice
-
             };
             myJsRoutes.controllers.Restaurants.addDrinkAJAX().ajax({
                 data: JSON.stringify(victual),
@@ -495,8 +556,65 @@
 
         });
 
+        // seat config
+            $(document).on("click", "#addSection", function() {
+
+                var sectionName = $('#sectionName').val();
+                var sectionColor = $('#sectionColor').val();
+                $("#sectionColor option[ value = " + sectionColor + " ]").remove();
+                var section = {
+                    'sectionName': sectionName, 'sectionColor': sectionColor
+                };
+
+                myJsRoutes.controllers.Restaurants.addSeatSection().ajax({
+                    data: JSON.stringify(section),
+                    contentType: 'application/json',
+                    success: function (sekcija) {
+                        $("#seatInfo").append(sekcija.sectionName + ": <div class='sectionPicker' id='" + sekcija.sectionColor + "' style='width:32px;height:32px;background-color:"+ sekcija.sectionColor +";border: 2px solid #dbdbdb;'> </div>");
+                    }
+                });
+            });
+
+            var pickedColor = "black";
+            $(document).on("click",'.sectionPicker',function () {
+               $(".sectionPicker").css('border-color', '#dbdbdb');
+               $(this).css("border-color","orange");
+
+               pickedColor = $(this).attr('id');
+
+
+            });
+
+            $(".divTableCell").click(function() {
+                var this_id = $(this).attr('id');
+                var new_id = this_id.split('|');
+                if(new_id[1] == pickedColor){
+                    $(this).css("background-color", "#fff1cc");
+                    $(this).attr("id", new_id[0] + "|none");
+                }
+                else {
+                    $(this).css("background-color", pickedColor);
+                    $(this).attr("id", new_id[0] + "|" + pickedColor);
+                }
+
+            });
+
         // close modal after adding a restaurant
-            $("#addRestFinish").click(function() {
+            $(".addRestFinish").click(function() {
+
+                var raspored = [];
+                $(".divTableCell").each(function() {
+                    var pozicija = $(this).attr('id');
+                    raspored.push(pozicija);
+                });
+
+                myJsRoutes.controllers.Restaurants.saveSeatConf().ajax({
+                    data: JSON.stringify({raspored:raspored}),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function () {
+                         }
+                    });
 
                 $('#addARestaurant').modal('toggle');
                 $('#vicList tr').remove();
@@ -508,9 +626,10 @@
                 $('#addARestaurant').find("input")
                         .val('')
                         .end();
-                $("#restAddSuccess").html("  <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <strong>Success!</strong> A new restaurant has been added.").fadeIn();
+              $("#restAddSuccess").html("  <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <strong>Success!</strong> A new restaurant has been added.").fadeIn();
 
                 });
+
 
 
 

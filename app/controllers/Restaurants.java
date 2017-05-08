@@ -4,6 +4,7 @@ package controllers;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import models.*;
 import play.*;
@@ -23,19 +24,24 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class Restaurants extends Controller {
 
     public static String addedRestaurantName;
 
+    public static List<Restaurant> restaurants = new ArrayList<Restaurant>();
+
+
     public static Result restaurants() {
 
         String loggedUser = session("connected");
         String verified = session("verified");
+        restaurants.clear();
 
-        List<Restaurant> restaurants = new ArrayList<Restaurant>();
 
         if(loggedUser == null || verified.equals("0"))
        // if(5 == 6)
@@ -43,12 +49,13 @@ public class Restaurants extends Controller {
         else {
             Connection connection = DB.getConnection();
             try {
-                String query = "Select name, description from restaurants";
+                String query = "Select name, description, address, tel, size from restaurants";
                 ResultSet set = connection.prepareStatement(query).executeQuery();
 
                 while(set.next()){
                     Restaurant restaurant =
-                    new Restaurant(set.getString(1), set.getString(2));
+                    new Restaurant(set.getString(1), set.getString(2),
+                            set.getString(3), set.getString(4), set.getString(5));
 
                     restaurants.add(restaurant);
                 }
@@ -75,12 +82,29 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         Restaurant rest = Json.fromJson(json, Restaurant.class);
         addedRestaurantName = rest.name;
-
+        int addedRestSize = 10;
+        if(rest.rSize.equals("small")){
+            addedRestSize = 8;
+        }
+        else if(rest.rSize.equals("medium")){
+            addedRestSize = 10;
+        }
+       else if(rest.rSize.equals("large")){
+            addedRestSize = 14;
+        }
+        for(Restaurant restoran : restaurants) {
+            System.out.println("added je " + addedRestaurantName + " a trazen je " + restoran.name);
+            if (restoran.name.equals(addedRestaurantName)) {
+                return status(409, "Already used restName");
+            }
+        }
+        restaurants.add(rest);
         Connection connection = DB.getConnection();
         try {
-            if (connection.prepareStatement("Insert into restaurants (name, description) " +
+            if (connection.prepareStatement("Insert into restaurants (name, description, address, tel, size) " +
                     "values (" + "\"" + rest.name + "\""
-                    + ", \"" + rest.description + "\")" + ";").execute()) {
+                    + ", \"" + rest.description + "\"" + ", \"" + rest.location + "\"" +
+                    ", \"" + rest.tel + "\"" + ", \"" + addedRestSize + "\")" + ";").execute()) {
 
             }
         } catch (SQLException e){
@@ -94,7 +118,7 @@ public class Restaurants extends Controller {
                 }
             }
         }
-        return ok();
+        return ok(Integer.toString(addedRestSize));
     }
 
     public static Result addVictualAJAX() {
@@ -105,15 +129,11 @@ public class Restaurants extends Controller {
 
         try {
 
-            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price) " +
+            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + victual.name + "\""
-                    + ", \"" + victual.description + "\"" + ", \"" + victual.price + "\")" + ";").execute()) {
-            }
-            if(connection.prepareStatement("Insert into victualMenu (restaurantId, victualId) " +
-                    "values (( select restaurantId from restaurants where name ="
-                    + "\"" + addedRestaurantName + "\"),(select victualsAndDrinksId from victualsAndDrinks where name ="
-                    + "\"" + victual.name + "\"));").execute()) {
-
+                    + ", \"" + victual.description + "\"" + ", \"" + victual.price + "\""
+                    + ",\"victual\", ( select restaurantId from restaurants where name ="
+                    + "\"" + addedRestaurantName + "\"))" + ";").execute()) {
             }
         } catch (SQLException e){
             e.printStackTrace();
@@ -137,15 +157,11 @@ public class Restaurants extends Controller {
         Connection connection = DB.getConnection();
         try {
 
-            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price) " +
+            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + drink.name + "\""
-                    + ", \"" + drink.description + "\"" + ", \"" + drink.price + "\")" + ";").execute()) {
-            }
-            if(connection.prepareStatement("Insert into drinkMenu (restaurantId, victualId) " +
-                    "values (( select restaurantId from restaurants where name ="
-                    + "\"" + addedRestaurantName + "\"),(select victualsAndDrinksId from victualsanddrinks where name ="
-                    + "\"" + drink.name + "\"));").execute()) {
-
+                    + ", \"" + drink.description + "\"" + ", \"" + drink.price + "\""
+                    + ",\"drink\", ( select restaurantId from restaurants where name ="
+                    + "\"" + addedRestaurantName + "\"))" + ";").execute()) {
             }
         } catch (SQLException e){
             e.printStackTrace();
@@ -160,6 +176,48 @@ public class Restaurants extends Controller {
         }
 
         return ok(Json.toJson(drink));
+    }
+
+    public static Result saveSeatConf() {
+
+
+        JsonNode j =  request().body().asJson();
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
+        Connection connection = DB.getConnection();
+        for(ArrayList value : result.values()) {
+            for (Object s : value) {
+                String polje = s.toString();
+                String[] deo = polje.split(":");
+                String posX = deo[1];
+                String posY = deo[2];
+                String[] deo2 = polje.split("\\|");
+                String boja = deo2[1];
+                System.out.println("posX je " + posX + " posY je " + posY + " boja je " + boja + "\n");
+
+
+                try {
+                    if (connection.prepareStatement("Insert into seatconfig (posX, posY, sector, restaurantId) " +
+                            "values (" + "\"" + posX + "\""
+                            + ", \"" + posY + "\"" + ", \"" + boja + "\", ( select restaurantId from restaurants where name =" +
+                            "\"" + addedRestaurantName + "\"))" + ";").execute()) {
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+
+        return ok();
+    }
+
+    public static Result addSeatSection() {
+
+        JsonNode json = request().body().asJson();
+        RestSection section = Json.fromJson(json, RestSection.class);
+        return ok(Json.toJson(section));
     }
 
     public static Result restManagerHome() {

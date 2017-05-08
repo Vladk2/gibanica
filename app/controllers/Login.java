@@ -5,6 +5,7 @@ import models.User;
 import play.*;
 import play.data.DynamicForm;
 import play.data.Form;
+import play.db.DB;
 import play.db.Databases;
 import play.db.Database;
 
@@ -30,18 +31,9 @@ public class Login extends Controller {
         created.email = requestData.get("email");
         created.password = requestData.get("password");
 
+        Connection connection = DB.getConnection();
 
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
 
-        Connection connection = database.getConnection();
         try {
             /*ResultSet set = connection.prepareStatement("Select email, password from users where email="
                     + "\"" + created.email + "\"" + " and password=" + "\"" + created.password
@@ -121,18 +113,7 @@ public class Login extends Controller {
         String old_pw = requestData.get("old_password");
         String new_pw = requestData.get("new_password");
 
-        Database database = Databases.createFrom(
-                "baklava",
-                "com.mysql.jdbc.Driver",
-                "jdbc:mysql://localhost/baklava",
-                ImmutableMap.of(
-                        "user", "root",
-                        "password", "gibanica"
-                )
-        );
-
-        Connection connection = database.getConnection();
-
+        Connection connection = DB.getConnection();
         try{
             ResultSet set = connection.prepareStatement("Select password, email from users where password="
                     + "\"" + old_pw + "\" and email=" + "\"" + loggedUser + "\"" + ";").executeQuery();

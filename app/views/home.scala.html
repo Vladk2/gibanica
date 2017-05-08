@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
     <script type="text/javascript" src="@routes.Application.jsRoutes()"></script>
@@ -21,12 +22,60 @@
       <link rel="stylesheet" href="@routes.Assets.at("stylesheets/theme2.css")">
 
       <script src="@routes.Assets.at("javascripts/caleandar.js")"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJyRyFrxmS3_EPRPEe__6hZEth-vDF4ZA&callback=initMap"
+  type="text/javascript"></script>
+      <script>
+      // ------------------------------- geocode google maps -------------------------------------
+      function initMap() {
+
+      var map = new google.maps.Map(document.getElementById('mapa'), {
+      zoom: 14,
+      center: {lat: 45.245510, lng: 19.847366}
+      });
+      var geocoder = new google.maps.Geocoder();
+      $("#mapa").hide();
+
+      $("#show_map").click(function() {
 
 
+      $("#mapa").fadeToggle(800);
+      google.maps.event.trigger(map, 'resize');
+      geocodeAddress(geocoder, map);
 
 
+      });
 
-    <style>
+      }
+
+      function geocodeAddress(geocoder, resultsMap) {
+      var address = document.getElementById('rlocation').value;
+      geocoder.geocode({'address': address}, function(results, status) {
+      if($("#show_map").html()=="Show")
+      $("#show_map").html('Hide');
+      else $("#show_map").html('Show');
+      if (status === 'OK') {
+
+      resultsMap.setCenter(results[0].geometry.location);
+      var marker = new google.maps.Marker({
+      map: resultsMap,
+      position: results[0].geometry.location
+      });
+
+      } else {
+      if($("#show_map").html()=="Hide")
+      alert('Sorry, we can\'t find your address on the map. :(');
+      }
+      });
+
+      }
+
+
+      // ------------------------------- </geocode google maps -------------------------------------
+
+</script>
+
+
+  <style>
         .form-control { width:70%; text-align:center }
         .form-control:focus{
             border-color: orange;
