@@ -22,57 +22,8 @@
       <link rel="stylesheet" href="@routes.Assets.at("stylesheets/theme2.css")">
 
       <script src="@routes.Assets.at("javascripts/caleandar.js")"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJyRyFrxmS3_EPRPEe__6hZEth-vDF4ZA&callback=initMap"
-  type="text/javascript"></script>
-      <script>
-      // ------------------------------- geocode google maps -------------------------------------
-      function initMap() {
-
-      var map = new google.maps.Map(document.getElementById('mapa'), {
-      zoom: 14,
-      center: {lat: 45.245510, lng: 19.847366}
-      });
-      var geocoder = new google.maps.Geocoder();
-      $("#mapa").hide();
-
-      $("#show_map").click(function() {
 
 
-      $("#mapa").fadeToggle(800);
-      google.maps.event.trigger(map, 'resize');
-      geocodeAddress(geocoder, map);
-
-
-      });
-
-      }
-
-      function geocodeAddress(geocoder, resultsMap) {
-      var address = document.getElementById('rlocation').value;
-      geocoder.geocode({'address': address}, function(results, status) {
-      if($("#show_map").html()=="Show")
-      $("#show_map").html('Hide');
-      else $("#show_map").html('Show');
-      if (status === 'OK') {
-
-      resultsMap.setCenter(results[0].geometry.location);
-      var marker = new google.maps.Marker({
-      map: resultsMap,
-      position: results[0].geometry.location
-      });
-
-      } else {
-      if($("#show_map").html()=="Hide")
-      alert('Sorry, we can\'t find your address on the map. :(');
-      }
-      });
-
-      }
-
-
-      // ------------------------------- </geocode google maps -------------------------------------
-
-</script>
 
 
   <style>

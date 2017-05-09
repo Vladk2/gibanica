@@ -21,10 +21,18 @@ create table if not exists baklava.victualsanddrinks (
 create table if not exists baklava.seatconfig (
   posX varchar(3) not null,
   posY varchar(3) not null,
-  sector varchar(15) not null,
+  sectorColor varchar(15) not null,
   restaurantId int(5) not null,
   constraint `restaurant_id_in_seat_config`
     foreign key (restaurantId) references baklava.restaurants (restaurantId)
+);
+
+create table if not exists baklava.sectornames (
+  sectorName varchar(25) not null,
+  sectorColor varchar(15) not null,
+  restaurantId int(5) not null,
+  constraint `restaurant_id_in_sectornames`
+  foreign key (restaurantId) references baklava.restaurants (restaurantId)
 );
 
 -- veza za menadzere restorana

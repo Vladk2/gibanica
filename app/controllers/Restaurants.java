@@ -32,7 +32,7 @@ import java.util.Map;
 public class Restaurants extends Controller {
 
     public static String addedRestaurantName;
-
+    public static int addedRestSize;
     public static List<Restaurant> restaurants = new ArrayList<Restaurant>();
 
 
@@ -82,7 +82,7 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         Restaurant rest = Json.fromJson(json, Restaurant.class);
         addedRestaurantName = rest.name;
-        int addedRestSize = 10;
+        addedRestSize = 8;
         if(rest.rSize.equals("small")){
             addedRestSize = 8;
         }
@@ -92,8 +92,10 @@ public class Restaurants extends Controller {
        else if(rest.rSize.equals("large")){
             addedRestSize = 14;
         }
+        else if(rest.rSize.equals("extra large")){
+            addedRestSize = 20;
+        }
         for(Restaurant restoran : restaurants) {
-            System.out.println("added je " + addedRestaurantName + " a trazen je " + restoran.name);
             if (restoran.name.equals(addedRestaurantName)) {
                 return status(409, "Already used restName");
             }
@@ -118,7 +120,7 @@ public class Restaurants extends Controller {
                 }
             }
         }
-        return ok(Integer.toString(addedRestSize));
+        return ok(Json.toJson(rest));
     }
 
     public static Result addVictualAJAX() {
@@ -186,6 +188,7 @@ public class Restaurants extends Controller {
         ObjectMapper mapper = new ObjectMapper();
         Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
         Connection connection = DB.getConnection();
+        try {
         for(ArrayList value : result.values()) {
             for (Object s : value) {
                 String polje = s.toString();
@@ -194,20 +197,18 @@ public class Restaurants extends Controller {
                 String posY = deo[2];
                 String[] deo2 = polje.split("\\|");
                 String boja = deo2[1];
-                System.out.println("posX je " + posX + " posY je " + posY + " boja je " + boja + "\n");
 
-
-                try {
-                    if (connection.prepareStatement("Insert into seatconfig (posX, posY, sector, restaurantId) " +
+                    if (connection.prepareStatement("Insert into seatconfig (posX, posY, sectorColor, restaurantId) " +
                             "values (" + "\"" + posX + "\""
                             + ", \"" + posY + "\"" + ", \"" + boja + "\", ( select restaurantId from restaurants where name =" +
                             "\"" + addedRestaurantName + "\"))" + ";").execute()) {
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
 
             }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return ok();
@@ -217,6 +218,26 @@ public class Restaurants extends Controller {
 
         JsonNode json = request().body().asJson();
         RestSection section = Json.fromJson(json, RestSection.class);
+        Connection connection = DB.getConnection();
+        try {
+
+            if (connection.prepareStatement("Insert into sectornames (sectorName, sectorColor, restaurantId)" +
+                    "values (" + "\"" + section.sectionName + "\""
+                    + ", \"" + section.sectionColor + "\"" + ", ( select restaurantId from restaurants where name ="
+                    + "\"" + addedRestaurantName + "\"))" + ";").execute()) {
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         return ok(Json.toJson(section));
     }
 
@@ -256,6 +277,12 @@ public class Restaurants extends Controller {
 
             return ok(restManagerHome.render(loggedUser));
         }
+    }
+
+    public static Result AddMenuAndSeating() {
+
+        return ok(addMenuAndSeating.render(addedRestSize));
+
     }
 
     public static Result addRestaurantManager() {

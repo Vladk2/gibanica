@@ -1,0 +1,221 @@
+@(restSize: Int)
+
+
+@home("Manage Menu and Seating") {
+  <center>
+  <div id="secondStepRest" style="width: 800px">
+    <h3> Food Menu </h3>
+    <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+
+    <label for="vicName">Victual Name:</label> <br>
+    <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicName" id="vicName" >
+    <label for="vicDesc">Victual Description:</label> <br>
+    <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicDesc" id="vicDesc"  >
+    <label for="vicPrice">Victual Price(RSD):</label> <br>
+    <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicPrice" id="vicPrice"  >
+    <p id="vicErrMessage" style="color:red; display:none"> </p>
+    <a class="btn btn-warning" id="addVictual" style="width:150px"> ADD A VICTUAL </a> <br> <br>
+    <div style="height:130px;overflow:auto">
+      <table class="table-bordered table-striped" style="width:630px;">
+        <thead>
+          <tr>
+            <th style="width:250px">Victual Name</th>
+            <th style="width:360px">Victual Description</th>
+            <th style="width:70px">Price(RSD)</th>
+          </tr>
+        </thead>
+        <tbody id="vicList">
+
+        </tbody>
+      </table>
+    </div>
+      <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+      <h3> Drink Menu </h3>
+    <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+
+    <label for="drinkName">Drink Name:</label> <br>
+    <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkName"  >
+    <label for="drinkDesc">Drink Description:</label> <br>
+    <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkDesc"  >
+    <label for="drinkPrice">Drink Price(RSD):</label> <br>
+    <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkPrice"  >
+    <p id="drinkErrMessage" style="color:red"> </p>
+    <a class="btn btn-warning" id="addDrink" style="width:150px"> ADD A DRINK </a> <br> <br>
+
+    <div style="height:130px;overflow:auto">
+      <table class="table-bordered table-striped" style="width:630px;">
+        <thead>
+          <tr>
+            <th style="width:250px">Drink Name</th>
+            <th style="width:360px">Drink Description</th>
+            <th style="width:70px">Price(RSD)</th>
+          </tr>
+        </thead>
+        <tbody id="drinkList">
+
+        </tbody>
+      </table>
+    </div>
+      <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+      <h3> Seat Configuration </h3>
+    <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+    <div id="seatConfig" style="height:auto">
+      <div id="seatInfo" style="float:left;margin-left:20px;">
+        <b>Restaurant section name:</b>  <input class = "form-control" type="text" id="sectionName" maxlength="25">
+        <b> Section color:</b>     <select class="form-control" id="sectionColor">
+        <option value="blue">blue</option>
+        <option value="red">red</option>
+        <option value="yellow">yellow</option>
+        <option value="purple">purple</option>
+        <option value="pink">pink</option>
+        <option value="green">green</option>
+        <option value="brown">brown</option>
+        <option value="lightgrey">lightgray</option>
+      </select> <br>
+        <a class="btn btn-warning" id="addSection" > ADD </a> <br> <br>
+        <p><b> LEGEND: </b></p>
+        Wall: <div class='sectionPicker' id="black"  style="width:32px;height:32px;background-color:black;border: 1px solid orange;"> </div>
+
+      </div> <br>
+      <p style="margin-left:100px"> <b>Seating plan:</b>  </p>
+      <div id = "seatTable" class="divTable" style=" width:450px;height:450px; border: 1px solid #dbdbdb;">
+
+        <div class="divTableBody">
+        @for(x <- 0 until restSize) {
+          <div class="divTableRow">
+            @for(y <- 0 until restSize ) {
+              <div id="seat:@x:@y:|none" class="divTableCell"></div>
+            }
+            <!-- DivTableRow end --> </div>
+        }
+        </div>
+          <!-- DivTable end --></div> <br> <br> <br> <br> <br> <br>
+    </div> <!-- seat confi end -->
+
+    <button class="btn btn-warning btn-block addRestFinish" id="addRestFinish"  style="width: 250px"><b>FINISH</b></button>
+        <br> <br>
+  </div>
+  </center>
+}
+
+  <script>
+          // add Victual ajax call
+          $("#addVictual").click(function() {
+
+
+              var vicName = $('#vicName').val();
+              var vicDesc = $('#vicDesc').val();
+              var vicPrice = $('#vicPrice').val();
+              var victual = {
+                  'name': vicName, 'description': vicDesc,
+                  'price' : vicPrice
+
+              };
+              myJsRoutes.controllers.Restaurants.addVictualAJAX().ajax({
+                  data: JSON.stringify(victual),
+                  contentType : 'application/json',
+                  success : function(jelo) {  $('#vicList').append('<tr> <td>'+ jelo.name + '</td> <td>'
+                          + jelo.description + '</td> <td>'+ jelo.price + '</td> </tr>');
+                      $("#vicErrMessage").html("");
+                      $('#vicName').val("");
+                      $('#vicDesc').val("");
+                      $('#vicPrice').val("");
+                  },
+                  error: function() { $("#vicErrMessage").html("You cannot put letters in the price box").fadeIn();
+                      $('#vicPrice').val("");  }
+              });
+
+          });
+
+          // add Drink ajax call
+          $("#addDrink").click(function() {
+
+
+              var drinkName = $('#drinkName').val();
+              var drinkDesc = $('#drinkDesc').val();
+              var drinkPrice = $('#drinkPrice').val();
+              var victual = {
+                  'name': drinkName, 'description': drinkDesc,
+                  'price' : drinkPrice
+              };
+              myJsRoutes.controllers.Restaurants.addDrinkAJAX().ajax({
+                  data: JSON.stringify(victual),
+                  contentType : 'application/json',
+                  success : function(jelo) {  $('#drinkList').append('<tr> <td>'+ jelo.name + '</td> <td>'
+                          + jelo.description + '</td> <td>'+ jelo.price + '</td> </tr>');
+                      $("#drinkErrMessage").html("");
+                      $('#drinkName').val("");
+                      $('#drinkDesc').val("");
+                      $('#drinkPrice').val("");
+                  },
+                  error: function() { $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
+                      $('#drinkPrice').val("");  }
+              });
+
+          });
+
+          // seat config
+          $(document).on("click", "#addSection", function() {
+
+              var sectionName = $('#sectionName').val();
+              var sectionColor = $('#sectionColor').val();
+              $("#sectionColor option[ value = " + sectionColor + " ]").remove();
+              var section = {
+                  'sectionName': sectionName, 'sectionColor': sectionColor
+              };
+
+              myJsRoutes.controllers.Restaurants.addSeatSection().ajax({
+                  data: JSON.stringify(section),
+                  contentType: 'application/json',
+                  success: function (sekcija) {
+                      $("#seatInfo").append(sekcija.sectionName + ": <div class='sectionPicker' id='" + sekcija.sectionColor + "' style='width:32px;height:32px;background-color:"+ sekcija.sectionColor +";border: 2px solid #dbdbdb;'> </div>");
+                  }
+              });
+          });
+
+          var pickedColor = "black";
+          $(document).on("click",'.sectionPicker',function () {
+              $(".sectionPicker").css('border-color', '#dbdbdb');
+              $(this).css("border-color","orange");
+
+              pickedColor = $(this).attr('id');
+
+
+          });
+
+          $(".divTableCell").click(function() {
+              var this_id = $(this).attr('id');
+              var new_id = this_id.split('|');
+              if(new_id[1] == pickedColor){
+                  $(this).css("background-color", "#fff1cc");
+                  $(this).attr("id", new_id[0] + "|none");
+              }
+              else {
+                  $(this).css("background-color", pickedColor);
+                  $(this).attr("id", new_id[0] + "|" + pickedColor);
+              }
+
+          });
+
+          // close modal after adding a restaurant
+          $(".addRestFinish").click(function() {
+
+              var raspored = [];
+              $(".divTableCell").each(function() {
+                  var pozicija = $(this).attr('id');
+                  raspored.push(pozicija);
+              });
+
+              myJsRoutes.controllers.Restaurants.saveSeatConf().ajax({
+                  data: JSON.stringify({raspored:raspored}),
+                  dataType: 'json',
+                  contentType: 'application/json',
+                  success: function () {
+                  }
+              });
+
+              window.location.replace("/restaurants");
+
+          });
+
+  </script>

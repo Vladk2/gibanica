@@ -3,6 +3,8 @@
 
 @home("Restaurants"){
 
+
+
   <div>
     <i style="float:right;margin-right:40px;">logged in: <b>@userEmail</b> </i> <br> <br>
 
@@ -255,8 +257,8 @@
                         <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required >
                         <label for="lname">Last name :</label> <br>
                         <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required >
-                        <label for="forRest">Restaurant :</label> <br>
-                        <select class="form-control" id="forRest" name="forRest" style="width:250px;">
+                        <label for="forRestSelect">Restaurant :</label> <br>
+                        <select class="form-control" id="forRestSelect" name="forRestSelect" style="width:250px;">
                         @for(restaurant <- restaurants) {
                             <option>@restaurant.name</option>
                         }
@@ -308,9 +310,9 @@
                             <label for="pickSize">Restaurant Size:</label> <br>
                            <select class="form-control" id="pickSize"  style="margin-bottom: 15px; width: 300px;">
                             <option>small(up to 15 tables)</option>
-                            <option>medium(up to 25 tables)</option>
-                            <option>large(up to 45 tables)</option>
-
+                            <option>medium(up to 30 tables)</option>
+                            <option>large(up to 50 tables)</option>
+                            <option>extra large(up to 100 tables)</option>
                            </select> <br>
                             <p id="stepErrMessage" style="color:red"> </p>
                             <a class="btn btn-warning" id="nextStepRest" title="Manage seating and food/drink menu" style="width:100px;"> NEXT </a>
@@ -490,8 +492,8 @@
                             $("#rlocation").prop('disabled', true);
                             $("#rtel").prop('disabled', true);
                             $("#pickSize").prop('disabled', true);
-                            $("#secondStepRest").show();
-                            $("#nextStepRest").hide();
+
+                           window.location.replace("/ManageMenuAndSeating");
                             $("#stepErrMessage").html("");
                         },
                         error: function() { $("#stepErrMessage").html("Restaurant's name is already in use!").fadeIn();
@@ -501,138 +503,126 @@
                 }
             });
 
-        // add Victual ajax call
-            $("#addVictual").click(function() {
-
-
-                var vicName = $('#vicName').val();
-                var vicDesc = $('#vicDesc').val();
-                var vicPrice = $('#vicPrice').val();
-                var victual = {
-                    'name': vicName, 'description': vicDesc,
-                    'price' : vicPrice
-
-                };
-                myJsRoutes.controllers.Restaurants.addVictualAJAX().ajax({
-                    data: JSON.stringify(victual),
-                    contentType : 'application/json',
-                    success : function(jelo) {  $('#vicList').append('<tr> <td>'+ jelo.name + '</td> <td>'
-                            + jelo.description + '</td> <td>'+ jelo.price + '</td> </tr>');
-                             $("#vicErrMessage").html("");
-                             $('#vicName').val("");
-                             $('#vicDesc').val("");
-                             $('#vicPrice').val("");
-                             },
-                    error: function() { $("#vicErrMessage").html("You cannot put letters in the price box").fadeIn();
-                                        $('#vicPrice').val("");  }
-                });
-
-            });
-
-        // add Drink ajax call
-        $("#addDrink").click(function() {
-
-
-            var drinkName = $('#drinkName').val();
-            var drinkDesc = $('#drinkDesc').val();
-            var drinkPrice = $('#drinkPrice').val();
-            var victual = {
-                'name': drinkName, 'description': drinkDesc,
-                'price' : drinkPrice
-            };
-            myJsRoutes.controllers.Restaurants.addDrinkAJAX().ajax({
-                data: JSON.stringify(victual),
-                contentType : 'application/json',
-                success : function(jelo) {  $('#drinkList').append('<tr> <td>'+ jelo.name + '</td> <td>'
-                        + jelo.description + '</td> <td>'+ jelo.price + '</td> </tr>');
-                    $("#drinkErrMessage").html("");
-                    $('#drinkName').val("");
-                    $('#drinkDesc').val("");
-                    $('#drinkPrice').val("");
-                },
-                error: function() { $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
-                    $('#drinkPrice').val("");  }
-            });
-
-        });
-
-        // seat config
-            $(document).on("click", "#addSection", function() {
-
-                var sectionName = $('#sectionName').val();
-                var sectionColor = $('#sectionColor').val();
-                $("#sectionColor option[ value = " + sectionColor + " ]").remove();
-                var section = {
-                    'sectionName': sectionName, 'sectionColor': sectionColor
-                };
-
-                myJsRoutes.controllers.Restaurants.addSeatSection().ajax({
-                    data: JSON.stringify(section),
-                    contentType: 'application/json',
-                    success: function (sekcija) {
-                        $("#seatInfo").append(sekcija.sectionName + ": <div class='sectionPicker' id='" + sekcija.sectionColor + "' style='width:32px;height:32px;background-color:"+ sekcija.sectionColor +";border: 2px solid #dbdbdb;'> </div>");
-                    }
-                });
-            });
-
-            var pickedColor = "black";
-            $(document).on("click",'.sectionPicker',function () {
-               $(".sectionPicker").css('border-color', '#dbdbdb');
-               $(this).css("border-color","orange");
-
-               pickedColor = $(this).attr('id');
-
-
-            });
-
-            $(".divTableCell").click(function() {
-                var this_id = $(this).attr('id');
-                var new_id = this_id.split('|');
-                if(new_id[1] == pickedColor){
-                    $(this).css("background-color", "#fff1cc");
-                    $(this).attr("id", new_id[0] + "|none");
-                }
-                else {
-                    $(this).css("background-color", pickedColor);
-                    $(this).attr("id", new_id[0] + "|" + pickedColor);
-                }
-
-            });
 
         // close modal after adding a restaurant
             $(".addRestFinish").click(function() {
 
-                var raspored = [];
-                $(".divTableCell").each(function() {
-                    var pozicija = $(this).attr('id');
-                    raspored.push(pozicija);
-                });
+                if( !$("#rname").val() ) {
+                    $("#stepErrMessage").html("You must enter a restaurant's name").fadeIn();
+                }
+                else {
+                    $("#stepErrMessage").html("");
+                    var rName = $('#rname').val();
+                    var rDesc = $('#rdesc').val();
+                    var rLocation = $("#rlocation").val();
+                    var rTel = $("#rtel").val();
+                    var sizeComboBox = $("#pickSize").val();
+                    var rSizeSplit = sizeComboBox.split('(');
+                    var rSize = rSizeSplit[0];
 
-                myJsRoutes.controllers.Restaurants.saveSeatConf().ajax({
-                    data: JSON.stringify({raspored:raspored}),
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    success: function () {
-                         }
+                    var restInfo = {
+                        'name': rName, 'description': rDesc, 'location': rLocation,
+                        'tel': rTel, 'rSize': rSize
+                    };
+                    myJsRoutes.controllers.Restaurants.addRestInfoAJAX().ajax({
+                        data: JSON.stringify(restInfo),
+                        contentType: 'application/json',
+                        success: function (rest) {
+
+                            $("#stepErrMessage").html("");
+                            $("#forRestSelect").append('<option>'+ rest.name + '</option>');
+                            var raspored = [];
+                            $(".divTableCell").each(function () {
+                                var pozicija = $(this).attr('id');
+                                raspored.push(pozicija);
+                            });
+
+                            myJsRoutes.controllers.Restaurants.saveSeatConf().ajax({
+                                data: JSON.stringify({raspored: raspored}),
+                                dataType: 'json',
+                                contentType: 'application/json',
+                                success: function () {
+                                }
+                            });
+
+
+                            $('#addARestaurant').modal('toggle');
+                            $('#vicList tr').remove();
+                            $('#drinkList tr').remove();
+
+                            $("#mapa").hide();
+                            $('#addARestaurant').find("input")
+                                    .val('')
+                                    .end();
+                            $("#restAddSuccess").html("  <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <strong>Success!</strong> A new restaurant has been added.").fadeIn();
+                        },
+                        error: function () {
+                            $("#stepErrMessage").html("Restaurant's name is already in use!").fadeIn();
+                            $('#rname').val("");
+                        }
+
                     });
 
-                $('#addARestaurant').modal('toggle');
-                $('#vicList tr').remove();
-                $('#drinkList tr').remove();
-                $("#rname").prop('disabled', false);
-                $("#rdesc").prop('disabled', false);
-                $("#secondStepRest").hide();
-                $("#nextStepRest").show();
-                $('#addARestaurant').find("input")
-                        .val('')
-                        .end();
-              $("#restAddSuccess").html("  <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <strong>Success!</strong> A new restaurant has been added.").fadeIn();
 
+
+                }
                 });
 
 
 
 
     </script>
+
+            <script>
+                    // ------------------------------- geocode google maps -------------------------------------
+                    function initMap() {
+
+                        var map = new google.maps.Map(document.getElementById('mapa'), {
+                            zoom: 14,
+                            center: {lat: 45.245510, lng: 19.847366}
+                        });
+                        var geocoder = new google.maps.Geocoder();
+                        $("#mapa").hide();
+
+                        $("#show_map").click(function() {
+
+
+                            $("#mapa").fadeToggle(800);
+                            google.maps.event.trigger(map, 'resize');
+                            geocodeAddress(geocoder, map);
+
+
+                        });
+
+                    }
+
+                    function geocodeAddress(geocoder, resultsMap) {
+                        var address = document.getElementById('rlocation').value;
+                        geocoder.geocode({'address': address}, function(results, status) {
+                            if($("#show_map").html()=="Show")
+                                $("#show_map").html('Hide');
+                            else $("#show_map").html('Show');
+                            if (status === 'OK') {
+
+                                resultsMap.setCenter(results[0].geometry.location);
+                                var marker = new google.maps.Marker({
+                                    map: resultsMap,
+                                    position: results[0].geometry.location
+                                });
+
+                            } else {
+                                if($("#show_map").html()=="Hide")
+                                    alert('Sorry, we can\'t find your address on the map. :(');
+                            }
+                        });
+
+                    }
+
+
+                    // ------------------------------- </geocode google maps -------------------------------------
+
+            </script>
+            <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJyRyFrxmS3_EPRPEe__6hZEth-vDF4ZA&callback=initMap"
+            type="text/javascript"></script>
 
 }
