@@ -28,38 +28,53 @@
 
   <style>
         .form-control { width:70%; text-align:center }
+
         .form-control:focus{
-            border-color: orange;
-            -webkit-box-shadow: none;
-            box-shadow: none;
+          border-color: orange;
+          -webkit-box-shadow: none;
+          box-shadow: none;
         }
         .modal-content {background-color: #fff1cc }
         .formText { color: white }
-        .btn { color: black}
-        .panel-table .panel-body{
-            padding:0;
+
+        *{
+        margin: 0;
+        padding: 0;
         }
-        .panel-table .panel-body .table-bordered {
-            border-style: none;
-            margin:0;
+        .rate {
+            float: left;
+            height: 46px;
+            padding: 0 10px;
         }
-        .panel-table .panel-body .table-bordered > thead > tr > th:first-of-type {
-            text-align:center;
-            width: 100px;
+        .rate:not(:checked) > input {
+            position:absolute;
+            top:-9999px;
         }
-        .panel-table .panel-body .table-bordered > thead > tr > th:last-of-type,
-        .panel-table .panel-body .table-bordered > tbody > tr > td:last-of-type {
-            border-right: 0px;
+        .rate:not(:checked) > label {
+            float:right;
+            width:1em;
+            overflow:hidden;
+            white-space:nowrap;
+            cursor:pointer;
+            font-size:30px;
+            color:#ccc;
         }
-        .panel-table .panel-body .table-bordered > thead > tr > th:first-of-type,
-        .panel-table .panel-body .table-bordered > tbody > tr > td:first-of-type {
-            border-left: 0px;
+        .rate:not(:checked) > label:before {
+            content: '★ ';
         }
-        .panel-table .panel-body .table-bordered > tbody > tr:first-of-type > td{
-            border-bottom: 0px;
+        .rate > input:checked ~ label {
+            color: #ffc700;
         }
-        .panel-table .panel-body .table-bordered > thead > tr:first-of-type > th{
-            border-top: 0px;
+        .rate:not(:checked) > label:hover,
+        .rate:not(:checked) > label:hover ~ label {
+            color: #deb217;
+        }
+        .rate > input:checked + label:hover,
+        .rate > input:checked + label:hover ~ label,
+        .rate > input:checked ~ label:hover,
+        .rate > input:checked ~ label:hover ~ label,
+        .rate > label:hover ~ input:checked ~ label {
+            color: #c59b08;
         }
     </style>
 

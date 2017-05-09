@@ -56,6 +56,9 @@
                         <th><em class="fa fa-cog"></em></th>
                         <th>Name</th>
                         <th>Description</th>
+                        <th>Address</th>
+                        <th>Telephone</th>
+                        <th>Size</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -72,11 +75,14 @@
                                         <input type="radio" id="star1" name="rate" value="1&{{jedNekretnina.id}}" ng-model="ocena"/><label for="star1" title="text">1 star</label>
                                     </div>
                                     <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
-
+                                </form>
                             </div>
                           </td>
                           <td>@restaurant.name</td>
                           <td>@restaurant.description</td>
+                           <td>@restaurant.location</td>
+                           <td>@restaurant.tel</td>
+                           <td>@restaurant.rSize</td>
                        </tr>
                     }
                   </tbody>
