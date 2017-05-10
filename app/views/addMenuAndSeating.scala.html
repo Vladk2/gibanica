@@ -3,8 +3,9 @@
 
 @home("Manage Menu and Seating") {
   <center>
+
   <div id="secondStepRest" style="width: 800px">
-    <h3> Food Menu </h3>
+    <h3 style="color:#ff6600"> Food Menu </h3>
     <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
 
     <label for="vicName">Victual Name:</label> <br>
@@ -30,7 +31,7 @@
       </table>
     </div>
       <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-      <h3> Drink Menu </h3>
+      <h3  style="color:#ff6600"> Drink Menu </h3>
     <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
 
     <label for="drinkName">Drink Name:</label> <br>
@@ -57,7 +58,7 @@
       </table>
     </div>
       <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-      <h3> Seat Configuration </h3>
+      <h3 style="color:#ff6600"> Seat Configuration </h3>
     <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
     <div id="seatConfig" style="height:auto">
       <div id="seatInfo" style="float:left;margin-left:20px;">
@@ -74,7 +75,7 @@
       </select> <br>
         <a class="btn btn-warning" id="addSection" > ADD </a> <br> <br>
         <p><b> LEGEND: </b></p>
-        Wall: <div class='sectionPicker' id="black"  style="width:32px;height:32px;background-color:black;border: 1px solid orange;"> </div>
+        Wall: <div class='sectionPicker' id="black"  style="width:32px;height:32px;cursor:pointer;background-color:black;border: 1px solid orange;"> </div>
 
       </div> <br>
       <p style="margin-left:100px"> <b>Seating plan:</b>  </p>
@@ -84,7 +85,7 @@
         @for(x <- 0 until restSize) {
           <div class="divTableRow">
             @for(y <- 0 until restSize ) {
-              <div id="seat:@x:@y:|none" class="divTableCell"></div>
+              <div id="seat:@x:@y:|none" class="divTableCell" style="cursor:pointer"></div>
             }
             <!-- DivTableRow end --> </div>
         }
@@ -168,7 +169,7 @@
                   data: JSON.stringify(section),
                   contentType: 'application/json',
                   success: function (sekcija) {
-                      $("#seatInfo").append(sekcija.sectionName + ": <div class='sectionPicker' id='" + sekcija.sectionColor + "' style='width:32px;height:32px;background-color:"+ sekcija.sectionColor +";border: 2px solid #dbdbdb;'> </div>");
+                      $("#seatInfo").append(sekcija.sectionName + ": <div class='sectionPicker' id='" + sekcija.sectionColor + "' style='width:32px;cursor:pointer;height:32px;background-color:"+ sekcija.sectionColor +";border: 2px solid #dbdbdb;'> </div>");
                   }
               });
           });
@@ -197,7 +198,7 @@
 
           });
 
-          // close modal after adding a restaurant
+          // at finish
           $(".addRestFinish").click(function() {
 
               var raspored = [];
@@ -214,7 +215,7 @@
                   }
               });
 
-              window.location.replace("/restaurants");
+              window.location.replace("/saveMenuSeat");
 
           });
 

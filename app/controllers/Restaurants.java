@@ -34,31 +34,79 @@ public class Restaurants extends Controller {
     public static String addedRestaurantName;
     public static int addedRestSize;
     public static List<Restaurant> restaurants = new ArrayList<Restaurant>();
-
+    public static boolean showMenuSeatPage = false;
 
     public static Result restaurants() {
 
         String loggedUser = session("connected");
         String verified = session("verified");
+        String myRestName = session("myRestName");
         restaurants.clear();
-
-
+        String thisRestId = "";
+        List<VictualAndDrink> menu = new ArrayList<>();
+        List<RestSection> seats = new ArrayList<>();
+        List<RestSection> sectors = new ArrayList<>();
+        String posX = ""; String posY = ""; String sectorColor = "";
+        double restSize=0; int noOfSectors=0;
+        Restaurant myRestaurant = new Restaurant();
         if(loggedUser == null || verified.equals("0"))
-       // if(5 == 6)
+
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
         else {
             Connection connection = DB.getConnection();
             try {
                 String query = "Select name, description, address, tel, size from restaurants";
                 ResultSet set = connection.prepareStatement(query).executeQuery();
-
                 while(set.next()){
                     Restaurant restaurant =
-                    new Restaurant(set.getString(1), set.getString(2),
-                            set.getString(3), set.getString(4), set.getString(5));
-
+                            new Restaurant(set.getString(1), set.getString(2),
+                                    set.getString(3), set.getString(4), set.getString(5));
+                    if(restaurant.name.equals(myRestName) && (session("userType")).equals("rest-manager"))
+                        myRestaurant = restaurant;
                     restaurants.add(restaurant);
                 }
+                //----------------------------- if rest manager ------------------------------------------------------
+
+                if((session("userType")).equals("rest-manager")) {
+
+                }
+
+
+
+                    ResultSet set2 = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
+                            "(select restaurantId from restaurantManagers where userId = (select userId from users where email = " +
+                            "\"" + loggedUser + "\"" + "));").executeQuery();
+                    while (set2.next()) {
+                        VictualAndDrink vd = new VictualAndDrink(set2.getString(1), set2.getString(2),
+                                set2.getDouble(3), set2.getString(4));
+                        menu.add(vd);
+                        thisRestId = set2.getString(5);
+
+
+                    }
+                    ResultSet set3 = connection.prepareStatement("Select posX, posY, sectorColor from seatconfig where restaurantId = " +
+                            "\"" + thisRestId + "\"" + ";").executeQuery();
+
+                    while (set3.next()) {
+                        restSize++;
+                        posX = set3.getString(1);
+                        posY = set3.getString(2);
+                        sectorColor = set3.getString(3);
+                        RestSection seat = new RestSection(sectorColor, posX, posY);
+                        seats.add(seat);
+
+                    }
+                        ResultSet set4 = connection.prepareStatement("Select sectorName, sectorColor from sectornames where restaurantId = " +
+                                "\"" + thisRestId + "\"" + ";").executeQuery();
+
+                        while (set4.next()) {
+                            RestSection legend = new RestSection(set4.getString(1),set4.getString(2));
+                            sectors.add(legend);
+                    }
+
+                // ------------------------------------ rest man. over ----------------------------------------
+
+
 
             } catch (SQLException e){
                 e.printStackTrace();
@@ -71,8 +119,9 @@ public class Restaurants extends Controller {
                     }
                 }
             }
-
-            return ok(restaurant.render(loggedUser, restaurants));
+            restSize = Math.sqrt(restSize);
+            int intSize = (int)restSize;
+            return ok(restaurant.render(loggedUser, restaurants,menu,seats,intSize,sectors,myRestaurant));
         }
     }
 
@@ -83,6 +132,7 @@ public class Restaurants extends Controller {
         Restaurant rest = Json.fromJson(json, Restaurant.class);
         addedRestaurantName = rest.name;
         addedRestSize = 8;
+        showMenuSeatPage = true;
         if(rest.rSize.equals("small")){
             addedRestSize = 8;
         }
@@ -188,6 +238,8 @@ public class Restaurants extends Controller {
         ObjectMapper mapper = new ObjectMapper();
         Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
         Connection connection = DB.getConnection();
+        showMenuSeatPage = false;
+
         try {
         for(ArrayList value : result.values()) {
             for (Object s : value) {
@@ -280,8 +332,17 @@ public class Restaurants extends Controller {
     }
 
     public static Result AddMenuAndSeating() {
-
+        String loggedUser = session("connected");
+        String verified = session("verified");
+        if(showMenuSeatPage == false || loggedUser == null || verified.equals("0"))
+            return redirect("/");
         return ok(addMenuAndSeating.render(addedRestSize));
+
+    }
+
+    public static Result saveMenuAndSeat() {
+        flash("addRestSuccess", "A new restaurant has been added.");
+        return redirect("/restaurants");
 
     }
 
@@ -292,8 +353,8 @@ public class Restaurants extends Controller {
         created.surname = requestData.get("lname");
         created.email = requestData.get("email");
         created.password = requestData.get("pass");
-        created.restaurant = requestData.get("forRest");
-        System.out.println("\n " + created.restaurant + "\ngfsdgfdgsfsf");
+        created.restaurant = requestData.get("forRestSelect");
+        System.out.println("\n " + created.restaurant + "\n");
 
         Connection connection = DB.getConnection();
         try {
@@ -397,7 +458,6 @@ public class Restaurants extends Controller {
             }
         }
 
-
         return ok(home.render("Welcome",new play.twirl.api.Html("<center>Bidder has been added successfully!</center>") ));
 
 
@@ -483,7 +543,7 @@ public class Restaurants extends Controller {
         }
 
         session("myRestName", restName);
-        session("myRestDesc", restDesc);
+
 
         return ok(home.render("Welcome",new play.twirl.api.Html("<center>You have successfully edited your restaurant's info!</center>") ));
     }

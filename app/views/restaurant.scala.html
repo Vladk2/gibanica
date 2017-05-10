@@ -1,4 +1,5 @@
-@(userEmail: String, restaurants: List[Restaurant])
+@(userEmail: String, restaurants: List[Restaurant], menu: List[VictualAndDrink], seats: List[RestSection], sizeSqrt: Int, sectors: List[RestSection], myRestaurant: Restaurant)
+@import java.math.BigInteger; var i=1;
 
 
 @home("Restaurants"){
@@ -11,10 +12,16 @@
 
       <center>
         <br>
+
         <div style="display: inline-block;">
         @if(session.get("userType").equals("system-manager")) {
-            <div  class="alert alert-success" id="restAddSuccess" style="display: none">
 
+            @if(flash.containsKey("addRestSuccess")) {
+                <div  class="alert alert-success" id="restAddSuccessFull" >
+                <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b>Success! </b>@flash.get("addRestSuccess")
+                </div>
+            }
+            <div  class="alert alert-success" id="restAddSuccess" style="display: none">
             </div>
             <button class="btn btn-warning btn-block"  data-toggle="modal" data-target="#addARestaurant" style="width: 170px;float: left;color: black;margin: 10px;"><b>ADD A RESTAURANT</b></button>
             <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addARestManager" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD A RESTAURANT MANAGER</b></button>
@@ -22,14 +29,102 @@
 
         }
         @if(session.get("userType").equals("rest-manager")) {
-            <div>
-                <h3> Restaurant: <i>@session.get("myRestName")</i></h3>
-                <h4> About: <i>@session.get("myRestDesc")</i></h4>
+
+
+            <div style="width: 800px">
+                <h3><span  style="color:#e85c00">Your Restaurant:</span> <b>@myRestaurant.name</b></h3>
+                <h4><span  style="color:#e85c00"> About:</span> <b>@myRestaurant.description</b></h4>
+                <h4><span  style="color:#e85c00"> Contact Number:</span> <b>@myRestaurant.tel</b></h4>
+                <h4><span  style="color:#e85c00"> Location:</span> <a id="show_map" style="cursor:pointer"><b>@myRestaurant.location</b></a></h4>
+                <input id="rlocation" value="@myRestaurant.location" style="display: none">
+                <div class = "hidemap" id = "mapa" style="width: 260px; height:220px; background-color:white;"></div> <br>
+
                 <br>
+                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#editRestaurant" style="width: 240px;float: left;color: black;margin: 10px;"><b>EDIT YOUR RESTAURANT</b></button>
+                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addAnEmployee" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD AN EMPLOYEE</b></button>
+                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addABidder" style="width: 240px;color: black;margin: 10px;"><b>ADD A BIDDER</b></button> <br>
+                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+                <h3 style="color:#e85c00"> Seat Configuration </h3>
+                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+                <div id="seatConfig" style="height:auto">
+                    <div id="seatInfo" style="float:left;margin-left:20px;">
+
+
+                        <p><b> LEGEND:</b></p>
+                        Wall: <div class='sectionPicker' id="black"  style="width:32px;height:32px;background-color:black;border: 1px solid antiquewhite;"> </div> <br>
+                        @for(sector <- sectors){
+                            @sector.sectionName: <div class='sectionPicker' id="@sector.sectionColor"  style="width:32px;height:32px;background-color:@sector.sectionColor;border: 1px solid antiquewhite;"> </div> <br>
+                        }
+                    </div> <br>
+
+                    <div id = "seatTable" class="divTable" style=" width:450px;height:450px; border: 1px solid #dbdbdb;">
+
+                        <div class="divTableBody">
+
+                        @for(seat <- seats) {
+                            @{i=i-1}
+                            @if(i == 0) {
+                            <div class="divTableRow">
+                                @{i = sizeSqrt}
+                            }
+                                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor" class="divTableCell" style="background-color: @seat.sectionColor;"></div>
+                            @if(i == 1) {
+                                <!-- DivTableRow end --> </div>
+                            }
+                        }
+                        </div>
+                            <!-- DivTable end --></div> <br> <br>
+                </div> <!-- seat confi end -->
+                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+                <h3 style="color:#e85c00"> Food and Beverage Menu </h3>
+                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+                <div style="height:130px;overflow:auto">
+                    <table class="table-bordered table-striped" style="width:630px;">
+                        <thead>
+                            <tr>
+                                <th style="width:250px">Victual Name</th>
+                                <th style="width:360px">Victual Description</th>
+                                <th style="width:70px">Price(RSD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drinkList">
+                            @for(victual <- menu) {
+                                @if(victual.tip == "victual") {
+                                    <tr><td>@victual.name</td>
+                                        <td>@victual.description</td>
+                                        <td>@victual.price</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
+
+                <div style="height:130px;overflow:auto">
+                    <table class="table-bordered table-striped" style="width:630px;">
+                        <thead>
+                            <tr>
+                                <th style="width:250px">Drink Name</th>
+                                <th style="width:360px">Drink Description</th>
+                                <th style="width:70px">Price(RSD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drinkList">
+                        @for(drink <- menu) {
+                            @if(drink.tip == "drink") {
+                                <tr><td>@drink.name</td>
+                                    <td>@drink.description</td>
+                                    <td>@drink.price</td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div> <br> <br> <br>
+                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
             </div>
-            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#editRestaurant" style="width: 240px;float: left;color: black;margin: 10px;"><b>EDIT YOUR RESTAURANT</b></button>
-            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addAnEmployee" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD AN EMPLOYEE</b></button>
-            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addABidder" style="width: 240px;color: black;margin: 10px;"><b>ADD A BIDDER</b></button>
+
         }
 
         @if(session.get("userType").equals("guest")) {
@@ -58,7 +153,7 @@
                         <th>Description</th>
                         <th>Address</th>
                         <th>Telephone</th>
-                        <th>Size</th>
+
                     </tr>
                   </thead>
                   <tbody>
@@ -82,7 +177,7 @@
                           <td>@restaurant.description</td>
                            <td>@restaurant.location</td>
                            <td>@restaurant.tel</td>
-                           <td>@restaurant.rSize</td>
+
                        </tr>
                     }
                   </tbody>
@@ -324,94 +419,7 @@
                             <a class="btn btn-warning" id="nextStepRest" title="Manage seating and food/drink menu" style="width:100px;"> NEXT </a>
                             <a class="btn btn-warning addRestFinish" id="finishWithoutStep" title="Finish and leave it to a restaurant manager"  style="width:100px;"> FINISH </a><br>
 
-                            <div style="display:none" id="secondStepRest">
 
-                            <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-
-                            <label for="vicName">Victual Name:</label> <br>
-                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicName" id="vicName" >
-                            <label for="vicDesc">Victual Description:</label> <br>
-                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicDesc" id="vicDesc"  >
-                            <label for="vicPrice">Victual Price(RSD):</label> <br>
-                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="vicPrice" id="vicPrice"  >
-                            <p id="vicErrMessage" style="color:red; display:none"> </p>
-                            <a class="btn btn-warning" id="addVictual" style="width:150px"> ADD A VICTUAL </a> <br> <br>
-                            <div style="height:130px;overflow:auto">
-                                <table class="table-bordered table-striped" style="width:630px;float:right">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:250px">Victual Name</th>
-                                            <th style="width:360px">Victual Description</th>
-                                            <th style="width:70px">Price(RSD)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="vicList">
-
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-
-                            <label for="drinkName">Drink Name:</label> <br>
-                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkName"  >
-                            <label for="drinkDesc">Drink Description:</label> <br>
-                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkDesc"  >
-                            <label for="drinkPrice">Drink Price(RSD):</label> <br>
-                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  id="drinkPrice"  >
-                            <p id="drinkErrMessage" style="color:red"> </p>
-                            <a class="btn btn-warning" id="addDrink" style="width:150px"> ADD A DRINK </a> <br> <br>
-
-                            <div style="height:130px;overflow:auto">
-                                <table class="table-bordered table-striped" style="width:630px;float:right">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:250px">Drink Name</th>
-                                            <th style="width:360px">Drink Description</th>
-                                            <th style="width:70px">Price(RSD)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="drinkList">
-
-                                    </tbody>
-                                </table>
-                            </div>
-                            <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-                                <div id="seatConfig" style="height:auto">
-                                <div id="seatInfo" style="float:left;margin-left:20px;">
-                                   <b>Restaurant section name:</b>  <input class = "form-control" type="text" id="sectionName" maxlength="25">
-                                    <b> Section color:</b>     <select class="form-control" id="sectionColor">
-                                        <option value="blue">blue</option>
-                                        <option value="red">red</option>
-                                        <option value="yellow">yellow</option>
-                                        <option value="purple">purple</option>
-                                        <option value="pink">pink</option>
-                                        <option value="green">green</option>
-                                        <option value="brown">brown</option>
-                                        <option value="lightgrey">lightgray</option>
-                                    </select> <br>
-                                        <a class="btn btn-warning" id="addSection" > ADD </a> <br> <br>
-                                   <p><b> LEGEND: </b></p>
-                                Wall: <div class='sectionPicker' id="black"  style="width:32px;height:32px;background-color:black;border: 1px solid orange;"> </div>
-
-                                </div> <br>
-                                    <p style="margin-left:100px"> <b>Seating plan:</b>  </p>
-                                <div id = "seatTable" class="divTable" style=" width:450px;height:450px; border: 1px solid #dbdbdb;">
-
-                                    <div class="divTableBody">
-                                    @for(x <- 0 until 12) {
-                                        <div class="divTableRow">
-                                            @for(y <- 0 until 12 ) {
-                                                <div id="seat:@x:@y:|none" class="divTableCell"></div>
-                                            }
-                                            <!-- DivTableRow end --> </div>
-                                    }
-                                    </div>
-                                        <!-- DivTable end --></div> <br> <br> <br> <br> <br> <br>
-                                </div> <!-- seat confi end -->
-                            <button class="btn btn-warning btn-block addRestFinish" id="addRestFinish"  style="width: 250px"><b>FINISH</b></button>
-
-                    </div>
                     </div>
 
                         <!--  modal footer -->
@@ -574,6 +582,9 @@
                 }
                 });
 
+            $(document).ready(function() {
+                $("#restButton").css("color","#ffb79b");
+            });
 
 
 
@@ -607,7 +618,8 @@
                         geocoder.geocode({'address': address}, function(results, status) {
                             if($("#show_map").html()=="Show")
                                 $("#show_map").html('Hide');
-                            else $("#show_map").html('Show');
+                            else if( $("#show_map").html()=='Hide')
+                                $("#show_map").html('Show')
                             if (status === 'OK') {
 
                                 resultsMap.setCenter(results[0].geometry.location);
