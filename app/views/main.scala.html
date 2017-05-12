@@ -1,9 +1,9 @@
 @*
- * This template is called from the `index` template. This template
- * handles the rendering of the page header and body tags. It takes
- * two arguments, a `String` for the title of the page and an `Html`
- * object to insert into the body of the page.
- *@
+* This template is called from the `index` template. This template
+* handles the rendering of the page header and body tags. It takes
+* two arguments, a `String` for the title of the page and an `Html`
+* object to insert into the body of the page.
+*@
 @(title: String)(content: Html)
 
 <!DOCTYPE html>
@@ -20,20 +20,26 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
 
         <style>
-        .form-control { width:70%; text-align:center }
+        .form-control {
+            width: 70%;
+            text-align: center
+        }
 
-        .form-control:focus{
+        .form-control:focus {
             border-color: orange;
             -webkit-box-shadow: none;
             box-shadow: none;
         }
-        .formText { color: white }
+
+        .formText {
+            color: white
+        }
         </style>
 
     </head>
     <body>
         @* And here's where we render the `Html` object containing
-         * the page content. *@
+        * the page content. *@
         @content
     </body>
 </html>

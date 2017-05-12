@@ -36,25 +36,25 @@ public class Register extends Controller {
         created.verified = 1;
         created.type = "guest";
         String verPass = requestData.get("repPass");
-        if(verPass.equals(requestData.get("pass"))) {
+        if (verPass.equals(requestData.get("pass"))) {
 
             Connection connection = DB.getConnection();
 
             try {
-                if(connection.prepareStatement("Insert into users (name, surname, email, password, type, verified) " +
+                if (connection.prepareStatement("Insert into users (name, surname, email, password, type, verified) " +
                         "values (" + "\"" + created.name + "\""
-                            + ", \"" + created.surname + "\""
-                            + ", \"" + created.email + "\""
-                            + ", \"" + created.password + "\""
-                            + ", \"" + created.type + "\""
-                            + ", \"" + created.verified + "\")" + ";").execute()){
+                        + ", \"" + created.surname + "\""
+                        + ", \"" + created.email + "\""
+                        + ", \"" + created.password + "\""
+                        + ", \"" + created.type + "\""
+                        + ", \"" + created.verified + "\")" + ";").execute()) {
                     System.out.println("Success");
                 }
 
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             } finally {
-                if(connection != null){
+                if (connection != null) {
                     try {
                         connection.close();
                     } catch (SQLException e) {
@@ -69,8 +69,7 @@ public class Register extends Controller {
             session("userType", created.type);
             return ok(submit.render(created));
 
-        }
-        else return ok("Password does not match the confirm password");
+        } else return ok("Password does not match the confirm password");
 
     }
 }

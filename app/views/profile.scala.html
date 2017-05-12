@@ -1,65 +1,83 @@
 @(email: String, fname: String, lname: String, userType: String)
 
 
-@home("Profile"){
-
+@home("Profile") {
 
 
     <div>
-  <center>
+        <center>
 
-    <form method="post" action="/edit_profile" accept-charset="UTF-8">
-      <label for="fname">First Name:</label> <br>
-      <input id="fname" class="form-control" style="margin-bottom: 15px;width:250px" type="text" value="@fname" name="fname" >
-        <label for="lname">Last Name:</label> <br>
-      <input id="lname" class="form-control" style="margin-bottom: 15px;width:250px" type="text" value="@lname" name="lname" >
-        <label  for="email">E-mail:</label> <br>
-      <input class="form-control" style="margin-bottom: 15px;width:250px" type="text" placeholder="@email" name="email" disabled>
-      <label for="tip">Role:</label> <br>
-      <input class="form-control" style="margin-bottom: 15px;width:250px" type="text" placeholder="@userType" name="tip" disabled> <br>
-      <input class="form-control"  style="margin-bottom: 15px;width:250px" type="password" placeholder="Type in old password"  name="old_password"> <br>
-      <input id="npass" class="form-control" style="margin-bottom: 15px;width:250px" type="password" placeholder="Type in new password"  name="new_password"> <br>
-        <button id="saveChanges" class="btn btn-warning btn-block" type="submit" id="sign-in"  style="width: 200px;color:black" disabled><b>SAVE CHANGES</b></button> <br> <br>
+            <form method="post" action="/edit_profile" accept-charset="UTF-8">
+                <label for="fname">First Name:</label> <br>
+                <input id="fname" class="form-control" style="margin-bottom: 15px;
+                    width: 250px" type="text" value="@fname" name="fname" >
+                <label for="lname">Last Name:</label> <br>
+                <input id="lname" class="form-control" style="margin-bottom: 15px;
+                    width: 250px" type="text" value="@lname" name="lname" >
+                <label for="email">E-mail:</label> <br>
+                <input class="form-control" style="margin-bottom: 15px;
+                    width: 250px" type="text" placeholder="@email" name="email" disabled>
+                <label for="tip">Role:</label> <br>
+                <input class="form-control" style="margin-bottom: 15px;
+                    width: 250px" type="text" placeholder="@userType" name="tip" disabled> <br>
+                <input class="form-control" style="margin-bottom: 15px;
+                    width: 250px" type="password" placeholder="Type in old password" name="old_password"> <br>
+                <input id="npass" class="form-control" style="margin-bottom: 15px;
+                    width: 250px" type="password" placeholder="Type in new password" name="new_password"> <br>
+                <button id="saveChanges" class="btn btn-warning btn-block" type="submit" id="sign-in" style="width: 200px;
+                    color: black" disabled><b>SAVE CHANGES</b></button> <br> <br>
 
-    </form>
+            </form>
 
 
-      @if(userType.equals("waiter") || userType.equals("chef") || userType.equals("bartender")){
-          <div id="calendar">
+            @if(userType.equals("waiter") || userType.equals("chef") || userType.equals("bartender")) {
+                <div id="calendar">
 
-          </div>
-          <script>
-              var events = [
-                  {'Date': new Date(2017, 4, 1), 'Title': '08:00 - 16:00', 'Link': function(){alert('08:00 - 16:00');}},
-                  {'Date': new Date(2017, 4, 18), 'Title': '08:00 - 16:00', 'Link': function(){alert('08:00 - 16:00');}},
-                  {'Date': new Date(2017, 4, 27), 'Title': '08:00 - 16:00', 'Link': function(){alert('08:00 - 16:00');}},
-              ];
-              var settings = {};
-              var element = $('#calendar')[0];
-              calendar(element, events, settings);
-          </script>
-      }
+                </div>
+                <script>
+                        var events = [
+                            {
+                                'Date': new Date(2017, 4, 1), 'Title': '08:00 - 16:00', 'Link': function () {
+                                alert('08:00 - 16:00');
+                            }
+                            },
+                            {
+                                'Date': new Date(2017, 4, 18), 'Title': '08:00 - 16:00', 'Link': function () {
+                                alert('08:00 - 16:00');
+                            }
+                            },
+                            {
+                                'Date': new Date(2017, 4, 27), 'Title': '08:00 - 16:00', 'Link': function () {
+                                alert('08:00 - 16:00');
+                            }
+                            },
+                        ];
+                        var settings = {};
+                        var element = $('#calendar')[0];
+                        calendar(element, events, settings);
+                </script>
+            }
 
-  </center>
-  </div>
+        </center>
+    </div>
 
 
     <script>
             // enable-uj dugme sa SAVE tek kad se promeni neka od vrednosti u text boxevima
-            $(document).ready(function() {
+            $(document).ready(function () {
 
-                $("#fname").change(function() {
-                   $("#saveChanges").prop('disabled', false);
-                });
-                $("#lname").change(function() {
+                $("#fname").change(function () {
                     $("#saveChanges").prop('disabled', false);
                 });
-                $("#npass").change(function() {
+                $("#lname").change(function () {
+                    $("#saveChanges").prop('disabled', false);
+                });
+                $("#npass").change(function () {
                     $("#saveChanges").prop('disabled', false);
                 });
 
                 // promena boje dugmeta kad je na profilnoj
-                $("#profButton").css("color","#ffb79b");
+                $("#profButton").css("color", "#ffb79b");
 
             });
 

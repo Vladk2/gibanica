@@ -1,13 +1,16 @@
-.cld-main{
+.cld-main {
     width: 400px;
 }
-.cld-main a{
+
+.cld-main a {
     color: #0080FF;
 }
-.cld-main svg{
+
+.cld-main svg {
     fill: #0080FF;
 }
-.cld-datetime{
+
+.cld-datetime {
     position: relative;
     width: 66%;
     min-width: 100px;
@@ -15,62 +18,77 @@
     margin: auto;
     overflow: hidden;
 }
-.cld-datetime .today{
+
+.cld-datetime .today {
     position: relative;
     float: left;
     width: calc(100% - 40px);
     margin: auto;
     text-align: center;
 }
-.cld-nav{
+
+.cld-nav {
     position: relative;
     width: 20px;
     height: 20px;
     margin-top: 2px;
 }
-.cld-nav:hover{
+
+.cld-nav:hover {
     cursor: pointer;
 }
-.cld-nav:hover svg{
+
+.cld-nav:hover svg {
     fill: #005EFF;
 }
-.cld-rwd{
+
+.cld-rwd {
     float: left;
 }
-.cld-fwd{
+
+.cld-fwd {
     float: right;
 }
-.cld-nav svg:hover{
+
+.cld-nav svg:hover {
 
 }
-.cld-labels, .cld-days{
+
+.cld-labels, .cld-days {
     padding-left: 0;
 }
-.cld-label, .cld-day{
+
+.cld-label, .cld-day {
     box-sizing: border-box;
     display: inline-block;
     width: 14.28%;
     text-align: center;
 }
-.cld-day{
+
+.cld-day {
     border: 1px solid #eee;
 }
-.cld-day.today .cld-number{
+
+.cld-day.today .cld-number {
     background: #0080FF;
     color: #fff;
 }
-.cld-day.disableDay{
+
+.cld-day.disableDay {
     opacity: 0.5;
 }
-.cld-day.nextMonth, .cld-day.prevMonth{
+
+.cld-day.nextMonth, .cld-day.prevMonth {
     opacity: 0.33;
 }
-.cld-number{
+
+.cld-number {
     position: relative;
     margin: 0;
     padding: 10px;
 }
-.cld-title{
+
+.cld-title {
     position: absolute;
     z-index: 5;
     display: none;
@@ -83,13 +101,16 @@
     border-radius: 5px;
     font-size: 12px;
 }
-.cld-number:hover .cld-title{
+
+.cld-number:hover .cld-title {
     display: block;
 }
-.cld-title::before{
+
+.cld-title::before {
     content: '';
     position: absolute;
-    top: -7.5px; left: 10px;
+    top: -7.5px;
+    left: 10px;
     width: 0;
     height: 0;
     border-left: 7.5px solid transparent;
@@ -97,14 +118,17 @@
 
     border-bottom: 7.5px solid #ccc;
 }
-.cld-number.eventday{
+
+.cld-number.eventday {
     font-weight: bold;
     color: #0080FF;
 }
-.cld-number.eventday:hover{
+
+.cld-number.eventday:hover {
     cursor: pointer;
     background: #eee;
 }
-.today .cld-number.eventday:hover{
+
+.today .cld-number.eventday:hover {
     background: #005EFF;
 }

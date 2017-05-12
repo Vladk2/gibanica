@@ -42,7 +42,7 @@ public class Restaurants extends Controller {
         String verified = session("verified");
         String myRestName = session("myRestName");
         restaurants.clear();
-        String thisRestId = "";
+
         List<VictualAndDrink> menu = new ArrayList<>();
         List<RestSection> seats = new ArrayList<>();
         List<RestSection> sectors = new ArrayList<>();
@@ -50,7 +50,6 @@ public class Restaurants extends Controller {
         double restSize=0; int noOfSectors=0;
         Restaurant myRestaurant = new Restaurant();
         if(loggedUser == null || verified.equals("0"))
-
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
         else {
             Connection connection = DB.getConnection();
@@ -69,23 +68,21 @@ public class Restaurants extends Controller {
 
                 if((session("userType")).equals("rest-manager")) {
 
-                }
-
-
 
                     ResultSet set2 = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
-                            "(select restaurantId from restaurantManagers where userId = (select userId from users where email = " +
+                            "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
                             "\"" + loggedUser + "\"" + "));").executeQuery();
                     while (set2.next()) {
                         VictualAndDrink vd = new VictualAndDrink(set2.getString(1), set2.getString(2),
                                 set2.getDouble(3), set2.getString(4));
                         menu.add(vd);
-                        thisRestId = set2.getString(5);
+
 
 
                     }
                     ResultSet set3 = connection.prepareStatement("Select posX, posY, sectorColor from seatconfig where restaurantId = " +
-                            "\"" + thisRestId + "\"" + ";").executeQuery();
+                            "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                            "\"" + loggedUser + "\"" + "));").executeQuery();
 
                     while (set3.next()) {
                         restSize++;
@@ -96,14 +93,15 @@ public class Restaurants extends Controller {
                         seats.add(seat);
 
                     }
-                        ResultSet set4 = connection.prepareStatement("Select sectorName, sectorColor from sectornames where restaurantId = " +
-                                "\"" + thisRestId + "\"" + ";").executeQuery();
+                    ResultSet set4 = connection.prepareStatement("Select sectorName, sectorColor from sectornames where restaurantId = " +
+                            "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                            "\"" + loggedUser + "\"" + "));").executeQuery();
 
-                        while (set4.next()) {
-                            RestSection legend = new RestSection(set4.getString(1),set4.getString(2));
-                            sectors.add(legend);
+                    while (set4.next()) {
+                        RestSection legend = new RestSection(set4.getString(1), set4.getString(2));
+                        sectors.add(legend);
                     }
-
+                }
                 // ------------------------------------ rest man. over ----------------------------------------
 
 
@@ -202,6 +200,11 @@ public class Restaurants extends Controller {
         return ok(Json.toJson(victual));
     }
 
+    public static Result editVictualAJAX() {
+
+        return ok();
+    }
+
     public static Result addDrinkAJAX() {
         JsonNode json = request().body().asJson();
         VictualAndDrink drink = Json.fromJson(json, VictualAndDrink.class);
@@ -230,41 +233,12 @@ public class Restaurants extends Controller {
         return ok(Json.toJson(drink));
     }
 
-    public static Result saveSeatConf() {
-
-
-        JsonNode j =  request().body().asJson();
-
-        ObjectMapper mapper = new ObjectMapper();
-        Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
-        Connection connection = DB.getConnection();
-        showMenuSeatPage = false;
-
-        try {
-        for(ArrayList value : result.values()) {
-            for (Object s : value) {
-                String polje = s.toString();
-                String[] deo = polje.split(":");
-                String posX = deo[1];
-                String posY = deo[2];
-                String[] deo2 = polje.split("\\|");
-                String boja = deo2[1];
-
-                    if (connection.prepareStatement("Insert into seatconfig (posX, posY, sectorColor, restaurantId) " +
-                            "values (" + "\"" + posX + "\""
-                            + ", \"" + posY + "\"" + ", \"" + boja + "\", ( select restaurantId from restaurants where name =" +
-                            "\"" + addedRestaurantName + "\"))" + ";").execute()) {
-                    }
-                }
-
-            }
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public static Result editDrinkAJAX() {
 
         return ok();
     }
+
+
 
     public static Result addSeatSection() {
 
@@ -291,6 +265,84 @@ public class Restaurants extends Controller {
         }
 
         return ok(Json.toJson(section));
+    }
+
+    public static Result editSeatSection() {
+
+        return ok();
+    }
+
+    public static Result saveSeatConf() {
+
+
+        JsonNode j =  request().body().asJson();
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
+        Connection connection = DB.getConnection();
+        showMenuSeatPage = false;
+
+        try {
+            for(ArrayList value : result.values()) {
+                for (Object s : value) {
+                    String polje = s.toString();
+                    String[] deo = polje.split(":");
+                    String posX = deo[1];
+                    String posY = deo[2];
+                    String[] deo2 = polje.split("\\|");
+                    String boja = deo2[1];
+
+                    if (connection.prepareStatement("Insert into seatconfig (posX, posY, sectorColor, restaurantId) " +
+                            "values (" + "\"" + posX + "\""
+                            + ", \"" + posY + "\"" + ", \"" + boja + "\", ( select restaurantId from restaurants where name =" +
+                            "\"" + addedRestaurantName + "\"))" + ";").execute()) {
+                    }
+                }
+
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ok();
+    }
+
+    public static Result editSeatConf() {
+
+        JsonNode j =  request().body().asJson();
+
+        String myRestName = session("myRestName");
+        ObjectMapper mapper = new ObjectMapper();
+        Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
+        Connection connection = DB.getConnection();
+
+
+        try {
+            for(ArrayList value : result.values()) {
+                for (Object s : value) {
+
+                    String polje = s.toString();
+                    String[] deo = polje.split(":");
+                    String posX = deo[1];
+                    String posY = deo[2];
+                    String[] deo2 = polje.split("\\|");
+                    String boja = deo2[1];
+
+                    if (connection.prepareStatement("Update seatconfig " +
+                            "set sectorColor = \"" + boja + "\" where posX = \"" + posX + "\" and posY = \"" + posY + "\" and restaurantId = ( select restaurantId from restaurants where name = " +
+                            "\"" + myRestName + "\")" + ";").execute()) {
+                    }
+                }
+
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        return ok();
     }
 
     public static Result restManagerHome() {
@@ -340,7 +392,74 @@ public class Restaurants extends Controller {
 
     }
 
-    public static Result saveMenuAndSeat() {
+    public static Result EditMenuAndSeating() {
+        String loggedUser = session("connected");
+        String verified = session("verified");
+        String userType = session("userType");
+        List<VictualAndDrink> menu = new ArrayList<>();
+        List<RestSection> seats = new ArrayList<>();
+        List<RestSection> sectors = new ArrayList<>();
+        String posX = ""; String posY = ""; String sectorColor = "";
+        double restSize=0; int noOfSectors=0;
+        if(!(userType.equals("rest-manager")) || loggedUser == null || verified.equals("0"))
+            return redirect("/");
+        Connection connection = DB.getConnection();
+        try {
+
+                ResultSet set2 = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
+                        "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                        "\"" + loggedUser + "\"" + "));").executeQuery();
+                while (set2.next()) {
+                    VictualAndDrink vd = new VictualAndDrink(set2.getString(1), set2.getString(2),
+                            set2.getDouble(3), set2.getString(4));
+                    menu.add(vd);
+
+
+
+                }
+                ResultSet set3 = connection.prepareStatement("Select posX, posY, sectorColor from seatconfig where restaurantId = " +
+                        "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                        "\"" + loggedUser + "\"" + "));").executeQuery();
+
+                while (set3.next()) {
+                    restSize++;
+                    posX = set3.getString(1);
+                    posY = set3.getString(2);
+                    sectorColor = set3.getString(3);
+                    RestSection seat = new RestSection(sectorColor, posX, posY);
+                    seats.add(seat);
+
+                }
+                ResultSet set4 = connection.prepareStatement("Select sectorName, sectorColor from sectornames where restaurantId = " +
+                        "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                        "\"" + loggedUser + "\"" + "));").executeQuery();
+
+                while (set4.next()) {
+                    RestSection legend = new RestSection(set4.getString(1), set4.getString(2));
+                    sectors.add(legend);
+                }
+
+
+
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        restSize = Math.sqrt(restSize);
+        int intSize = (int)restSize;
+        return ok(editMenuAndSeating.render(menu,seats,intSize,sectors));
+    }
+
+
+    public static Result restAddedFlash() {
         flash("addRestSuccess", "A new restaurant has been added.");
         return redirect("/restaurants");
 
@@ -515,17 +634,21 @@ public class Restaurants extends Controller {
 
     public static Result editRestaurant() {
 
-        DynamicForm requestData = Form.form().bindFromRequest();
-        String restName = requestData.get("rname");
-        String restDesc = requestData.get("rdesc");
         String oldName = session("myRestName");
-
+        JsonNode json = request().body().asJson();
+        Restaurant rest = Json.fromJson(json, Restaurant.class);
+        for(Restaurant restoran : restaurants) {
+            if (restoran.name.equals(rest.name) && !(restoran.name.equals(oldName))) {
+                return status(409, "Already used restName");
+            }
+        }
         Connection connection = DB.getConnection();
         try{
 
             if(connection.prepareStatement("Update restaurants" +
-                    " set name =" + "\"" + restName + "\"" +
-                    ", description =" + "\"" + restDesc + "\" where name = " + "\"" + oldName + "\"" + ";").execute()){
+                    " set name =" + "\"" + rest.name + "\"" +
+                    ", description =" + "\"" + rest.description + "\"" + ", tel =" + "\"" + rest.tel + "\"" +
+                    ", address = " + "\"" + rest.location + "\" where name = " + "\"" + oldName + "\"" + ";").execute()){
                 System.out.println("Restaurant's info successfully changed!");
 
             }
@@ -542,10 +665,16 @@ public class Restaurants extends Controller {
             }
         }
 
-        session("myRestName", restName);
+        session("myRestName", rest.name);
 
 
-        return ok(home.render("Welcome",new play.twirl.api.Html("<center>You have successfully edited your restaurant's info!</center>") ));
+        return ok();
+    }
+
+    public static Result restEditedFlash() {
+        flash("editRestSuccess", "Your restaurant info has been successfully changed.");
+        return redirect("/restaurants");
+
     }
 
 }

@@ -17,5 +17,6 @@ public class VictualAndDrink {
         this.tip = tip;
     }
 
-    public VictualAndDrink() {}
+    public VictualAndDrink() {
+    }
 }

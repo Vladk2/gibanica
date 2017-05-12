@@ -10,6 +10,7 @@ public class Restaurant {
     public String location;
     public String tel;
     public String rSize;
+
     public Restaurant(String name, String description, String location, String tel, String rSize) {
         this.name = name;
         this.description = description;
@@ -18,5 +19,6 @@ public class Restaurant {
         this.rSize = rSize;
     }
 
-    public Restaurant() { }
+    public Restaurant() {
+    }
 }

@@ -1,31 +1,38 @@
 /* DivTable */
-.divTable{
+.divTable {
     display: table;
     width: 100%;
 }
+
 .divTableRow {
     display: table-row;
 }
+
 .divTableHeading {
     background-color: #EEE;
     display: table-header-group;
 }
+
 .divTableCell, .divTableHead {
     border: 1px solid #fff5dd;
     display: table-cell;
     padding: 3px 10px;
 }
+
 .divTableHeading {
     background-color: #EEE;
     display: table-header-group;
     font-weight: bold;
 }
+
 .divTableFoot {
     background-color: #EEE;
     display: table-footer-group;
     font-weight: bold;
 }
+
 .divTableBody {
     display: table-row-group;
 }
+
 /*DivTable style ends */

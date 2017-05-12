@@ -25,15 +25,6 @@ import static views.html.home.render;
 
 public class Application extends Controller {
 
- /*   public Result javascriptRoutes() {
-        return ok(
-                JavaScriptReverseRouter.create("jsRoutes",
-                        routes.javascript.Users.list(),
-                        routes.javascript.Users.get()
-                )
-        ).as("text/javascript");
-    }
-*/
 
     public static Result jsRoutes() {
         response().setContentType("text/javascript");
@@ -42,7 +33,13 @@ public class Application extends Controller {
                 routes.javascript.Restaurants.addRestInfoAJAX(),
                 routes.javascript.Restaurants.addDrinkAJAX(),
                 routes.javascript.Restaurants.saveSeatConf(),
-                routes.javascript.Restaurants.addSeatSection()
+                routes.javascript.Restaurants.addSeatSection(),
+                routes.javascript.Restaurants.editRestaurant(),
+                routes.javascript.Restaurants.editVictualAJAX(),
+                routes.javascript.Restaurants.editDrinkAJAX(),
+                routes.javascript.Restaurants.editSeatConf(),
+                routes.javascript.Restaurants.editSeatSection()
+
                 )
         );
     }
@@ -53,15 +50,6 @@ public class Application extends Controller {
         String verified = session("verified");
         String tip = session("userType");
         if(loggedUser==null) {
-//            Database database = Databases.createFrom(
-//                    "baklava",
-//                    "com.mysql.jdbc.Driver",
-//                    "jdbc:mysql://localhost/baklava",
-//                    ImmutableMap.of(
-//                            "user", "root",
-//                            "password", "gibanica"
-//                    )
-//            );
 
             Connection connection = DB.getConnection();
             try {

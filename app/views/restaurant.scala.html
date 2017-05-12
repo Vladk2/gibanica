@@ -1,212 +1,289 @@
 @(userEmail: String, restaurants: List[Restaurant], menu: List[VictualAndDrink], seats: List[RestSection], sizeSqrt: Int, sectors: List[RestSection], myRestaurant: Restaurant)
-@import java.math.BigInteger; var i=1;
+@import java.math.BigInteger; var i = 1;
 
 
-@home("Restaurants"){
+@home("Restaurants") {
 
 
-
-  <div>
-    <i style="float:right;margin-right:40px;">logged in: <b>@userEmail</b> </i> <br> <br>
-
-
-      <center>
-        <br>
-
-        <div style="display: inline-block;">
-        @if(session.get("userType").equals("system-manager")) {
-
-            @if(flash.containsKey("addRestSuccess")) {
-                <div  class="alert alert-success" id="restAddSuccessFull" >
-                <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b>Success! </b>@flash.get("addRestSuccess")
-                </div>
-            }
-            <div  class="alert alert-success" id="restAddSuccess" style="display: none">
-            </div>
-            <button class="btn btn-warning btn-block"  data-toggle="modal" data-target="#addARestaurant" style="width: 170px;float: left;color: black;margin: 10px;"><b>ADD A RESTAURANT</b></button>
-            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addARestManager" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD A RESTAURANT MANAGER</b></button>
-            <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addASysManager" style="width: 210px;float:left;color: black;margin: 10px;"><b>ADD A SYSTEM MANAGER</b></button>
-
-        }
-        @if(session.get("userType").equals("rest-manager")) {
+    <div>
+        <i style="float: right;
+            margin-right: 40px;">logged in: <b>@userEmail</b> </i> <br> <br>
 
 
-            <div style="width: 800px">
-                <h3><span  style="color:#e85c00">Your Restaurant:</span> <b>@myRestaurant.name</b></h3>
-                <h4><span  style="color:#e85c00"> About:</span> <b>@myRestaurant.description</b></h4>
-                <h4><span  style="color:#e85c00"> Contact Number:</span> <b>@myRestaurant.tel</b></h4>
-                <h4><span  style="color:#e85c00"> Location:</span> <a id="show_map" style="cursor:pointer"><b>@myRestaurant.location</b></a></h4>
-                <input id="rlocation" value="@myRestaurant.location" style="display: none">
-                <div class = "hidemap" id = "mapa" style="width: 260px; height:220px; background-color:white;"></div> <br>
+        <center>
+            <br>
 
-                <br>
-                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#editRestaurant" style="width: 240px;float: left;color: black;margin: 10px;"><b>EDIT YOUR RESTAURANT</b></button>
-                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addAnEmployee" style="width: 240px;float: left;margin: 10px;color: black"><b>ADD AN EMPLOYEE</b></button>
-                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addABidder" style="width: 240px;color: black;margin: 10px;"><b>ADD A BIDDER</b></button> <br>
-                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-                <h3 style="color:#e85c00"> Seat Configuration </h3>
-                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-                <div id="seatConfig" style="height:auto">
-                    <div id="seatInfo" style="float:left;margin-left:20px;">
+            <div style="display: inline-block;">
+                @if(session.get("userType").equals("system-manager")) {
 
-
-                        <p><b> LEGEND:</b></p>
-                        Wall: <div class='sectionPicker' id="black"  style="width:32px;height:32px;background-color:black;border: 1px solid antiquewhite;"> </div> <br>
-                        @for(sector <- sectors){
-                            @sector.sectionName: <div class='sectionPicker' id="@sector.sectionColor"  style="width:32px;height:32px;background-color:@sector.sectionColor;border: 1px solid antiquewhite;"> </div> <br>
-                        }
-                    </div> <br>
-
-                    <div id = "seatTable" class="divTable" style=" width:450px;height:450px; border: 1px solid #dbdbdb;">
-
-                        <div class="divTableBody">
-
-                        @for(seat <- seats) {
-                            @{i=i-1}
-                            @if(i == 0) {
-                            <div class="divTableRow">
-                                @{i = sizeSqrt}
-                            }
-                                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor" class="divTableCell" style="background-color: @seat.sectionColor;"></div>
-                            @if(i == 1) {
-                                <!-- DivTableRow end --> </div>
-                            }
-                        }
+                    @if(flash.containsKey("addRestSuccess")) {
+                        <div class="alert alert-success" id="restAddSuccessFull" >
+                            <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b>
+                            Success! </b>@flash.get("addRestSuccess")
                         </div>
-                            <!-- DivTable end --></div> <br> <br>
-                </div> <!-- seat confi end -->
-                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-                <h3 style="color:#e85c00"> Food and Beverage Menu </h3>
-                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-                <div style="height:130px;overflow:auto">
-                    <table class="table-bordered table-striped" style="width:630px;">
-                        <thead>
-                            <tr>
-                                <th style="width:250px">Victual Name</th>
-                                <th style="width:360px">Victual Description</th>
-                                <th style="width:70px">Price(RSD)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="drinkList">
-                            @for(victual <- menu) {
-                                @if(victual.tip == "victual") {
-                                    <tr><td>@victual.name</td>
-                                        <td>@victual.description</td>
-                                        <td>@victual.price</td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-
-                <div style="height:130px;overflow:auto">
-                    <table class="table-bordered table-striped" style="width:630px;">
-                        <thead>
-                            <tr>
-                                <th style="width:250px">Drink Name</th>
-                                <th style="width:360px">Drink Description</th>
-                                <th style="width:70px">Price(RSD)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="drinkList">
-                        @for(drink <- menu) {
-                            @if(drink.tip == "drink") {
-                                <tr><td>@drink.name</td>
-                                    <td>@drink.description</td>
-                                    <td>@drink.price</td>
-                                </tr>
-                            }
-                        }
-                        </tbody>
-                    </table>
-                </div> <br> <br> <br>
-                <hr style="width: 100%; color: black; height: 1px; background-color:#d8d8d8;" />
-            </div>
-
-        }
-
-        @if(session.get("userType").equals("guest")) {
-            <div class="container">
-    <div class="row">
-
-        <div class="col-md-10 col-md-offset-1">
-
-            <div class="panel panel-default panel-table">
-              <div class="panel-heading">
-                <div class="row">
-                  <div class="col col-xs-6">
-                    <!-- <h3 class="panel-title">Restaurants</h3> -->
-                  </div>
-                  <div class="col col-xs-6 text-right">
-                    <!-- <button type="button" class="btn btn-sm btn-primary btn-create">Add New</button> -->
-                  </div>
-                </div>
-              </div>
-              <div class="panel-body">
-                <table class="table table-striped table-bordered table-list">
-                  <thead>
-                    <tr>
-                        <th><em class="fa fa-cog"></em></th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Address</th>
-                        <th>Telephone</th>
-
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for(restaurant <- restaurants) {
-                       <tr>
-                          <td>
-                              <div class="ocena-oglasa" ng-controller="OcenaNekretnineCtrl">
-                                <form ng-submit="ocene()">
-                                    <div class="rate">
-                                        <input type="radio" id="star5" name="rate" value="5&{{jedNekretnina.id}}" ng-model="ocena"/><label for="star5" title="text">5 stars</label>
-                                        <input type="radio" id="star4" name="rate" value="4&{{jedNekretnina.id}}" ng-model="ocena"/><label for="star4" title="text">4 stars</label>
-                                        <input type="radio" id="star3" name="rate" value="3&{{jedNekretnina.id}}" ng-model="ocena"/><label for="star3" title="text">3 stars</label>
-                                        <input type="radio" id="star2" name="rate" value="2&{{jedNekretnina.id}}" ng-model="ocena"/><label for="star2" title="text">2 stars</label>
-                                        <input type="radio" id="star1" name="rate" value="1&{{jedNekretnina.id}}" ng-model="ocena"/><label for="star1" title="text">1 star</label>
-                                    </div>
-                                    <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
-                                </form>
-                            </div>
-                          </td>
-                          <td>@restaurant.name</td>
-                          <td>@restaurant.description</td>
-                           <td>@restaurant.location</td>
-                           <td>@restaurant.tel</td>
-
-                       </tr>
                     }
-                  </tbody>
-                </table>
 
-              </div>
-              <div class="panel-footer">
-                <div class="row">
-                  <div class="col col-xs-4">
-                  </div>
-                  <div class="col col-xs-8">
-                    <ul class="pagination hidden-xs pull-right">
-                      <li><a href="#">1</a></li>
-                      <li><a href="#">2</a></li>
-                      <li><a href="#">3</a></li>
-                      <li><a href="#">4</a></li>
-                      <li><a href="#">5</a></li>
-                    </ul>
-                    <ul class="pagination visible-xs pull-right">
-                        <li><a href="#">«</a></li>
-                        <li><a href="#">»</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+                    <div class="alert alert-success" id="restAddSuccess" style="display: none">
+                    </div>
+                    <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addARestaurant" style="width: 170px;
+                        float: left;
+                        color: black;
+                        margin: 10px;"><b>ADD A RESTAURANT</b></button>
+                    <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addARestManager" style="width: 240px;
+                        float: left;
+                        margin: 10px;
+                        color: black"><b>ADD A RESTAURANT MANAGER</b></button>
+                    <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addASysManager" style="width: 210px;
+                        float: left;
+                        color: black;
+                        margin: 10px;"><b>ADD A SYSTEM MANAGER</b></button>
 
-        </div></div></div>
-        }                         <!-- neki div nije zatvoren, ne mogu provalim koji -- >
+                }
+                @if(session.get("userType").equals("rest-manager")) {
+
+                    @if(flash.containsKey("editRestSuccess")) {
+                        <div class="alert alert-success" id="restEditSuccessFull" >
+                            <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b>
+                            Success! </b>@flash.get("editRestSuccess")
+                        </div>
+                    }
+                    <div style="width: 800px" >
+                        <h3><span style="color: #e85c00">Your Restaurant:</span> <b>@myRestaurant.name</b>
+                            <span style="margin-left:15px;font-size: 20px;cursor:pointer;color: #e85c00" class="glyphicon glyphicon-edit" data-toggle="modal" data-target="#editRestaurant" aria-hidden="true">
+                            </span>
+                        </h3>
+                        <h4><span style="color: #e85c00"> About:</span> <b>@myRestaurant.description</b></h4>
+                        <h4><span style="color: #e85c00"> Contact Number:</span> <b>@myRestaurant.tel</b></h4>
+                        <h4><span style="color: #e85c00">
+                            Location:</span> <a id="show_map" style="cursor: pointer"><b>@myRestaurant.location</b></a></h4>
+                        <input id="rlocation" value="@myRestaurant.location" style="display: none">
+                        <div class = "hidemap" id = "mapa" style="width: 100%;
+                            height: 220px;
+                            background-color: white;"></div> <br>
+
+                        <br>
+                        <a class="btn btn-warning btn-block" href="#" style="width: 240px;
+                            float: left;
+                            color: black;
+                            margin: 10px;"><b>ASSIGN WORKING HOURS</b></a>
+                        <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addAnEmployee" style="width: 240px;
+                            float: left;
+                            margin: 10px;
+                            color: black"><b>ADD AN EMPLOYEE</b></button>
+                        <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addABidder" style="width: 240px;
+                            color: black;
+                            margin: 10px;"><b>ADD A BIDDER</b></button> <br>
+                        <hr style="width: 100%;
+                            color: black;
+                            height: 1px;
+                            background-color: #d8d8d8;" />
+                        <h3><b> Seat Configuration </b>
+                            <a href="/editMenuAndSeating"><span  style="color:#e85c00;margin-left:10px;font-size: 20px;cursor:pointer" class="glyphicon glyphicon-edit"  aria-hidden="true">
+                            </span> </a>
+                        </h3>
+                        <hr style="width: 100%;
+                            color: black;
+                            height: 1px;
+                            background-color: #d8d8d8;" />
+                        <div id="seatConfig" style="height: auto">
+                            <div id="seatInfo" style="float: left;
+                                margin-left: 20px;">
+
+
+                                <p><b> LEGEND:</b></p>
+                                Wall: <div class='sectionPicker' id="black" style="width: 32px;
+                                height: 32px;
+                                background-color: black;
+                                border: 1px solid antiquewhite;"> </div> <br>
+                                @for(sector <- sectors) {
+                                    @sector.sectionName
+                                    : <div class='sectionPicker' id="@sector.sectionColor" style="width: 32px;
+                                        height: 32px;
+                                        background-color:
+                                    @sector.sectionColor;
+                                        border: 1px solid antiquewhite;"> </div>
+                                    <br>
+                                    }
+                            </div> <br>
+
+                            <div id = "seatTable" class="divTable" style=" width: 450px;
+                                height: 450px;
+                                border: 1px solid #dbdbdb;
+                            ">
+
+                                <div class="divTableBody">
+
+                                @for(seat <- seats) {
+                                    @{
+                                        i = i - 1
+                                    }
+                                    @if(i == 0) {
+                                        <div class="divTableRow">
+                                            @{
+                                                i = sizeSqrt
+                                            }
+                                        }
+                                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor" class="divTableCell" style="background-color:
+                                    @seat.sectionColor;"></div>
+                                    @if(i == 1) {
+                                            <!-- DivTableRow end --> </div>
+                                    }
+                                }
+                                </div>
+                                    <!-- DivTable end --></div> <br> <br>
+                        </div> <!-- seat confi end -->
+                        <hr style="width: 100%;
+                            color: black;
+                            height: 1px;
+                            background-color: #d8d8d8;" />
+                        <h3><b> Food and Beverage Menu </b> <a href="/editMenuAndSeating">
+                            <span style="color:#e85c00;margin-left:10px;font-size: 20px;cursor:pointer" class="glyphicon glyphicon-edit" aria-hidden="true"></span> </a> </h3>
+                        <hr style="width: 100%;
+                            color: black;
+                            height: 1px;
+                            background-color: #d8d8d8;" />
+                        <div style="height: 130px;
+                            overflow: auto">
+                            <table class="table-bordered table-striped" style="width: 630px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 250px">Victual Name</th>
+                                        <th style="width: 360px">Victual Description</th>
+                                        <th style="width: 70px">Price(RSD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="drinkList">
+                                @for(victual <- menu) {
+                                    @if(victual.tip == "victual") {
+                                        <tr><td>@victual.name</td>
+                                            <td>@victual.description</td>
+                                            <td>@victual.price</td>
+                                        </tr>
+                                    }
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr style="width: 100%;
+                            color: black;
+                            height: 1px;
+                            background-color: #d8d8d8;" />
+
+                        <div style="height: 130px;
+                            overflow: auto">
+                            <table class="table-bordered table-striped" style="width: 630px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 250px">Drink Name</th>
+                                        <th style="width: 360px">Drink Description</th>
+                                        <th style="width: 70px">Price(RSD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="drinkList">
+                                @for(drink <- menu) {
+                                    @if(drink.tip == "drink") {
+                                        <tr><td>@drink.name</td>
+                                            <td>@drink.description</td>
+                                            <td>@drink.price</td>
+                                        </tr>
+                                    }
+                                }
+                                </tbody>
+                            </table>
+                        </div> <br> <br> <br>
+                        <hr style="width: 100%;
+                            color: black;
+                            height: 1px;
+                            background-color: #d8d8d8;" />
+                    </div>
+
+                }
+
+                @if(session.get("userType").equals("guest")) {
+                    <div class="container">
+                        <div class="row">
+
+                            <div class="col-md-10 col-md-offset-1">
+
+                                <div class="panel panel-default panel-table">
+                                    <div class="panel-heading">
+                                        <div class="row">
+                                            <div class="col col-xs-6">
+                                                    <!-- <h3 class="panel-title">Restaurants</h3> -->
+                                            </div>
+                                            <div class="col col-xs-6 text-right">
+                                                    <!-- <button type="button" class="btn btn-sm btn-primary btn-create">Add New</button> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <table class="table table-striped table-bordered table-list">
+                                            <thead>
+                                                <tr>
+                                                    <th><em class="fa fa-cog"></em></th>
+                                                    <th>Name</th>
+                                                    <th>Description</th>
+                                                    <th>Address</th>
+                                                    <th>Telephone</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            @for(restaurant <- restaurants) {
+                                                <tr>
+                                                    <td>
+                                                        <div class="ocena-oglasa" ng-controller="OcenaNekretnineCtrl">
+                                                            <form ng-submit="ocene()">
+                                                                <div class="rate">
+                                                                    <input type="radio" id="star5" name="rate" value="5&{{jedNekretnina.id}}" ng-model="ocena"/>
+                                                                    <label for="star5" title="text">5 stars</label>
+                                                                    <input type="radio" id="star4" name="rate" value="4&{{jedNekretnina.id}}" ng-model="ocena"/>
+                                                                    <label for="star4" title="text">4 stars</label>
+                                                                    <input type="radio" id="star3" name="rate" value="3&{{jedNekretnina.id}}" ng-model="ocena"/>
+                                                                    <label for="star3" title="text">3 stars</label>
+                                                                    <input type="radio" id="star2" name="rate" value="2&{{jedNekretnina.id}}" ng-model="ocena"/>
+                                                                    <label for="star2" title="text">2 stars</label>
+                                                                    <input type="radio" id="star1" name="rate" value="1&{{jedNekretnina.id}}" ng-model="ocena"/>
+                                                                    <label for="star1" title="text">1 star</label>
+                                                                </div>
+                                                                    <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                    <td>@restaurant.name</td>
+                                                    <td>@restaurant.description</td>
+                                                    <td>@restaurant.location</td>
+                                                    <td>@restaurant.tel</td>
+
+                                                </tr>
+                                            }
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                    <div class="panel-footer">
+                                        <div class="row">
+                                            <div class="col col-xs-4">
+                                            </div>
+                                            <div class="col col-xs-8">
+                                                <ul class="pagination hidden-xs pull-right">
+                                                    <li><a href="#">1</a></li>
+                                                    <li><a href="#">2</a></li>
+                                                    <li><a href="#">3</a></li>
+                                                    <li><a href="#">4</a></li>
+                                                    <li><a href="#">5</a></li>
+                                                </ul>
+                                                <ul class="pagination visible-xs pull-right">
+                                                    <li><a href="#">«</a></li>
+                                                    <li><a href="#">»</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div></div></div>
+                } <!-- neki div nije zatvoren, ne mogu provalim koji -- >
 
       </center>
 
@@ -215,432 +292,540 @@
 
 
       <!--- MODAL ZA DODAVANJE SYS. MENADZERA -->
-    <div class="modal fade" id="addASysManager" >
-      <div class="modal-dialog" >
-        <div class="modal-content" >
-            <!--  modal header -->
-          <div class="modal-header">
-            <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A SYSTEM MANAGER </h3>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
-            <!--  modal body -->
-          <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+                <div class="modal fade" id="addASysManager" >
+                    <div class="modal-dialog" >
+                        <div class="modal-content" >
+                                <!--  modal header -->
+                            <div class="modal-header">
+                                <h3 class="modal-title" style="color: black;
+                                    font-family: Verdana;
+                                    font-size: 24pt"> ADD A SYSTEM MANAGER </h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                                <!--  modal body -->
+                            <div class="floating-box" style="width: 400px;
+                                display: inline-block;
+                                height: 500px;
+                                margin: 20px;">
 
-            <form method="post" action="/addSystemManager" accept-charset="UTF-8">
-              <label for="email">E-mail:</label> <br>
-              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
-              <label for="pass">Password:</label> <br>
-              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required>
-              <label for="name">First name:</label> <br>
-              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required >
-              <label for="lname">Last name :</label> <br>
-              <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required >
+                                <form method="post" action="/addSystemManager" accept-charset="UTF-8">
+                                    <label for="email">E-mail:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="email" required >
+                                    <label for="pass">Password:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="password" name="pass" required>
+                                    <label for="name">First name:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="fname" required >
+                                    <label for="lname">Last name :</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="lname" required >
 
-               <br> <br> <br>
+                                    <br> <br> <br>
 
-              <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW MANAGER" style="width: 250px">
-            </form>
+                                    <input class="btn btn-warning btn-block" type="submit" value="REGISTER A NEW MANAGER" style="width: 250px">
+                                </form>
 
-          </div>
-
-
-            <!--  modal footer -->
-          <div class="modal-footer">
-          </div>
-        </div>
-      </div>
-    </div>
-
-          <!--- MODAL ZA DODAVANJE BIDDERA -->
-      <div class="modal fade" id="addABidder" >
-          <div class="modal-dialog" >
-              <div class="modal-content" >
-                      <!--  modal header -->
-                  <div class="modal-header">
-                      <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A BIDDER </h3>
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                  </div>
-                      <!--  modal body -->
-                  <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
-
-                      <form method="post" action="/addBidder" accept-charset="UTF-8">
-                          <label for="email">E-mail:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
-                          <label for="pass">Password:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required>
-                          <label for="name">First name:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required>
-                          <label for="lname">Last name :</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required>
-
-                          <br> <br> <br>
-
-                          <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW BIDDER" style="width: 250px">
-                      </form>
-
-                  </div>
+                            </div>
 
 
-                      <!--  modal footer -->
-                  <div class="modal-footer">
-                  </div>
-              </div>
-          </div>
-      </div>
-
-
-          <!--- MODAL ZA DODAVANJE RADNIKA -->
-      <div class="modal fade" id="addAnEmployee" >
-          <div class="modal-dialog" >
-              <div class="modal-content" >
-                      <!--  modal header -->
-                  <div class="modal-header">
-                      <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD AN EMPLOYEE </h3>
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                  </div>
-                      <!--  modal body -->
-                  <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
-
-                      <form method="post" action="/addEmployee" accept-charset="UTF-8">
-                          <label for="email">E-mail:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
-                          <label for="pass">Password:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required>
-                          <label for="name">First name:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required>
-                          <label for="lname">Last name :</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required>
-                          <label for="birthDate">Date of birth:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="date" max="2005-12-31"  name="birthDate" required>
-                          <label for="clothNo">Clothing size:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="clothNo" required>
-                          <label for="shoesNo">Shoe size:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="shoesNo" required>
-                          <label for="type">Works as:</label> <br>
-                          <select class="form-control"  name="type" style="width:250px;">
-                              <option>bartender</option>
-                              <option>chef</option>
-                              <option>waiter</option>
-                          </select>
-                          <br> <br> <br>
-
-                          <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW EMPLOYEE" style="width: 250px">
-                      </form>
-
-                  </div>
-
-
-                      <!--  modal footer -->
-                  <div class="modal-footer">
-                  </div>
-              </div>
-          </div>
-      </div>
-
-        <!--- MODAL ZA DODAVANJE REST. MENADZERA -->
-    <div class="modal fade" id="addARestManager" >
-        <div class="modal-dialog" >
-            <div class="modal-content" >
-                    <!--  modal header -->
-                <div class="modal-header">
-                    <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A RESTAURANT MANAGER </h3>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                    <!--  modal body -->
-                <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
-
-                    <form method="post" action="/addRestaurantManager" accept-charset="UTF-8">
-                        <label for="email">E-mail:</label> <br>
-                        <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="email" required >
-                        <label for="pass">Password:</label> <br>
-                        <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="password"  name="pass" required >
-                        <label for="name">First name:</label> <br>
-                        <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="fname" required >
-                        <label for="lname">Last name :</label> <br>
-                        <input class="form-control"  style="margin-bottom: 15px; width: 250px;" type="text"  name="lname" required >
-                        <label for="forRestSelect">Restaurant :</label> <br>
-                        <select class="form-control" id="forRestSelect" name="forRestSelect" style="width:250px;">
-                        @for(restaurant <- restaurants) {
-                            <option>@restaurant.name</option>
-                        }
-                        </select> <br> <br> <br>
-
-                        <input class="btn btn-warning btn-block" type="submit"  value="REGISTER A NEW MANAGER" style="width: 250px">
-                    </form>
-
-                </div>
-
-
-                    <!--  modal footer -->
-                <div class="modal-footer">
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-        <!--- MODAL ZA DODAVANJE RESTORANA -->
-    <center>
-        <div class="modal fade" id="addARestaurant"  >
-            <div class="modal-dialog modal-sm" style="width:700px">
-                <div class="modal-content" >
-                        <!--  modal header -->
-                    <div class="modal-header">
-                        <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> ADD A NEW RESTAURANT </h3>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                        <!--  modal body -->
-
-                    <div class="modal-body">
-
-
-                            <label for="rname">Restaurant Name:</label> <br>
-                            <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rname" id="rname"required >
-                            <label for="rdesc">About a Restaurant (eg. Vegan, Chinese food...):</label> <br>
-                        <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rdesc" id="rdesc" required >
-                        <label for="rlocation">Location:</label> <br>
-                        <div class="input-group">
-                            <input type="text" id="rlocation" class="form-control" name="adresa" style="width:240px" required>
-                            <span class="input-group-btn" style="width:50px">
-                                <button id="show_map" class="btn btn-warning" type="button" style="width:60px">Show</button> </span> </div>
-                        <div class = "hidemap" id = "mapa" style="width: 260px; height:220px; background-color:white;"></div> <br>
-
-
-                        <label for="rtel">Telephone Number:</label> <br>
-                        <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rtel" id="rtel" required >
-                            <label for="pickSize">Restaurant Size:</label> <br>
-                           <select class="form-control" id="pickSize"  style="margin-bottom: 15px; width: 300px;">
-                            <option>small(up to 15 tables)</option>
-                            <option>medium(up to 30 tables)</option>
-                            <option>large(up to 50 tables)</option>
-                            <option>extra large(up to 100 tables)</option>
-                           </select> <br>
-                            <p id="stepErrMessage" style="color:red"> </p>
-                            <a class="btn btn-warning" id="nextStepRest" title="Manage seating and food/drink menu" style="width:100px;"> NEXT </a>
-                            <a class="btn btn-warning addRestFinish" id="finishWithoutStep" title="Finish and leave it to a restaurant manager"  style="width:100px;"> FINISH </a><br>
-
-
-                    </div>
-
-                        <!--  modal footer -->
-                    <div class="modal-footer">
+                                <!--  modal footer -->
+                            <div class="modal-footer">
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+
+                    <!--- MODAL ZA DODAVANJE BIDDERA -->
+                <div class="modal fade" id="addABidder" >
+                    <div class="modal-dialog" >
+                        <div class="modal-content" >
+                                <!--  modal header -->
+                            <div class="modal-header">
+                                <h3 class="modal-title" style="color: black;
+                                    font-family: Verdana;
+                                    font-size: 24pt"> ADD A BIDDER </h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                                <!--  modal body -->
+                            <div class="floating-box" style="width: 400px;
+                                display: inline-block;
+                                height: 500px;
+                                margin: 20px;">
+
+                                <form method="post" action="/addBidder" accept-charset="UTF-8">
+                                    <label for="email">E-mail:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="email" required >
+                                    <label for="pass">Password:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="password" name="pass" required>
+                                    <label for="name">First name:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="fname" required>
+                                    <label for="lname">Last name :</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="lname" required>
+
+                                    <br> <br> <br>
+
+                                    <input class="btn btn-warning btn-block" type="submit" value="REGISTER A NEW BIDDER" style="width: 250px">
+                                </form>
+
+                            </div>
+
+
+                                <!--  modal footer -->
+                            <div class="modal-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                    <!--- MODAL ZA DODAVANJE RADNIKA -->
+                <div class="modal fade" id="addAnEmployee" >
+                    <div class="modal-dialog" >
+                        <div class="modal-content" >
+                                <!--  modal header -->
+                            <div class="modal-header">
+                                <h3 class="modal-title" style="color: black;
+                                    font-family: Verdana;
+                                    font-size: 24pt"> ADD AN EMPLOYEE </h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                                <!--  modal body -->
+                            <div class="floating-box" style="width: 400px;
+                                display: inline-block;
+                                height: 500px;
+                                margin: 20px;">
+
+                                <form method="post" action="/addEmployee" accept-charset="UTF-8">
+                                    <label for="email">E-mail:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="email" required >
+                                    <label for="pass">Password:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="password" name="pass" required>
+                                    <label for="name">First name:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="fname" required>
+                                    <label for="lname">Last name :</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="lname" required>
+                                    <label for="birthDate">Date of birth:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="date" max="2005-12-31" name="birthDate" required>
+                                    <label for="clothNo">Clothing size:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="clothNo" required>
+                                    <label for="shoesNo">Shoe size:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="shoesNo" required>
+                                    <label for="type">Works as:</label> <br>
+                                    <select class="form-control" name="type" style="width: 250px;">
+                                        <option>bartender</option>
+                                        <option>chef</option>
+                                        <option>waiter</option>
+                                    </select>
+                                    <br> <br> <br>
+
+                                    <input class="btn btn-warning btn-block" type="submit" value="REGISTER A NEW EMPLOYEE" style="width: 250px">
+                                </form>
+
+                            </div>
+
+
+                                <!--  modal footer -->
+                            <div class="modal-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                    <!--- MODAL ZA DODAVANJE REST. MENADZERA -->
+                <div class="modal fade" id="addARestManager" >
+                    <div class="modal-dialog" >
+                        <div class="modal-content" >
+                                <!--  modal header -->
+                            <div class="modal-header">
+                                <h3 class="modal-title" style="color: black;
+                                    font-family: Verdana;
+                                    font-size: 24pt"> ADD A RESTAURANT MANAGER </h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                                <!--  modal body -->
+                            <div class="floating-box" style="width: 400px;
+                                display: inline-block;
+                                height: 500px;
+                                margin: 20px;">
+
+                                <form method="post" action="/addRestaurantManager" accept-charset="UTF-8">
+                                    <label for="email">E-mail:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="email" required >
+                                    <label for="pass">Password:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="password" name="pass" required >
+                                    <label for="name">First name:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="fname" required >
+                                    <label for="lname">Last name :</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="text" name="lname" required >
+                                    <label for="forRestSelect">Restaurant :</label> <br>
+                                    <select class="form-control" id="forRestSelect" name="forRestSelect" style="width: 250px;">
+                                    @for(restaurant <- restaurants) {
+                                        <option>@restaurant.name</option>
+                                    }
+                                    </select> <br> <br> <br>
+
+                                    <input class="btn btn-warning btn-block" type="submit" value="REGISTER A NEW MANAGER" style="width: 250px">
+                                </form>
+
+                            </div>
+
+
+                                <!--  modal footer -->
+                            <div class="modal-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                    <!--- MODAL ZA DODAVANJE RESTORANA -->
+                <center>
+                    <div class="modal fade" id="addARestaurant" >
+                        <div class="modal-dialog modal-sm" style="width: 700px">
+                            <div class="modal-content" >
+                                    <!--  modal header -->
+                                <div class="modal-header">
+                                    <h3 class="modal-title" style="color: black;
+                                        font-family: Verdana;
+                                        font-size: 24pt"> ADD A NEW RESTAURANT </h3>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                    <!--  modal body -->
+
+                                <div class="modal-body">
+
+
+                                    <label for="rname">Restaurant Name:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 300px;" type="text" name="rname" id="rname" required >
+                                    <label for="rdesc">About a Restaurant (eg. Vegan, Chinese food...):</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 300px;" type="text" name="rdesc" id="rdesc" required >
+                                    <label for="rlocation">Location:</label> <br>
+                                    <div class="input-group">
+                                        <input type="text" id="rlocation" class="form-control" name="adresa" style="width: 240px" required>
+                                        <span class="input-group-btn" style="width: 50px">
+                                            <button id="show_map" class="btn btn-warning" type="button" style="width: 60px">
+                                                Show</button> </span> </div>
+                                    <div class = "hidemap" id = "mapa" style="width: 260px;
+                                        height: 220px;
+                                        background-color: white;"></div> <br>
+
+
+                                    <label for="rtel">Telephone Number:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 300px;" type="text" name="rtel" id="rtel" required >
+                                    <label for="pickSize">Restaurant Size:</label> <br>
+                                    <select class="form-control" id="pickSize" style="margin-bottom: 15px;
+                                        width: 300px;">
+                                        <option>small(up to 15 tables)</option>
+                                        <option>medium(up to 30 tables)</option>
+                                        <option>large(up to 50 tables)</option>
+                                        <option>extra large(up to 100 tables)</option>
+                                    </select> <br>
+                                    <p id="stepErrMessage" style="color: red"> </p>
+                                    <a class="btn btn-warning" id="nextStepRest" title="Manage seating and food/drink menu" style="width: 100px;">
+                                        NEXT </a>
+                                    <a class="btn btn-warning addRestFinish" id="finishWithoutStep" title="Finish and leave it to a restaurant manager" style="width: 100px;">
+                                        FINISH </a><br>
+
+
+                                </div>
+
+                                    <!--  modal footer -->
+                                <div class="modal-footer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                        <!--- MODAL ZA EDITOVANJE RESTORANA -->
+                    <div class="modal fade" id="editRestaurant" >
+                        <div class="modal-dialog" >
+                            <div class="modal-content" >
+                                    <!--  modal header -->
+                                <div class="modal-header">
+                                    <h3 class="modal-title" style="color: black;
+                                        font-family: Verdana;
+                                        font-size: 24pt"> EDIT RESTAURANT'S INFO </h3>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                    <!--  modal body -->
+                                <div class="floating-box" style="width: 400px;
+                                    display: inline-block;
+                                    height: 500px;
+                                    margin: 20px;">
+
+
+                                        <label for="rnameEdit">Restaurant Name:</label> <br>
+                                        <input class="form-control" style="margin-bottom: 15px;
+                                            width: 300px;" type="text" name="rnameEdit" id="rnameEdit" value='@myRestaurant.name' >
+                                        <label for="rdescEdit">About a Restaurant (eg. Vegan, Chinese food...):</label> <br>
+                                        <input class="form-control" style="margin-bottom: 15px;
+                                            width: 300px;" type="text" name="rdescEdit" id="rdescEdit" value='@myRestaurant.description' >
+                                        <label for="rlocationEdit">Location:</label> <br>
+                                        <input type="text" id="rlocationEdit" class="form-control" name="adresaEdit" style="width: 300px" value='@myRestaurant.location'>
+                                             <br>
+                                        <label for="rtelEdit">Telephone Number:</label> <br>
+                                        <input class="form-control" style="margin-bottom: 15px;
+                                            width: 300px;" type="text" name="rtelEdit" id="rtelEdit" value='@myRestaurant.tel' >
+
+                                        <p id="editErrMessage" style="color: red"> </p> <br> <br> <br> <br> <br>
+                                    <button class="btn btn-warning btn-block" id="editRest"   style="width: 250px" disabled>SAVE CHANGES</button>
+
+
+                                </div>
+
+
+                                    <!--  modal footer -->
+                                <div class="modal-footer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </center>
+
+                <script>
+
+
+                        $("#editRest").click(function () {
+
+                            if (!$("#rnameEdit").val()) {
+                                $("#editErrMessage").html("You must enter a restaurant's name").fadeIn();
+                            }
+                            else {
 
 
 
+                                $("#editErrMessage").html("");
+                                var rName = $('#rnameEdit').val();
+                                var rDesc = $('#rdescEdit').val();
+                                var rLocation = $("#rlocationEdit").val();
+                                var rTel = $("#rtelEdit").val();
 
-          <!--- MODAL ZA EDITOVANJE RESTORANA -->
-      <div class="modal fade" id="editRestaurant" >
-          <div class="modal-dialog" >
-              <div class="modal-content" >
-                      <!--  modal header -->
-                  <div class="modal-header">
-                      <h3 class="modal-title" style="color:black;font-family:Verdana; font-size:24pt"> EDIT RESTAURANT'S INFO </h3>
-                      <button type="button" class="close" data-dismiss="modal">&times;</button>
-                  </div>
-                      <!--  modal body -->
-                  <div class="floating-box"  style="width:400px; display: inline-block; height:500px; margin:20px;">
+                                var restInfo = {
+                                    'name': rName, 'description': rDesc, 'location': rLocation,
+                                    'tel': rTel
+                                };
 
-                      <form method="post" action="/editRestaurant" accept-charset="UTF-8">
-                          <label for="rname">Restaurant Name:</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rname" value="@session.get("myRestName")" >
-                          <label for="rdesc">About a restaurant (eg. Vegan, Chinese food...):</label> <br>
-                          <input class="form-control"  style="margin-bottom: 15px; width: 300px;" type="text"  name="rdesc"  value="@session.get("myRestDesc")" >
-                          <label for="meals">Select victuals:</label> <br>
-                          <select class="selectpicker" multiple id="meals" disabled >
-                              <option>Jelo1</option>
-                              <option>Jelo2</option>
-                          </select> <br> <br>
-                          <label for="drinks">Select drinks:</label> <br>
-                          <select class="selectpicker" multiple id="drinks" style="width:450px;" disabled>
-                              <option>Pice1</option>
-                              <option>Pice2</option>
-                          </select> <br> <br> <br> <br> <br>
-                          <input class="btn btn-warning btn-block" type="submit"  value="SAVE CHANGES" style="width: 250px">
+                                myJsRoutes.controllers.Restaurants.editRestaurant().ajax({
 
-                      </form>
-                  </div>
+                                    data: JSON.stringify(restInfo),
+                                    contentType: 'application/json',
+                                    success: function () {
 
+                                        window.location.replace("/restEditedFlash");
+                                    },
+                                    error: function () {
+                                        $("#editErrMessage").html("Restaurant's name is already in use!").fadeIn();
+                                        $('#rnameEdit').val("");
+                                    }
 
-                      <!--  modal footer -->
-                  <div class="modal-footer">
-                  </div>
-              </div>
-          </div>
-      </div>
-
-  </center>
-
-    <script>
-
-
-            // add Restaurant Info ajax call
-            $("#nextStepRest").click(function() {
-
-                if( !$("#rname").val() ) {
-                    $("#stepErrMessage").html("You must enter a restaurant's name").fadeIn();
-                }
-                else {
-                    $("#stepErrMessage").html("");
-                    var rName = $('#rname').val();
-                    var rDesc = $('#rdesc').val();
-                    var rLocation = $("#rlocation").val();
-                    var rTel = $("#rtel").val();
-                    var sizeComboBox = $("#pickSize").val();
-                    var rSizeSplit =  sizeComboBox.split('(');
-                    var rSize = rSizeSplit[0];
-
-                    var restInfo = {
-                        'name': rName, 'description': rDesc, 'location': rLocation,
-                        'tel': rTel, 'rSize' : rSize
-                    };
-                    myJsRoutes.controllers.Restaurants.addRestInfoAJAX().ajax({
-                        data: JSON.stringify(restInfo),
-                        contentType : 'application/json',
-                        success : function() {
-                            $("#rname").prop('disabled', true);
-                            $("#rdesc").prop('disabled', true);
-                            $("#rlocation").prop('disabled', true);
-                            $("#rtel").prop('disabled', true);
-                            $("#pickSize").prop('disabled', true);
-
-                           window.location.replace("/ManageMenuAndSeating");
-                            $("#stepErrMessage").html("");
-                        },
-                        error: function() { $("#stepErrMessage").html("Restaurant's name is already in use!").fadeIn();
-                            $('#rname').val(""); }
-
-                    });
-                }
-            });
-
-
-        // close modal after adding a restaurant
-            $(".addRestFinish").click(function() {
-
-                if( !$("#rname").val() ) {
-                    $("#stepErrMessage").html("You must enter a restaurant's name").fadeIn();
-                }
-                else {
-                    $("#stepErrMessage").html("");
-                    var rName = $('#rname').val();
-                    var rDesc = $('#rdesc').val();
-                    var rLocation = $("#rlocation").val();
-                    var rTel = $("#rtel").val();
-                    var sizeComboBox = $("#pickSize").val();
-                    var rSizeSplit = sizeComboBox.split('(');
-                    var rSize = rSizeSplit[0];
-
-                    var restInfo = {
-                        'name': rName, 'description': rDesc, 'location': rLocation,
-                        'tel': rTel, 'rSize': rSize
-                    };
-                    myJsRoutes.controllers.Restaurants.addRestInfoAJAX().ajax({
-                        data: JSON.stringify(restInfo),
-                        contentType: 'application/json',
-                        success: function (rest) {
-
-                            $("#stepErrMessage").html("");
-                            $("#forRestSelect").append('<option>'+ rest.name + '</option>');
-                            var raspored = [];
-                            $(".divTableCell").each(function () {
-                                var pozicija = $(this).attr('id');
-                                raspored.push(pozicija);
-                            });
-
-                            myJsRoutes.controllers.Restaurants.saveSeatConf().ajax({
-                                data: JSON.stringify({raspored: raspored}),
-                                dataType: 'json',
-                                contentType: 'application/json',
-                                success: function () {
-                                }
-                            });
-
-
-                            $('#addARestaurant').modal('toggle');
-                            $('#vicList tr').remove();
-                            $('#drinkList tr').remove();
-
-                            $("#mapa").hide();
-                            $('#addARestaurant').find("input")
-                                    .val('')
-                                    .end();
-                            $("#restAddSuccess").html("  <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <strong>Success!</strong> A new restaurant has been added.").fadeIn();
-                        },
-                        error: function () {
-                            $("#stepErrMessage").html("Restaurant's name is already in use!").fadeIn();
-                            $('#rname').val("");
-                        }
-
-                    });
-
-
-
-                }
-                });
-
-            $(document).ready(function() {
-                $("#restButton").css("color","#ffb79b");
-            });
-
-
-
-    </script>
-
-            <script>
-                    // ------------------------------- geocode google maps -------------------------------------
-                    function initMap() {
-
-                        var map = new google.maps.Map(document.getElementById('mapa'), {
-                            zoom: 14,
-                            center: {lat: 45.245510, lng: 19.847366}
-                        });
-                        var geocoder = new google.maps.Geocoder();
-                        $("#mapa").hide();
-
-                        $("#show_map").click(function() {
-
-
-                            $("#mapa").fadeToggle(800);
-                            google.maps.event.trigger(map, 'resize');
-                            geocodeAddress(geocoder, map);
-
-
-                        });
-
-                    }
-
-                    function geocodeAddress(geocoder, resultsMap) {
-                        var address = document.getElementById('rlocation').value;
-                        geocoder.geocode({'address': address}, function(results, status) {
-                            if($("#show_map").html()=="Show")
-                                $("#show_map").html('Hide');
-                            else if( $("#show_map").html()=='Hide')
-                                $("#show_map").html('Show')
-                            if (status === 'OK') {
-
-                                resultsMap.setCenter(results[0].geometry.location);
-                                var marker = new google.maps.Marker({
-                                    map: resultsMap,
-                                    position: results[0].geometry.location
                                 });
 
-                            } else {
-                                if($("#show_map").html()=="Hide")
-                                    alert('Sorry, we can\'t find your address on the map. :(');
+                            }
+                            });
+
+                        // add Restaurant Info ajax call
+                        $("#nextStepRest").click(function () {
+
+                            if (!$("#rname").val()) {
+                                $("#stepErrMessage").html("You must enter a restaurant's name").fadeIn();
+                            }
+                            else {
+                                $("#stepErrMessage").html("");
+                                var rName = $('#rname').val();
+                                var rDesc = $('#rdesc').val();
+                                var rLocation = $("#rlocation").val();
+                                var rTel = $("#rtel").val();
+                                var sizeComboBox = $("#pickSize").val();
+                                var rSizeSplit = sizeComboBox.split('(');
+                                var rSize = rSizeSplit[0];
+
+                                var restInfo = {
+                                    'name': rName, 'description': rDesc, 'location': rLocation,
+                                    'tel': rTel, 'rSize': rSize
+                                };
+                                myJsRoutes.controllers.Restaurants.addRestInfoAJAX().ajax({
+                                    data: JSON.stringify(restInfo),
+                                    contentType: 'application/json',
+                                    success: function () {
+                                        $("#rname").prop('disabled', true);
+                                        $("#rdesc").prop('disabled', true);
+                                        $("#rlocation").prop('disabled', true);
+                                        $("#rtel").prop('disabled', true);
+                                        $("#pickSize").prop('disabled', true);
+
+                                        window.location.replace("/manageMenuAndSeating");
+                                        $("#stepErrMessage").html("");
+                                    },
+                                    error: function () {
+                                        $("#stepErrMessage").html("Restaurant's name is already in use!").fadeIn();
+                                        $('#rname').val("");
+                                    }
+
+                                });
                             }
                         });
 
-                    }
+
+                        // close modal after adding a restaurant
+                        $(".addRestFinish").click(function () {
+
+                            if (!$("#rname").val()) {
+                                $("#stepErrMessage").html("You must enter a restaurant's name").fadeIn();
+                            }
+                            else {
+                                $("#stepErrMessage").html("");
+                                var rName = $('#rname').val();
+                                var rDesc = $('#rdesc').val();
+                                var rLocation = $("#rlocation").val();
+                                var rTel = $("#rtel").val();
+                                var sizeComboBox = $("#pickSize").val();
+                                var rSizeSplit = sizeComboBox.split('(');
+                                var rSize = rSizeSplit[0];
+
+                                var restInfo = {
+                                    'name': rName, 'description': rDesc, 'location': rLocation,
+                                    'tel': rTel, 'rSize': rSize
+                                };
+                                myJsRoutes.controllers.Restaurants.addRestInfoAJAX().ajax({
+                                    data: JSON.stringify(restInfo),
+                                    contentType: 'application/json',
+                                    success: function (rest) {
+
+                                        $("#stepErrMessage").html("");
+                                        $("#forRestSelect").append('<option>' + rest.name + '</option>');
+                                        var raspored = [];
+                                        $(".divTableCell").each(function () {
+                                            var pozicija = $(this).attr('id');
+                                            raspored.push(pozicija);
+                                        });
+
+                                        myJsRoutes.controllers.Restaurants.saveSeatConf().ajax({
+                                            data: JSON.stringify({raspored: raspored}),
+                                            dataType: 'json',
+                                            contentType: 'application/json',
+                                            success: function () {
+                                            }
+                                        });
 
 
-                    // ------------------------------- </geocode google maps -------------------------------------
+                                        $('#addARestaurant').modal('toggle');
+                                        $('#vicList tr').remove();
+                                        $('#drinkList tr').remove();
 
-            </script>
-            <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJyRyFrxmS3_EPRPEe__6hZEth-vDF4ZA&callback=initMap"
-            type="text/javascript"></script>
+                                        $("#mapa").hide();
+                                        $('#addARestaurant').find("input")
+                                                .val('')
+                                                .end();
+                                        $("#restAddSuccess").html("  <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <strong>Success!</strong> A new restaurant has been added.").fadeIn();
+                                    },
+                                    error: function () {
+                                        $("#stepErrMessage").html("Restaurant's name is already in use!").fadeIn();
+                                        $('#rname').val("");
+                                    }
+
+                                });
+
+
+                            }
+                        });
+
+                        $(document).ready(function () {
+
+                            // enable-uj dugme sa SAVE tek kad se promeni neka od vrednosti u text boxevima
+                            $("#rnameEdit").change(function () {
+                                $("#editRest").prop('disabled', false);
+                            });
+                            $("#rdescEdit").change(function () {
+                                $("#editRest").prop('disabled', false);
+                            });
+                            $("#rlocationEdit").change(function () {
+                                $("#editRest").prop('disabled', false);
+                            });
+                            $("#rtelEdit").change(function () {
+                                $("#editRest").prop('disabled', false);
+                            });
+                            // ------------------------------------------------------
+
+                            $("#restButton").css("color", "#ffb79b");
+                        });
+
+
+
+                </script>
+
+                <script>
+                        // ------------------------------- geocode google maps -------------------------------------
+                        function initMap() {
+
+                            var map = new google.maps.Map(document.getElementById('mapa'), {
+                                zoom: 14,
+                                center: {lat: 45.245510, lng: 19.847366}
+                            });
+                            var geocoder = new google.maps.Geocoder();
+                            $("#mapa").hide();
+
+                            $("#show_map").click(function () {
+
+
+                                $("#mapa").fadeToggle(800);
+                                google.maps.event.trigger(map, 'resize');
+                                geocodeAddress(geocoder, map);
+
+
+                            });
+
+                        }
+
+                        function geocodeAddress(geocoder, resultsMap) {
+                            var address = document.getElementById('rlocation').value;
+                            geocoder.geocode({'address': address}, function (results, status) {
+                                if ($("#show_map").html() == "Show")
+                                    $("#show_map").html('Hide');
+                                else if ($("#show_map").html() == 'Hide')
+                                    $("#show_map").html('Show')
+                                if (status === 'OK') {
+
+                                    resultsMap.setCenter(results[0].geometry.location);
+                                    var marker = new google.maps.Marker({
+                                        map: resultsMap,
+                                        position: results[0].geometry.location
+                                    });
+
+                                } else {
+                                    if ($("#show_map").html() == "Hide")
+                                        alert('Sorry, we can\'t find your address on the map. :(');
+                                }
+                            });
+
+                        }
+
+
+                        // ------------------------------- </geocode google maps -------------------------------------
+
+                </script>
+                <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJyRyFrxmS3_EPRPEe__6hZEth-vDF4ZA&callback=initMap"
+                type="text/javascript"></script>
 
 }

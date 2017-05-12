@@ -2,73 +2,86 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    @* Here's where we render the page title `String`. *@
-    <title>@title</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
-    <script type="text/javascript" src="@routes.Application.jsRoutes()"></script>
+    <head>
+        @* Here's where we render the page title `String`. *@
+        <title>@title</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+        <script type="text/javascript" src="@routes.Application.jsRoutes()"></script>
 
-      <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
-      <link rel="stylesheet" href="@routes.Assets.at("stylesheets/demo.css")">
-      <link rel="stylesheet" href="@routes.Assets.at("stylesheets/theme2.css")">
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/demo.css")">
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/theme2.css")">
 
-      <script src="@routes.Assets.at("javascripts/caleandar.js")"></script>
+        <script src="@routes.Assets.at("javascripts/caleandar.js")"></script>
 
-
-
-
-  <style>
-        .form-control { width:70%; text-align:center }
-
-        .form-control:focus{
-          border-color: orange;
-          -webkit-box-shadow: none;
-          box-shadow: none;
+        <style>
+        .form-control {
+            width: 70%;
+            text-align: center
         }
-        .modal-content {background-color: #fff1cc }
-        .formText { color: white }
 
-        *{
-        margin: 0;
-        padding: 0;
+        .form-control:focus {
+            border-color: orange;
+            -webkit-box-shadow: none;
+            box-shadow: none;
         }
+
+        .modal-content {
+            background-color: #fff1cc
+        }
+
+        .formText {
+            color: white
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
         .rate {
             float: left;
             height: 46px;
             padding: 0 10px;
         }
+
         .rate:not(:checked) > input {
-            position:absolute;
-            top:-9999px;
+            position: absolute;
+            top: -9999px;
         }
+
         .rate:not(:checked) > label {
-            float:right;
-            width:1em;
-            overflow:hidden;
-            white-space:nowrap;
-            cursor:pointer;
-            font-size:30px;
-            color:#ccc;
+            float: right;
+            width: 1em;
+            overflow: hidden;
+            white-space: nowrap;
+            cursor: pointer;
+            font-size: 30px;
+            color: #ccc;
         }
+
         .rate:not(:checked) > label:before {
             content: '★ ';
         }
+
         .rate > input:checked ~ label {
             color: #ffc700;
         }
+
         .rate:not(:checked) > label:hover,
         .rate:not(:checked) > label:hover ~ label {
             color: #deb217;
         }
+
         .rate > input:checked + label:hover,
         .rate > input:checked + label:hover ~ label,
         .rate > input:checked ~ label:hover,
@@ -76,49 +89,55 @@
         .rate > label:hover ~ input:checked ~ label {
             color: #c59b08;
         }
-    </style>
+        </style>
 
-  </head>
-
-
-  <body style="background-color: #fff1cc">
-      <!--  Top Menu Bar -->
-    <nav class="navbar navbar-inverse"  >
-      <div class="container" >
-
-          <!--  logo  -->
-        <div class="navbar-header" >
-          <button type="button" class ="navbar-toggle"
-          data-toggle="collapse" data-target="#mainNavBar">
-            <span class="icon-bar">  </span>
-            <span class="icon-bar">  </span>
-            <span class="icon-bar">  </span>
-          </button>
-
-          <a href="#" title="Gibanica home" class="navbar-brand" style="color:#f47441; font-size:200%;font-family:Verdana"> <b><i>gibanica.com</i></b> </a>
-
-        </div>
-
-          <!--  Menu items -->
-        <div class="collapse navbar-collapse" id=mainNavBar >
-          <ul class="nav navbar-nav navbar-right" >
+    </head>
 
 
-            <li id="profile"> <a  href="/profile"><b style="font-size:130%;color: #f47441" id="profButton"> Profile </b></a>       </li>
-           <li id="restaurants"> <a  href="/restaurants" ><b style="font-size:130%;color: #f47441" id="restButton"> Restaurants </b></a></li>
-            <li id="friends" > <a  href="#" ><b style="font-size:130%;color: #f47441"> Friends </b></a></li>
-            <li class="divider" style="background-color: white"></li>
-            <li id="logout"> <a  href="/logout"><b style="font-size:130%;color: #f47441"> Log out </b></a></li>
+    <body style="background-color: #fff1cc">
+            <!--  Top Menu Bar -->
+        <nav class="navbar navbar-inverse" >
+            <div class="container" >
 
-          </ul>
-        </div>
+                    <!--  logo  -->
+                <div class="navbar-header" >
+                    <button type="button" class ="navbar-toggle"
+                    data-toggle="collapse" data-target="#mainNavBar">
+                        <span class="icon-bar">  </span>
+                        <span class="icon-bar">  </span>
+                        <span class="icon-bar">  </span>
+                    </button>
 
-      </div>
+                    <a href="#" title="Gibanica home" class="navbar-brand" style="color: #f47441;
+                        font-size: 200%;
+                        font-family: Verdana"> <b><i>gibanica.com</i></b> </a>
 
-    </nav>
-    @* And here's where we render the `Html` object containing
-    * the page content. *@
+                </div>
 
-    @content
-  </body>
+                    <!--  Menu items -->
+                <div class="collapse navbar-collapse" id=mainNavBar >
+                    <ul class="nav navbar-nav navbar-right" >
+
+
+                        <li id="profile"> <a href="/profile"><b style="font-size: 130%;
+                            color: #f47441" id="profButton"> Profile </b></a>       </li>
+                        <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
+                            color: #f47441" id="restButton"> Restaurants </b></a></li>
+                        <li id="friends" > <a href="#" ><b style="font-size: 130%;
+                            color: #f47441"> Friends </b></a></li>
+                        <li class="divider" style="background-color: white"></li>
+                        <li id="logout"> <a href="/logout"><b style="font-size: 130%;
+                            color: #f47441"> Log out </b></a></li>
+
+                    </ul>
+                </div>
+
+            </div>
+
+        </nav>
+        @* And here's where we render the `Html` object containing
+        * the page content. *@
+
+        @content
+    </body>
 </html>
