@@ -14,6 +14,7 @@ import play.mvc.Result;
 import views.html.*;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -26,35 +27,65 @@ import java.util.List;
 public class Register extends Controller {
 
 
-    public static Result submit() {
+    public static Result submit() throws SQLException {
+        /* Uradjen primer transakcija sa Oracle sajta. Ima smisla ako se vise stvari odjednom insertuje u bazu */
+
         DynamicForm requestData = Form.form().bindFromRequest();
         User created = new User();
+
         created.email = requestData.get("Regemail");
         created.password = requestData.get("pass");
         created.name = requestData.get("fName");
         created.surname = requestData.get("lName");
         created.verified = 1;
         created.type = "guest";
-        String verPass = requestData.get("repPass");
-        if (verPass.equals(requestData.get("pass"))) {
 
-            Connection connection = DB.getConnection();
+        String verPass = requestData.get("repPass");
+
+        if(verPass.equals(requestData.get("pass"))) {
+
+            Connection connection = null;
+
+            PreparedStatement regUser = null;
 
             try {
-                if (connection.prepareStatement("Insert into users (name, surname, email, password, type, verified) " +
-                        "values (" + "\"" + created.name + "\""
-                        + ", \"" + created.surname + "\""
-                        + ", \"" + created.email + "\""
-                        + ", \"" + created.password + "\""
-                        + ", \"" + created.type + "\""
-                        + ", \"" + created.verified + "\")" + ";").execute()) {
-                    System.out.println("Success");
+                connection = DB.getConnection();
+
+                connection.setAutoCommit(false);
+
+                regUser = connection.prepareStatement("Insert into users (name, surname, email, password, type, verified) " +
+                            "values (" + "\"" + created.name + "\""
+                            + ", \"" + created.surname + "\""
+                            + ", \"" + created.email + "\""
+                            + ", \"" + created.password + "\""
+                            + ", \"" + created.type + "\""
+                            + ", \"" + created.verified + "\")" + ";");
+
+                regUser.executeUpdate();
+
+                connection.commit();
+
+                System.out.println("Success");
+
+
+            } catch (SQLException sqle){
+                sqle.printStackTrace();
+                if (connection != null) {
+                    try {
+                        System.err.print("Transaction is being rolled back");
+                        connection.rollback();
+                    } catch(SQLException excep) {
+                        excep.printStackTrace();
+                    }
+                }
+            } finally {
+                connection.setAutoCommit(true);
+
+                if (regUser != null) {
+                    regUser.close();
                 }
 
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                if (connection != null) {
+                if(connection != null){
                     try {
                         connection.close();
                     } catch (SQLException e) {
@@ -62,14 +93,19 @@ public class Register extends Controller {
                     }
                 }
             }
+
             session("connected", created.email);
             session("connectedFName", created.name);
             session("connectedLName", created.surname);
             session("connectedPass", created.password);
             session("userType", created.type);
+            session("verified", "1");
+
+
             return ok(submit.render(created));
 
-        } else return ok("Password does not match the confirm password");
+        }
 
+        else return ok("Password does not match the confirm password");
     }
 }

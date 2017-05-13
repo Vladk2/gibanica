@@ -1,5 +1,6 @@
 package controllers;
 
+import models.RestSection;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.DB;
@@ -11,6 +12,8 @@ import views.html.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by stefan on 4/11/17.
@@ -26,8 +29,13 @@ public class Profile extends Controller {
         String verified = session("verified");
         if(loggedUser == null || verified.equals("0"))
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
-        else
-        return ok(profile.render(loggedUser, loggedFName, loggedLName, loggedType));
+        else {
+            List<RestSection> seats = new ArrayList<>();
+            List<RestSection> sectors = new ArrayList<>();
+            int rsize = 0;
+
+            return ok(profile.render(loggedUser, loggedFName, loggedLName, loggedType, rsize, seats, sectors));
+        }
     }
 
     public static Result editProfile() {

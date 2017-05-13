@@ -1,5 +1,5 @@
-@(email: String, fname: String, lname: String, userType: String)
-
+@(email: String, fname: String, lname: String, userType: String, sizeSqrt: Int, seats: List[RestSection], sectors: List[RestSection])
+@import java.math.BigInteger; var i = 1;
 
 @home("Profile") {
 
@@ -31,6 +31,57 @@
 
 
             @if(userType.equals("waiter") || userType.equals("chef") || userType.equals("bartender")) {
+                @if(userType.equals("waiter")){
+                    <div id="seatConfig" style="height: auto">
+                            <div id="seatInfo" style="float: left;
+                                margin-left: 20px;">
+
+
+                                <p><b> LEGEND:</b></p>
+                                Wall: <div class='sectionPicker' id="black" style="width: 32px;
+                                height: 32px;
+                                background-color: black;
+                                border: 1px solid antiquewhite;"> </div> <br>
+                                @for(sector <- sectors) {
+                                    @sector.sectionName
+                                    : <div class='sectionPicker' id="@sector.sectionColor" style="width: 32px;
+                                        height: 32px;
+                                        background-color:
+                                    @sector.sectionColor;
+                                        border: 1px solid antiquewhite;"> </div>
+                                    <br>
+                                    }
+                            </div> <br>
+
+                            <div id = "seatTable" class="divTable" style=" width: 450px;
+                                height: 450px;
+                                border: 1px solid #dbdbdb;
+                            ">
+
+                                <div class="divTableBody">
+
+                                @for(seat <- seats) {
+                                    @{
+                                        i = i - 1
+                                    }
+                                    @if(i == 0) {
+                                        <div class="divTableRow">
+                                            @{
+                                                i = sizeSqrt
+                                            }
+                                        }
+                                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor" class="divTableCell" style="background-color:
+                                    @seat.sectionColor;"></div>
+                                    @if(i == 1) {
+                                            <!-- DivTableRow end --> </div>
+                                    }
+                                }
+                                </div>
+                            <!-- DivTable end -->
+                            </div> <br> <br>
+                    </div> <!-- seat confi end -->
+                }
+                <br><br><br><br>
                 <div id="calendar">
 
                 </div>
