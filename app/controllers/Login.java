@@ -64,7 +64,7 @@ public class Login extends Controller {
                 if((session("userType")).equals("rest-manager")){
 
                     ResultSet set2 = connection.prepareStatement("Select name from restaurants where restaurantId = " +
-                            "(select restaurantId from restaurantManagers where userId = (select userId from users where email = " +
+                            "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
                              "\"" + created.email + "\"" + "));").executeQuery();
 
                     while(set2.next()){

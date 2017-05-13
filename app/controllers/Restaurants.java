@@ -36,6 +36,7 @@ public class Restaurants extends Controller {
     public static List<Restaurant> restaurants = new ArrayList<Restaurant>();
     public static boolean showMenuSeatPage = false;
 
+    @SuppressWarnings("Duplicates")
     public static Result restaurants() {
 
         String loggedUser = session("connected");
@@ -52,8 +53,10 @@ public class Restaurants extends Controller {
         if(loggedUser == null || verified.equals("0"))
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
         else {
-            Connection connection = DB.getConnection();
+            Connection connection = null;
             try {
+                connection = DB.getConnection();
+
                 String query = "Select name, description, address, tel, size from restaurants";
                 ResultSet set = connection.prepareStatement(query).executeQuery();
                 while(set.next()){
@@ -119,6 +122,7 @@ public class Restaurants extends Controller {
             }
             restSize = Math.sqrt(restSize);
             int intSize = (int)restSize;
+
             return ok(restaurant.render(loggedUser, restaurants,menu,seats,intSize,sectors,myRestaurant));
         }
     }

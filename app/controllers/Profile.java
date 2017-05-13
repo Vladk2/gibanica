@@ -21,12 +21,14 @@ import java.util.List;
 
 public class Profile extends Controller {
 
+    @SuppressWarnings("Duplicates")
     public static Result profile() {
         String loggedUser = session("connected");
         String loggedFName = session("connectedFName");
         String loggedLName = session("connectedLName");
         String loggedType = session("userType");
         String verified = session("verified");
+
         if(loggedUser == null || verified.equals("0"))
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
         else {
@@ -34,7 +36,57 @@ public class Profile extends Controller {
             List<RestSection> sectors = new ArrayList<>();
             int rsize = 0;
 
-            return ok(profile.render(loggedUser, loggedFName, loggedLName, loggedType, rsize, seats, sectors));
+            String posX;
+            String posY;
+            String sectorColor;
+
+            double restSize=0;
+
+            Connection connection = null;
+
+            try {
+                connection = DB.getConnection();
+
+                ResultSet set = connection.prepareStatement("Select posX, posY, sectorColor from seatconfig where restaurantId = " +
+                        "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                        "\"" + "rmanager@gmail.com"/* promeni ovo da izlistava restoran zaposlenog konobara */ + "\"" + "));").executeQuery();
+
+                while(set.next()){
+                    restSize++;
+                    posX = set.getString(1);
+                    posY = set.getString(2);
+                    sectorColor = set.getString(3);
+                    RestSection seat = new RestSection(sectorColor, posX, posY);
+                    seats.add(seat);
+                }
+
+                ResultSet set2 = connection.prepareStatement("Select sectorName, sectorColor from sectornames where restaurantId = " +
+                        "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                        "\"" + "rmanager@gmail.com"/* promeni ovo da izlistava restoran zaposlenog konobara */ + "\"" + "));").executeQuery();
+
+                while (set2.next()) {
+                    RestSection legend = new RestSection(set2.getString(1), set2.getString(2));
+                    sectors.add(legend);
+                }
+
+                restSize = Math.sqrt(restSize);
+                rsize = (int)restSize;
+
+                return ok(profile.render(loggedUser, loggedFName, loggedLName, loggedType, rsize, seats, sectors));
+
+            } catch (SQLException e){
+                e.printStackTrace();
+            } finally {
+                if(connection != null){
+                    try {
+                        connection.close();
+                    } catch (SQLException ez) {
+                        ez.printStackTrace();
+                    }
+                }
+            }
+
+            return badRequest("Something strange happened ):");
         }
     }
 
