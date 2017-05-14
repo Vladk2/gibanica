@@ -1,4 +1,5 @@
-@(email: String, fname: String, lname: String, userType: String, sizeSqrt: Int, seats: List[RestSection], sectors: List[RestSection])
+@(email: String, fname: String, lname: String, userType: String,
+        sizeSqrt: Int, seats: List[RestSection], sectors: List[RestSection], times: List[WorkTime])
 @import java.math.BigInteger; var i = 1;
 
 @home("Profile") {
@@ -86,23 +87,20 @@
 
                 </div>
                 <script>
-                        var events = [
-                            {
-                                'Date': new Date(2017, 4, 1), 'Title': '08:00 - 16:00', 'Link': function () {
-                                alert('08:00 - 16:00');
-                            }
-                            },
-                            {
-                                'Date': new Date(2017, 4, 18), 'Title': '08:00 - 16:00', 'Link': function () {
-                                alert('08:00 - 16:00');
-                            }
-                            },
-                            {
-                                'Date': new Date(2017, 4, 27), 'Title': '08:00 - 16:00', 'Link': function () {
-                                alert('08:00 - 16:00');
-                            }
-                            },
-                        ];
+                        var events = [];
+                        @for(time <- times){
+                            var time = "@time.date";
+                            var date = time.split("-");
+                            // nece da radi kad se prosledi string iz liste
+                            events.push({
+                                'Date': new Date(date[0], date[1] - 1, date[2]),
+                                'Title': '@time.startTime - @time.endTime',
+                                'Link': function () {
+                                    alert("@time.date");
+                                }
+                            });
+                        }
+
                         var settings = {};
                         var element = $('#calendar')[0];
                         calendar(element, events, settings);

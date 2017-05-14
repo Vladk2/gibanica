@@ -1,6 +1,7 @@
 package controllers;
 
 import models.RestSection;
+import models.WorkTime;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.DB;
@@ -32,10 +33,14 @@ public class Profile extends Controller {
         if(loggedUser == null || verified.equals("0"))
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
         else {
+            /* liste za raspored stolova */
             List<RestSection> seats = new ArrayList<>();
             List<RestSection> sectors = new ArrayList<>();
             int rsize = 0;
-
+            // -------------------
+            /* lista za radno vreme */
+            List<WorkTime> times = new ArrayList<>();
+            // -------------------
             String posX;
             String posY;
             String sectorColor;
@@ -69,10 +74,28 @@ public class Profile extends Controller {
                     sectors.add(legend);
                 }
 
+                if (loggedType.equals("waiter") || loggedType.equals("bartender") || loggedType.equals("chef")) {
+                    String statement =
+                      String.format("select wd.date, wd.startTime, wd.endTime from workingDay as wd " +
+                                    "left join userWorkingDay as uwd on wd.dayId = uwd.dayId " +
+                                    "left join users as u on uwd.userId = u.userId where u.email = \"%s\";", loggedUser);
+
+                    ResultSet working_schedule = connection.prepareStatement(statement).executeQuery();
+
+                    while(working_schedule.next()){
+                        WorkTime workTime =
+                                new WorkTime(working_schedule.getString(1),
+                                             working_schedule.getString(2),
+                                             working_schedule.getString(3));
+                        System.out.println(workTime.date);
+                        times.add(workTime);
+                    }
+                }
+
                 restSize = Math.sqrt(restSize);
                 rsize = (int)restSize;
 
-                return ok(profile.render(loggedUser, loggedFName, loggedLName, loggedType, rsize, seats, sectors));
+                return ok(profile.render(loggedUser, loggedFName, loggedLName, loggedType, rsize, seats, sectors, times));
 
             } catch (SQLException e){
                 e.printStackTrace();
