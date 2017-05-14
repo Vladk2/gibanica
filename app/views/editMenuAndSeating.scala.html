@@ -30,19 +30,22 @@
                 <option value="lightgrey">lightgray</option>
             </select> <br>
                 <a class="btn btn-warning" id="addSection" > ADD </a> <br> <br>
+                <p id="sectionsErrMessage" style="color:red"></p>
                 <p><b> LEGEND: </b></p>
                 Wall: <div class='sectionPicker' id="black" style="width: 32px;
                 height: 32px;
                 cursor: pointer;
                 background-color: black;
-                border: 1px solid orange;"> </div> <br>
+                border: 1px solid orange;">  </div>  <br>
                 @for(sector <- sectors) {
+                    <div id="@sector.sectionColor|block">
                     @sector.sectionName
-                    : <div class='sectionPicker' id="@sector.sectionColor" style="width: 32px;
+                    : <span style="color:#e85c00;margin-left:0px;font-size: 14px;cursor:pointer" class="glyphicon glyphicon-remove removeSector" id="@sector.sectionColor|remove" aria-hidden="true"></span> <div class='sectionPicker' id="@sector.sectionColor" style="width: 32px;
                         height: 32px;
+                        cursor:pointer;
                         background-color:
                     @sector.sectionColor;
-                        border: 1px solid antiquewhite;"> </div>
+                        border: 1px solid antiquewhite;"> </div> </div>
                     <br>
                     }
             </div> <br>
@@ -103,10 +106,19 @@
                     <th style="width: 250px">Victual Name</th>
                     <th style="width: 360px">Victual Description</th>
                     <th style="width: 70px">Price(RSD)</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody id="vicList">
-
+                @for(victual <- menu) {
+                    @if(victual.tip == "victual") {
+                        <tr><td id="@victual.name">@victual.name</td>
+                            <td>@victual.description</td>
+                            <td>@victual.price</td>
+                            <td><span style="color:#e85c00;margin-left:0px;font-size: 14px;cursor:pointer" class="glyphicon glyphicon-remove removeVicOrDrink" id="@victual.name|remove" aria-hidden="true"></span></td>
+                        </tr>
+                    }
+                }
                 </tbody>
             </table>
         </div>
@@ -140,10 +152,19 @@
                     <th style="width: 250px">Drink Name</th>
                     <th style="width: 360px">Drink Description</th>
                     <th style="width: 70px">Price(RSD)</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody id="drinkList">
-
+                @for(drink <- menu) {
+                    @if(drink.tip == "drink") {
+                        <tr><td id="@drink.name">@drink.name</td>
+                            <td>@drink.description</td>
+                            <td>@drink.price</td>
+                            <td><span style="color:#e85c00;margin-left:0px;font-size: 14px;cursor:pointer" class="glyphicon glyphicon-remove removeVicOrDrink" id="@drink.name|remove" aria-hidden="true"></span></td>
+                        </tr>
+                    }
+                }
                 </tbody>
             </table>
         </div>
@@ -162,6 +183,7 @@
 
 
         var vicName = $('#vicName').val();
+        if($("#" + vicName).length == 0) {
         var vicDesc = $('#vicDesc').val();
         var vicPrice = $('#vicPrice').val();
         var victual = {
@@ -173,8 +195,9 @@
             data: JSON.stringify(victual),
             contentType: 'application/json',
             success: function (jelo) {
-                $('#vicList').append('<tr> <td>' + jelo.name + '</td> <td>'
-                    + jelo.description + '</td> <td>' + jelo.price + '</td> </tr>');
+                $('#vicList').append('<tr> <td id="'+jelo.name +'">' + jelo.name + '</td> <td>'
+                    + jelo.description + '</td> <td>' + jelo.price + '</td><td>' +
+                        '<span style="color:#e85c00;margin-left:0px;font-size: 14px;cursor:pointer" class="glyphicon glyphicon-remove removeVicOrDrink" id="' + jelo.name + '|remove" aria-hidden="true"></span></td> </tr>');
                 $("#vicErrMessage").html("");
                 $('#vicName').val("");
                 $('#vicDesc').val("");
@@ -185,7 +208,8 @@
                 $('#vicPrice').val("");
             }
         });
-
+            }
+            else { $("#vicErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn(); }
     });
 
     // add Drink ajax call
@@ -193,30 +217,61 @@
 
 
         var drinkName = $('#drinkName').val();
-        var drinkDesc = $('#drinkDesc').val();
-        var drinkPrice = $('#drinkPrice').val();
-        var victual = {
-            'name': drinkName, 'description': drinkDesc,
-            'price': drinkPrice
-        };
-        myJsRoutes.controllers.Restaurants.editDrinkAJAX().ajax({
-            data: JSON.stringify(victual),
+        if(drinkName == ""){
+            $("#drinkErrMessage").html("You must enter a drink name!").fadeIn();
+        }
+        if($("#" + drinkName).length == 0) {
+            var drinkDesc = $('#drinkDesc').val();
+            var drinkPrice = $('#drinkPrice').val();
+            var victual = {
+                'name': drinkName, 'description': drinkDesc,
+                'price': drinkPrice
+            };
+            myJsRoutes.controllers.Restaurants.editDrinkAJAX().ajax({
+                data: JSON.stringify(victual),
+                contentType: 'application/json',
+                success: function (pice) {
+                    $('#drinkList').append('<tr> <td id="' + pice.name + '">' + pice.name + '</td> <td>'
+                            + pice.description + '</td> <td>' + pice.price + '</td>' +
+                            '<td><span style="color:#e85c00;margin-left:0px;font-size: 14px;cursor:pointer" class="glyphicon glyphicon-remove removeVicOrDrink" id="' + pice.name + '|remove" aria-hidden="true"></span></td> </tr>');
+                    $("#drinkErrMessage").html("");
+                    $('#drinkName').val("");
+                    $('#drinkDesc').val("");
+                    $('#drinkPrice').val("");
+                },
+                error: function () {
+                    $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
+                    $('#drinkPrice').val("");
+                }
+            });
+        }
+        else { $("#drinkErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn(); }
+    });
+
+
+    // remove drinks and victuals
+    $(document).on("click", '.removeVicOrDrink', function () {
+        var this_id = $(this).attr('id').split("|");
+        var this_drink_vict = this_id[0];
+        $(this).parent().parent().remove();
+        var vic_drink = { "name" : this_drink_vict};
+        myJsRoutes.controllers.Restaurants.removeVictualOrDrink().ajax({
+
+            data: JSON.stringify(vic_drink),
+            dataType: 'json',
             contentType: 'application/json',
-            success: function (jelo) {
-                $('#drinkList').append('<tr> <td>' + jelo.name + '</td> <td>'
-                    + jelo.description + '</td> <td>' + jelo.price + '</td> </tr>');
-                $("#drinkErrMessage").html("");
-                $('#drinkName').val("");
-                $('#drinkDesc').val("");
-                $('#drinkPrice').val("");
-            },
-            error: function () {
-                $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
-                $('#drinkPrice').val("");
+            success: function () {
+
             }
         });
 
+
     });
+
+
+
+
+
 
     // seat config
     var josjedan = true;
@@ -229,7 +284,7 @@
         var section = {
             'sectionName': sectionName, 'sectionColor': sectionColor
         };
-
+        $("#sectionsErrMessage").html("");
         myJsRoutes.controllers.Restaurants.editSeatSection().ajax({
             data: JSON.stringify(section),
             contentType: 'application/json',
@@ -237,8 +292,12 @@
                 if($('#sectionColor option').length >= 0 && josjedan == true){
                     if($('#sectionColor option').length == 0)
                         josjedan=false;
-                $("#seatInfo").append(sekcija.sectionName + ": <div class='sectionPicker' id='" + sekcija.sectionColor + "' style='width:32px;cursor:pointer;height:32px;background-color:" + sekcija.sectionColor + ";border: 2px solid #dbdbdb;'> </div>");
+
+                $("#seatInfo").append("<div id='" + sekcija.sectionColor + "|block'>" + sekcija.sectionName + ": <span id='" + sekcija.sectionColor + "|remove' style='color:#e85c00;margin-left:0px;font-size: 14px;cursor:pointer' class='glyphicon glyphicon-remove removeSector' aria-hidden='true'></span> <div class='sectionPicker' id='" + sekcija.sectionColor + "' style='width:32px;cursor:pointer;height:32px;background-color:" + sekcija.sectionColor + ";border: 2px solid #dbdbdb;'> </div> </div> <br>");
                 }
+            },
+            error: function(sekcija) {
+                $("#sectionsErrMessage").html("Sorry, no more section colors");
             }
         });
 
@@ -251,6 +310,40 @@
 
         pickedColor = $(this).attr('id');
 
+
+    });
+
+    // remove sector
+    $(document).on("click", '.removeSector', function () {
+        var this_sector = $(this).attr('id');
+        var this_color = this_sector.split("|");
+        var this_div = this_color[0] + "|block";
+        $(this).parent().remove();
+        var section = {
+            'sectionColor': this_color[0]
+        };
+
+
+        myJsRoutes.controllers.Restaurants.removeSector().ajax({
+          //  data: {"sectionColor" : this_color[0]},
+            data: JSON.stringify(section),
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function (section) {
+                $('#sectionColor').append($('<option>', {
+                    value: section.sectionColor,
+                    text: section.sectionColor
+                }));
+                $(".divTableCell").each(function () {
+                    var polje = $(this).attr('id').split("|");
+                    if(polje[1] == section.sectionColor){
+                        $(this).attr("id", polje[0] + "|none");
+                        $(this).css("background-color", "inherit");
+                    }
+
+                });
+            }
+        });
 
     });
 

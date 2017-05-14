@@ -99,6 +99,7 @@
                     <option value="lightgrey">lightgray</option>
                 </select> <br>
                     <a class="btn btn-warning" id="addSection" > ADD </a> <br> <br>
+                    <p id="sectionsErrMessage" style="color:red"></p>
                     <p><b> LEGEND: </b></p>
                     Wall: <div class='sectionPicker' id="black" style="width: 32px;
                     height: 32px;
@@ -138,6 +139,10 @@
 
 
             var vicName = $('#vicName').val();
+            if(vicName == ""){
+                $("#vicErrMessage").html("You must enter a drink name!").fadeIn();
+            }
+            if($("#" + vicName).length == 0) {
             var vicDesc = $('#vicDesc').val();
             var vicPrice = $('#vicPrice').val();
             var victual = {
@@ -149,7 +154,7 @@
                 data: JSON.stringify(victual),
                 contentType: 'application/json',
                 success: function (jelo) {
-                    $('#vicList').append('<tr> <td>' + jelo.name + '</td> <td>'
+                    $('#vicList').append('<tr id="' + jelo.name + '"> <td>' + jelo.name + '</td> <td>'
                             + jelo.description + '</td> <td>' + jelo.price + '</td> </tr>');
                     $("#vicErrMessage").html("");
                     $('#vicName').val("");
@@ -161,7 +166,8 @@
                     $('#vicPrice').val("");
                 }
             });
-
+        }
+            else { $("#vicErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn(); }
         });
 
         // add Drink ajax call
@@ -169,28 +175,34 @@
 
 
             var drinkName = $('#drinkName').val();
-            var drinkDesc = $('#drinkDesc').val();
-            var drinkPrice = $('#drinkPrice').val();
-            var victual = {
-                'name': drinkName, 'description': drinkDesc,
-                'price': drinkPrice
-            };
-            myJsRoutes.controllers.Restaurants.addDrinkAJAX().ajax({
-                data: JSON.stringify(victual),
-                contentType: 'application/json',
-                success: function (jelo) {
-                    $('#drinkList').append('<tr> <td>' + jelo.name + '</td> <td>'
-                            + jelo.description + '</td> <td>' + jelo.price + '</td> </tr>');
-                    $("#drinkErrMessage").html("");
-                    $('#drinkName').val("");
-                    $('#drinkDesc').val("");
-                    $('#drinkPrice').val("");
-                },
-                error: function () {
-                    $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
-                    $('#drinkPrice').val("");
-                }
-            });
+            if(drinkName == ""){
+                $("#drinkErrMessage").html("You must enter a drink name!").fadeIn();
+            }
+            if($("#" + drinkName).length == 0) {
+                var drinkDesc = $('#drinkDesc').val();
+                var drinkPrice = $('#drinkPrice').val();
+                var victual = {
+                    'name': drinkName, 'description': drinkDesc,
+                    'price': drinkPrice
+                };
+                myJsRoutes.controllers.Restaurants.addDrinkAJAX().ajax({
+                    data: JSON.stringify(victual),
+                    contentType: 'application/json',
+                    success: function (pice) {
+                        $('#drinkList').append('<tr> <td id="' + pice.name + '">' + pice.name + '</td> <td>'
+                                + pice.description + '</td> <td>' + pice.price + '</td> </tr>');
+                        $("#drinkErrMessage").html("");
+                        $('#drinkName').val("");
+                        $('#drinkDesc').val("");
+                        $('#drinkPrice').val("");
+                    },
+                    error: function () {
+                        $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
+                        $('#drinkPrice').val("");
+                    }
+                });
+            }
+            else { $("#drinkErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn(); }
 
         });
 
@@ -209,6 +221,9 @@
                 contentType: 'application/json',
                 success: function (sekcija) {
                     $("#seatInfo").append(sekcija.sectionName + ": <div class='sectionPicker' id='" + sekcija.sectionColor + "' style='width:32px;cursor:pointer;height:32px;background-color:" + sekcija.sectionColor + ";border: 2px solid #dbdbdb;'> </div>");
+                },
+                error: function(sekcija) {
+                    $("#sectionsErrMessage").html("Sorry, no more section colors");
                 }
             });
         });

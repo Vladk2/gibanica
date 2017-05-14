@@ -38,8 +38,9 @@ public class Application extends Controller {
                 routes.javascript.Restaurants.editVictualAJAX(),
                 routes.javascript.Restaurants.editDrinkAJAX(),
                 routes.javascript.Restaurants.editSeatConf(),
-                routes.javascript.Restaurants.editSeatSection()
-
+                routes.javascript.Restaurants.editSeatSection(),
+                routes.javascript.Restaurants.removeVictualOrDrink(),
+                routes.javascript.Restaurants.removeSector()
                 )
         );
     }

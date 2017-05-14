@@ -206,8 +206,34 @@ public class Restaurants extends Controller {
 
     public static Result editVictualAJAX() {
 
-        return ok();
+        JsonNode json = request().body().asJson();
+        VictualAndDrink victual = Json.fromJson(json, VictualAndDrink.class);
+        String myRestName = session("myRestName");
+        Connection connection = DB.getConnection();
+
+        try {
+
+            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price, type, restaurantId) " +
+                    "values (" + "\"" + victual.name + "\""
+                    + ", \"" + victual.description + "\"" + ", \"" + victual.price + "\""
+                    + ",\"victual\", ( select restaurantId from restaurants where name ="
+                    + "\"" + myRestName + "\"))" + ";").execute()) {
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return ok(Json.toJson(victual));
     }
+
 
     public static Result addDrinkAJAX() {
         JsonNode json = request().body().asJson();
@@ -238,16 +264,70 @@ public class Restaurants extends Controller {
     }
 
     public static Result editDrinkAJAX() {
+        JsonNode json = request().body().asJson();
+        VictualAndDrink drink = Json.fromJson(json, VictualAndDrink.class);
+        String myRestName = session("myRestName");
+        Connection connection = DB.getConnection();
+        try {
+
+            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price, type, restaurantId) " +
+                    "values (" + "\"" + drink.name + "\""
+                    + ", \"" + drink.description + "\"" + ", \"" + drink.price + "\""
+                    + ",\"drink\", ( select restaurantId from restaurants where name ="
+                    + "\"" + myRestName + "\"))" + ";").execute()) {
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return ok(Json.toJson(drink));
+
+    }
+
+    public static Result removeVictualOrDrink() {
+
+        String myRestName = session("myRestName");
+        JsonNode json = request().body().asJson();
+        VictualAndDrink vd = Json.fromJson(json, VictualAndDrink.class);
+
+
+        Connection connection = DB.getConnection();
+        System.out.println("NAME = "+vd.name+"\nRESTID = " + myRestName);
+        try {
+
+            connection.prepareStatement("delete from victualsanddrinks where name=" +
+                    "\"" + vd.name + "\""
+                    + "and restaurantId= ( select restaurantId from restaurants where name =\"" + myRestName + "\")" + ";").execute();
+
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         return ok();
     }
-
-
 
     public static Result addSeatSection() {
 
         JsonNode json = request().body().asJson();
         RestSection section = Json.fromJson(json, RestSection.class);
+        if(section.sectionColor != null) {
         Connection connection = DB.getConnection();
         try {
 
@@ -269,12 +349,77 @@ public class Restaurants extends Controller {
         }
 
         return ok(Json.toJson(section));
+        }
+        else  return status(409, "No more section colors");
     }
+
+
 
     public static Result editSeatSection() {
 
-        return ok();
+        String myRestName = session("myRestName");
+        JsonNode json = request().body().asJson();
+        RestSection section = Json.fromJson(json, RestSection.class);
+        if(section.sectionColor != null) {
+            Connection connection = DB.getConnection();
+
+            try {
+
+                if (connection.prepareStatement("Insert into sectornames (sectorName, sectorColor, restaurantId)" +
+                        "values (" + "\"" + section.sectionName + "\""
+                        + ", \"" + section.sectionColor + "\"" + ", ( select restaurantId from restaurants where name ="
+                        + "\"" + myRestName + "\"))" + ";").execute()) {
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return ok(Json.toJson(section));
+        }
+        else  return status(409, "No more section colors");
     }
+
+    public static Result removeSector() {
+        String myRestName = session("myRestName");
+        JsonNode json = request().body().asJson();
+        RestSection section = Json.fromJson(json, RestSection.class);
+        //  String color = json.get("sectorColor").textValue();   bad request ??
+
+        Connection connection = DB.getConnection();
+
+        try {
+
+            connection.prepareStatement("delete from sectornames where sectorColor=" +
+                    "\"" + section.sectionColor + "\""
+                    + "and restaurantId= ( select restaurantId from restaurants where name =\"" + myRestName + "\")" + ";").execute();
+
+            connection.prepareStatement("Update seatconfig " +
+                    "set sectorColor = 'none' where sectorColor = \"" + section.sectionColor + "\" and restaurantId = ( select restaurantId from restaurants where name = " +
+                    "\"" + myRestName + "\")" + ";").execute();
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return ok(Json.toJson(section));
+    }
+
 
     public static Result saveSeatConf() {
 
