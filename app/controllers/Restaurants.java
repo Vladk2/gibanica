@@ -194,7 +194,7 @@ public class Restaurants extends Controller {
 
         try {
 
-            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price, type, restaurantId) " +
+            if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + victual.name + "\""
                     + ", \"" + victual.description + "\"" + ", \"" + victual.price + "\""
                     + ",\"victual\", ( select restaurantId from restaurants where name ="
@@ -224,7 +224,7 @@ public class Restaurants extends Controller {
 
         try {
 
-            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price, type, restaurantId) " +
+            if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + victual.name + "\""
                     + ", \"" + victual.description + "\"" + ", \"" + victual.price + "\""
                     + ",\"victual\", ( select restaurantId from restaurants where name ="
@@ -253,7 +253,7 @@ public class Restaurants extends Controller {
         Connection connection = DB.getConnection();
         try {
 
-            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price, type, restaurantId) " +
+            if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + drink.name + "\""
                     + ", \"" + drink.description + "\"" + ", \"" + drink.price + "\""
                     + ",\"drink\", ( select restaurantId from restaurants where name ="
@@ -281,7 +281,7 @@ public class Restaurants extends Controller {
         Connection connection = DB.getConnection();
         try {
 
-            if (connection.prepareStatement("Insert into victualsAndDrinks (name, description, price, type, restaurantId) " +
+            if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + drink.name + "\""
                     + ", \"" + drink.description + "\"" + ", \"" + drink.price + "\""
                     + ",\"drink\", ( select restaurantId from restaurants where name ="

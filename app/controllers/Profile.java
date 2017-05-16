@@ -76,7 +76,7 @@ public class Profile extends Controller {
 
                 if (loggedType.equals("waiter") || loggedType.equals("bartender") || loggedType.equals("chef")) {
                     String statement =
-                      String.format("select wd.date, wd.startTime, wd.endTime, wd.sectorName from workingDay as wd " +
+                      String.format("select wd.date, wd.startTime, wd.endTime, wd.sectorName from workingday as wd " +
                                     "left join users as u on wd.userId = u.userId where u.email = \"%s\";", loggedUser);
 
                     ResultSet working_schedule = connection.prepareStatement(statement).executeQuery();

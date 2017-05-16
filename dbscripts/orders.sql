@@ -4,10 +4,14 @@ CREATE TABLE IF NOT EXISTS baklava.orders (
   orderTime TIME NOT NULL,
   guestId INT(5) NOT NULL,
   waiterId INT(5) NOT NULL,
+  restaurantId INT(5) NOT NULL,
+  price DECIMAL(6, 2) NOT NULL,
   CONSTRAINT `guest_ordUsrVDconstraint`
     FOREIGN KEY (guestId) REFERENCES baklava.users (userId),
   CONSTRAINT `waiter_ordUsrVDconstraint`
     FOREIGN KEY (waiterId) REFERENCES baklava.users (userId),
+  CONSTRAINT `restaurant_ordUsrVDconstraint`
+    FOREIGN KEY (restaurantId) REFERENCES baklava.restaurants (restaurantId),
   PRIMARY KEY (orderId)
 );
 
@@ -19,14 +23,6 @@ CREATE TABLE IF NOT EXISTS baklava.orderuservictualdrink (
   CONSTRAINT `victualDrink_ordUsrVDconstraint`
     FOREIGN KEY (victualDrinkId) REFERENCES baklava.victualsanddrinks (victualsAndDrinksId)
 );
-
-INSERT INTO baklava.orders (orderDate, orderTime, guestId, waiterId) VALUES ("2017-05-14", "22:13:44", 1, 4);
-INSERT INTO baklava.orders (orderDate, orderTime, guestId, waiterId) VALUES ("2017-05-13", "14:25:30", 1, 4);
-INSERT INTO baklava.orders (orderDate, orderTime, guestId, waiterId) VALUES ("2017-05-10", "10:08:00", 2, 4);
-
-INSERT INTO baklava.orderuservictualdrink VALUES (1, 3);
-INSERT INTO baklava.orderuservictualdrink VALUES (1, 4);
-INSERT INTO baklava.orderuservictualdrink VALUES (2, 3);
 
 SELECT DISTINCT o.guestId, u.email, uw.email, o.orderDate, o.orderTime, o.waiterId, vd.name, vd.description, vd.price
 FROM baklava.orders AS o
