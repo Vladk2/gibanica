@@ -38,7 +38,7 @@ public class Register extends Controller {
         created.name = requestData.get("fName");
         created.surname = requestData.get("lName");
         created.verified = 1;
-        created.type = "guest";
+        created.tip = "guest";
 
         String verPass = requestData.get("repPass");
 
@@ -58,7 +58,7 @@ public class Register extends Controller {
                             + ", \"" + created.surname + "\""
                             + ", \"" + created.email + "\""
                             + ", \"" + created.password + "\""
-                            + ", \"" + created.type + "\""
+                            + ", \"" + created.tip + "\""
                             + ", \"" + created.verified + "\")" + ";");
 
                 regUser.executeUpdate();
@@ -98,7 +98,7 @@ public class Register extends Controller {
             session("connectedFName", created.name);
             session("connectedLName", created.surname);
             session("connectedPass", created.password);
-            session("userType", created.type);
+            session("userType", created.tip);
             session("verified", "1");
 
 

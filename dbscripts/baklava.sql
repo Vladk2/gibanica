@@ -20,8 +20,12 @@ create table if not exists baklava.workers(
 	birthDate varchar(20) not null,
 	clothNo varchar(20) not null,
 	shoesNo varchar(20) not null,
+	restaurantId INT(5)  NOT NULL,
 	constraint `user_id_in_workers`
-		foreign key (userId) references baklava.users (userId)
+		foreign key (userId) references baklava.users (userId),
+		 CONSTRAINT `restaurant_id_in_workers`
+  FOREIGN KEY (restaurantId) REFERENCES baklava.restaurants (restaurantId)
+
 	
 	
 );

@@ -47,6 +47,7 @@ public class Restaurants extends Controller {
         List<VictualAndDrink> menu = new ArrayList<>();
         List<RestSection> seats = new ArrayList<>();
         List<RestSection> sectors = new ArrayList<>();
+        List<User> workers = new ArrayList<>();
         String posX = ""; String posY = ""; String sectorColor = "";
         double restSize=0; int noOfSectors=0;
         Restaurant myRestaurant = new Restaurant();
@@ -104,6 +105,16 @@ public class Restaurants extends Controller {
                         RestSection legend = new RestSection(set4.getString(1), set4.getString(2));
                         sectors.add(legend);
                     }
+
+
+                    ResultSet set5 = connection.prepareStatement("Select name, surname, email, type from users as u left join workers as w on u.userId = w.userId where w.restaurantId = " +
+                            "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                            "\"" + loggedUser + "\"" + "));").executeQuery();
+
+                    while (set5.next()) {
+                        User worker = new User(set5.getString(1), set5.getString(2), set5.getString(3), set5.getString(4));
+                        workers.add(worker);
+                    }
                 }
                 // ------------------------------------ rest man. over ----------------------------------------
 
@@ -123,7 +134,7 @@ public class Restaurants extends Controller {
             restSize = Math.sqrt(restSize);
             int intSize = (int)restSize;
 
-            return ok(restaurant.render(loggedUser, restaurants,menu,seats,intSize,sectors,myRestaurant));
+            return ok(restaurant.render(loggedUser, restaurants,menu,seats,intSize,sectors,myRestaurant,workers));
         }
     }
 
@@ -532,6 +543,8 @@ public class Restaurants extends Controller {
         }
     }
 
+
+
     public static Result AddMenuAndSeating() {
         String loggedUser = session("connected");
         String verified = session("verified");
@@ -562,8 +575,6 @@ public class Restaurants extends Controller {
                     VictualAndDrink vd = new VictualAndDrink(set2.getString(1), set2.getString(2),
                             set2.getDouble(3), set2.getString(4));
                     menu.add(vd);
-
-
 
                 }
                 ResultSet set3 = connection.prepareStatement("Select posX, posY, sectorColor from seatconfig where restaurantId = " +
@@ -732,6 +743,7 @@ public class Restaurants extends Controller {
     }
 
     public static Result addEmployee() {
+        String myRestName = session("myRestName");
         DynamicForm requestData = Form.form().bindFromRequest();
         Employee created = new Employee();
         created.name = requestData.get("fname");
@@ -754,12 +766,12 @@ public class Restaurants extends Controller {
                     + ", \"" + created.type +"\")" + ";").execute()) {
                 System.out.println("Added to users table");
             }
-            if(connection.prepareStatement("Insert into workers (userId, birthDate, clothNo, shoesNo) " +
+            if(connection.prepareStatement("Insert into workers (userId, birthDate, clothNo, shoesNo, restaurantId) " +
                     "values ((select userId from users where email ="
                     + "\"" + created.email + "\")"
                     + ", \"" + created.birthDate + "\""
                     + ", \"" + created.clothNo + "\""
-                    + ", \"" + created.shoeNo + "\")" + ";").execute()) {
+                    + ", \"" + created.shoeNo + "\"" + ", (select restaurantId from restaurants where name =" + "\"" + myRestName + "\"));").execute()) {
 
                 System.out.println("Added to workers table");
             }
@@ -824,6 +836,44 @@ public class Restaurants extends Controller {
         flash("editRestSuccess", "Your restaurant info has been successfully changed.");
         return redirect("/restaurants");
 
+    }
+
+    public static Result addWorkTime() {
+
+        JsonNode json = request().body().asJson();
+        WorkTime wt = Json.fromJson(json, WorkTime.class);
+
+        Connection connection = DB.getConnection();
+
+        try {
+
+            ResultSet set = connection.prepareStatement("Select date from workingday where userId = " +
+                    "(select userId from users where email = " + "\"" + wt.workerEmail + "\"" + ");").executeQuery();
+            while (set.next()) {
+                String datum = set.getString(1);
+                if(datum.equals(wt.date))
+                    return status(409, "Worker already works on that day");
+            }
+
+            if (connection.prepareStatement("Insert into workingday (date, startTime, endTime,sectorName,userId)" +
+                    "values (" + "\"" + wt.date + "\""
+                    + ", \"" + wt.startTime + "\"" + ", \"" + wt.endTime + "\""  + ", \"" + wt.workingSector + "\""  +
+                    ",(select userId from users where email = " + "\"" + wt.workerEmail + "\"" + "));").execute()) {
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        return ok();
     }
 
 }

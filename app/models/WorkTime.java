@@ -9,11 +9,28 @@ public class WorkTime {
     public String date;
     public String startTime;
     public String endTime;
+    public String workingSector;
+    public String workerEmail;
 
     public WorkTime(String _date, String _startTime, String _endTime){
         this.date = _date;
         this.startTime = _startTime;
         this.endTime = _endTime;
+    }
+
+    public WorkTime(String _date, String _startTime, String _endTime, String workingSector){
+        this.date = _date;
+        this.startTime = _startTime;
+        this.endTime = _endTime;
+        this.workingSector = workingSector;
+    }
+
+    public WorkTime(String _date, String _startTime, String _endTime, String workingSector, String workerEmail){
+        this.date = _date;
+        this.startTime = _startTime;
+        this.endTime = _endTime;
+        this.workingSector = workingSector;
+        this.workerEmail = workerEmail;
     }
 
     public WorkTime() {}

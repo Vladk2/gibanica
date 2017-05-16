@@ -1,4 +1,5 @@
-@(userEmail: String, restaurants: List[Restaurant], menu: List[VictualAndDrink], seats: List[RestSection], sizeSqrt: Int, sectors: List[RestSection], myRestaurant: Restaurant)
+@(userEmail: String, restaurants: List[Restaurant], menu: List[VictualAndDrink], seats: List[RestSection], sizeSqrt: Int,
+        sectors: List[RestSection], myRestaurant: Restaurant, workers: List[User])
 @import java.math.BigInteger; var i = 1;
 
 
@@ -62,7 +63,7 @@
                             background-color: white;"></div> <br>
 
                         <br>
-                        <a class="btn btn-warning btn-block" href="#" style="width: 240px;
+                        <a class="btn btn-warning btn-block" data-toggle="modal" data-target="#addWorkingTime" style="width: 240px;
                             float: left;
                             color: black;
                             margin: 10px;"><b>ASSIGN WORKING HOURS</b></a>
@@ -444,7 +445,142 @@
                     </div>
                 </div>
 
-                    <!--- MODAL ZA DODAVANJE REST. MENADZERA -->
+
+                    <!--- MODAL ZA DODAVANJE RADNOG VREMENA -->
+                <div class="modal fade" id="addWorkingTime" >
+                    <div class="modal-dialog" >
+                        <div class="modal-content" >
+                                <!--  modal header -->
+                            <div class="modal-header">
+                                <h3 class="modal-title" style="color: black;
+                                    font-family: Verdana;
+                                    font-size: 24pt"> ADD WORKING HOURS </h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                                <!--  modal body -->
+
+
+                                    <label for="selectWorker">Select employee:</label> <br>
+                                    <select class="form-control" style=" margin-bottom: 15px;
+                                        width: 250px;" type="text" id="selectWorker" name="selectWorker">
+                                        @for(worker <- workers) {
+                                            <option id="@worker.email">@worker.name @worker.surname (@worker.tip)</option>
+                                        }
+                                    </select>
+                                    <label for="forDay">For day:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="date" min="" max="2018-12-31" id="forDay" name="forDay" required>
+                                    <label for="fromTime">From:</label> <br>
+                                    <input class="form-control" style="margin-bottom: 15px;
+                                        width: 250px;" type="time" name="fromTime" id="fromTime" value="08:00:00">
+                                     <label for="toTime">To:</label> <br>
+                                     <input class="form-control" style="margin-bottom: 15px;  width: 250px;" type="time" name="toTime" id="toTime" value="16:00:00">
+                                     <label style="display: none" id="selectSectorLabel" for="selectSector">Select working sector:</label> <br>
+                                     <select class="form-control" style=" margin-bottom: 15px;
+                                         width: 250px;display:none" type="text;"  id="selectSector" name="selectSector">
+                                        @for(sector <- sectors) {
+                                            <option>@sector.sectionName</option>
+                                         }
+                                     </select>
+
+                                    <br> <br> <br>
+                            <div style="height:50px;display:none" id="WorkTimeMessage"> </div> <br>
+
+
+
+                            <button class="btn btn-warning btn-block" id="addWorkingHours"  style="width: 80px; display:inline-block "> ASSIGN </button>
+                            <button class="btn btn-warning btn-block" id="closeWorkingHours"  style="width: 80px;margin-left:10px;display:inline-block "> CLOSE </button> <br> <br>
+
+
+                            </div>
+
+
+                                <!--  modal footer -->
+                            <div class="modal-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <script>
+                    // datum za radno vreme ------
+                    var d = new Date();
+                    var month = d.getMonth()+1;
+                    var day = d.getDate();
+                    var output = d.getFullYear() + '-' +
+                            (month<10 ? '0' : '') + month + '-' +
+                            (day<10 ? '0' : '') + day;
+                    $("#forDay").attr("min", output);
+                    $("#forDay").attr("value", output);
+                    // ------
+
+                    $(document).ready(function () {
+                        var selektovan = $("#selectWorker").val().split("(");
+
+                        if(selektovan[1] == "waiter)") {
+                            $("#selectSector").show();
+                            $("#selectSectorLabel").show();
+                        }
+                        else {
+                            $("#selectSector").hide();
+                            $("#selectSectorLabel").hide();
+                        }
+                    });
+                    $('#selectWorker').on('change', function() {
+                        var selektovan = $("#selectWorker").val().split("(");
+                        $("#WorkTimeMessage").hide();
+                        if(selektovan[1] == "waiter)") {
+                            $("#selectSector").show();
+                            $("#selectSectorLabel").show();
+
+                        }
+                        else {
+                            $("#selectSector").hide();
+                            $("#selectSectorLabel").hide();
+                            $("#selectSector").val("nula bajo");
+                        }
+                    });
+
+                    $("#addWorkingHours").click(function() {
+
+                        var dan = $("#forDay").val();
+                        var odKad = $("#fromTime").val();
+                        var doKad = $("#toTime").val();
+                        var sektor = $("#selectSector").val();
+                        var workerEmail = $("#selectWorker option:selected").attr("id");
+
+                        var worktime = {
+                            'date': dan, 'startTime': odKad, 'endTime': doKad,
+                            'workingSector': sektor, 'workerEmail': workerEmail
+                        };
+                        myJsRoutes.controllers.Restaurants.addWorkTime().ajax({
+                            data: JSON.stringify(worktime),
+                            contentType: 'application/json',
+                            success: function () {
+                                $("#WorkTimeMessage").html("<div class='alert alert-success' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Working hours added! </div>");
+                                $("#WorkTimeMessage").show();
+                            },
+                            error: function() {
+                                $("#WorkTimeMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Employee already works on that day! </div>");
+                                $("#WorkTimeMessage").show();
+
+                            }
+                         });
+
+                        });
+
+                    $("#closeWorkingHours").click(function() {
+                        $("#addWorkingTime").modal('toggle');
+                        $("#fromTime").val("08:00:00");
+                        $("#toTime").val("16:00:00");
+                        $("#forDay").attr("value", output);
+                        $("#WorkTimeMessage").hide();
+                    });
+
+            </script>
+
+
+                <!--- MODAL ZA DODAVANJE REST. MENADZERA -->
                 <div class="modal fade" id="addARestManager" >
                     <div class="modal-dialog" >
                         <div class="modal-content" >

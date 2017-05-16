@@ -53,8 +53,8 @@ public class Profile extends Controller {
                 connection = DB.getConnection();
 
                 ResultSet set = connection.prepareStatement("Select posX, posY, sectorColor from seatconfig where restaurantId = " +
-                        "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
-                        "\"" + "rmanager@gmail.com"/* promeni ovo da izlistava restoran zaposlenog konobara */ + "\"" + "));").executeQuery();
+                        "(select restaurantId from workers where userId = (select userId from users where email = " +
+                        "\"" + loggedUser + "\"" + "));").executeQuery();
 
                 while(set.next()){
                     restSize++;
@@ -66,8 +66,8 @@ public class Profile extends Controller {
                 }
 
                 ResultSet set2 = connection.prepareStatement("Select sectorName, sectorColor from sectornames where restaurantId = " +
-                        "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
-                        "\"" + "rmanager@gmail.com"/* promeni ovo da izlistava restoran zaposlenog konobara */ + "\"" + "));").executeQuery();
+                        "(select restaurantId from workers where userId = (select userId from users where email = " +
+                        "\"" + loggedUser + "\"" + "));").executeQuery();
 
                 while (set2.next()) {
                     RestSection legend = new RestSection(set2.getString(1), set2.getString(2));
@@ -76,9 +76,8 @@ public class Profile extends Controller {
 
                 if (loggedType.equals("waiter") || loggedType.equals("bartender") || loggedType.equals("chef")) {
                     String statement =
-                      String.format("select wd.date, wd.startTime, wd.endTime from workingDay as wd " +
-                                    "left join userWorkingDay as uwd on wd.dayId = uwd.dayId " +
-                                    "left join users as u on uwd.userId = u.userId where u.email = \"%s\";", loggedUser);
+                      String.format("select wd.date, wd.startTime, wd.endTime, wd.sectorName from workingDay as wd " +
+                                    "left join users as u on wd.userId = u.userId where u.email = \"%s\";", loggedUser);
 
                     ResultSet working_schedule = connection.prepareStatement(statement).executeQuery();
 
@@ -86,7 +85,8 @@ public class Profile extends Controller {
                         WorkTime workTime =
                                 new WorkTime(working_schedule.getString(1),
                                              working_schedule.getString(2),
-                                             working_schedule.getString(3));
+                                             working_schedule.getString(3),
+                                             working_schedule.getString(4));
                         System.out.println(workTime.date);
                         times.add(workTime);
                     }

@@ -8,6 +8,16 @@ public class User {
     public String surname;
     public String email;
     public String password;
-    public String type;
+    public String tip;
     public int verified;
+
+    public User() {}
+
+    public User(String name, String surname, String email, String tip){
+
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.tip = tip;
+    }
 }

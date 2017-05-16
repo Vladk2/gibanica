@@ -5,6 +5,7 @@ package models;
  */
 public class Employee {
 
+    public int userId;
     public String name;
     public String surname;
     public String email;
@@ -14,4 +15,6 @@ public class Employee {
     public String clothNo;
     public String shoeNo;
     public String birthDate;
+
+
 }

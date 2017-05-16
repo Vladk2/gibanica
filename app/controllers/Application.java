@@ -32,7 +32,9 @@ public class Application extends Controller {
                 routes.javascript.Restaurants.editSeatConf(),
                 routes.javascript.Restaurants.editSeatSection(),
                 routes.javascript.Restaurants.removeVictualOrDrink(),
+                routes.javascript.Restaurants.addWorkTime(),
                 routes.javascript.Restaurants.removeSector()
+
                 )
         );
     }

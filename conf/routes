@@ -31,6 +31,7 @@ GET         /editMenuAndSeating          controllers.Restaurants.EditMenuAndSeat
 GET         /restAddedFlash              controllers.Restaurants.restAddedFlash()
 GET         /restEditedFlash             controllers.Restaurants.restEditedFlash()
 POST         /removeSector               controllers.Restaurants.removeSector()
+POST         /addWorkTimee                controllers.Restaurants.addWorkTime()
 POST         /removeVictualOrDrink       controllers.Restaurants.removeVictualOrDrink()
 GET         /jsRoutes                    controllers.Application.jsRoutes()
 # Map static resources from the /public folder to the /assets URL path
