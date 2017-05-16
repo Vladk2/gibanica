@@ -85,26 +85,31 @@
                             </div> <br> <br>
                     </div> <!-- seat confi end -->
                 }
-                <div style="display: inline-block;margin-bottom: 100px;vertical-align:top;margin-left:100px">
+
+                <div style="@if(userType.equals("waiter")) {margin-left:100px;} display: inline-block; vertical-align:top;">
+
+
                 <h3> Work calendar: </h3> <br>
                 <div id="calendar">
 
                 </div>
                     <div id="calendarMessage"> </div>
                 </div>
+                <br> <br> <br> <br> <br>
                 <script>
                         var events = [];
                         @for(time <- times){
                             var time = "@time.date";
                             var date = time.split("-");
                             // nece da radi kad se prosledi string iz liste
+
                             events.push({
                                 'Date': new Date(date[0], date[1] - 1, date[2]),
-                                'Title': '@time.startTime - @time.endTime, sector: @time.workingSector',
+                                'Title': '@time.startTime - @time.endTime  @if(userType.equals("waiter")) {, sector: @time.workingSector}',
                                 'Link': function (e) {
                                     e.preventDefault();  // da ne bi skakao na vrh stranice
                                     $("#calendarMessage").html("<div class='alert alert-warning' > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;" +
-                                            " </a> On <b>@time.date </b>, you are working from <b>@time.startTime </b> to <b>@time.endTime </b>. <br> Your sector is: <b>@time.workingSector </b> </div>");
+                                            " </a> On <b>@time.date </b>, you are working from <b>@time.startTime </b> to <b>@time.endTime </b>. @if(userType.equals("waiter")) { <br> Your sector is: <b>@time.workingSector </b> } </div>");
                                 }
                             });
                         }
