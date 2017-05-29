@@ -233,7 +233,7 @@
                                             @for(restaurant <- restaurants) {
                                                 <tr>
                                                     <td>
-                                                        <form id="w">
+                                                        <form id="120rst">
                                                             <fieldset id="fset">
                                                             <div class="rate">
                                                                 <input type="radio" id="star5" name="rate"/>
@@ -543,19 +543,21 @@
 
                     var i = 0;
 
-                    $("#w").click(function(event){
+                    $("form[id$='rst']").click(function(event){
                         if(i != 0)
                             return;
-                        else
+                        else {
                             i++;
+                        }
                         $("input[type='radio']").click(function(){
 
                             var form_ = {
-                                "star1": $("input[id='star1']:checked").val(),
-                                "star2": $("input[id='star2']:checked").val(),
-                                "star3": $("input[id='star3']:checked").val(),
-                                "star4": $("input[id='star4']:checked").val(),
-                                "star5": $("input[id='star5']:checked").val()
+                                "star1": $("input[id$='star1']:checked").val(),
+                                "star2": $("input[id$='star2']:checked").val(),
+                                "star3": $("input[id$='star3']:checked").val(),
+                                "star4": $("input[id$='star4']:checked").val(),
+                                "star5": $("input[id$='star5']:checked").val(),
+                                "form_id": $("form[id][id$='rst']").attr('id')
                             };
 
                             $.ajax({

@@ -6,7 +6,6 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import models.*;
 import play.*;
 
@@ -25,6 +24,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 
 public class Restaurants extends Controller {
@@ -249,31 +249,30 @@ public class Restaurants extends Controller {
     }
 
     public static Result rateRestaurantAJAX() {
+        ObjectMapper objectMapper = new ObjectMapper();
         JsonNode ajax_json = request().body().asJson();
+        HashMap<String, String> response = objectMapper.convertValue(ajax_json, HashMap.class);
+        System.out.println(response.toString());
 
-        String mark;
+        int restaurant_id =
+                Integer.parseInt(response.get("form_id").substring(0,
+                        response.get("form_id").length() - 3)); // - 1 for string size
 
-        if (ajax_json != null)
-            mark = ajax_json.toString();
-        else
-            return badRequest();
+        System.out.println(restaurant_id);
 
-        StringBuilder stringBuilder = new StringBuilder();
+        String mark = null;
 
-        if(mark.length() > 0) {
-            String[] tokens = mark.split(":");
-            String key = tokens[0];
-            for(int i = 0; i < key.length(); i++){
-                if(key.charAt(i) == '{' || key.charAt(i) == '\"'){
-                    continue;
-                }
-                stringBuilder.append(key.charAt(i));
-            }
+        for(Map.Entry<String, String> el : response.entrySet()){
+            if(el.getKey().startsWith("star"))
+               mark = el.getKey();
         }
 
-        int rating = Character.getNumericValue(stringBuilder.toString().charAt(stringBuilder.toString().length() - 1));
+        int mark_final = Integer.parseInt(mark.substring(4, mark.length()));
 
-        System.out.println("RATING: " + rating);
+        System.out.println(mark_final);
+
+        // form_id je u sustini id restorana iz baze. prilikom prikaza na html stranici
+        // formi ce biti dodeljen taj id + 'rst' -> restaurant
 
         return ok();
     }
