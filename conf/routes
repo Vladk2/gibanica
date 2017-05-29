@@ -23,6 +23,7 @@ POST        /addRestInfo                 controllers.Restaurants.addRestInfoAJAX
 POST        /finishAddRest               controllers.Restaurants.saveSeatConf()
 POST        /addSeatSection              controllers.Restaurants.addSeatSection()
 POST        /editVictual                 controllers.Restaurants.editVictualAJAX()
+POST        /rateRestaurant              controllers.Restaurants.rateRestaurantAJAX()
 POST        /editDrink                   controllers.Restaurants.editDrinkAJAX()
 POST        /editSeatSection             controllers.Restaurants.editSeatSection()
 POST        /finishEditRest              controllers.Restaurants.editSeatConf()

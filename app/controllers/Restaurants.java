@@ -6,6 +6,7 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import models.*;
 import play.*;
 
@@ -23,10 +24,7 @@ import views.html.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class Restaurants extends Controller {
@@ -54,9 +52,7 @@ public class Restaurants extends Controller {
         if(loggedUser == null || verified.equals("0"))
             return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
         else {
-            Connection connection = null;
-            try {
-                connection = DB.getConnection();
+            try (Connection connection = DB.getConnection()) {
 
                 String query = "Select name, description, address, tel, size from restaurants";
                 ResultSet set = connection.prepareStatement(query).executeQuery();
@@ -122,14 +118,6 @@ public class Restaurants extends Controller {
 
             } catch (SQLException e){
                 e.printStackTrace();
-            } finally {
-                if(connection != null){
-                    try {
-                        connection.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
             restSize = Math.sqrt(restSize);
             int intSize = (int)restSize;
@@ -146,6 +134,7 @@ public class Restaurants extends Controller {
         addedRestaurantName = rest.name;
         addedRestSize = 8;
         showMenuSeatPage = true;
+
         if(rest.rSize.equals("small")){
             addedRestSize = 8;
         }
@@ -164,8 +153,7 @@ public class Restaurants extends Controller {
             }
         }
         restaurants.add(rest);
-        Connection connection = DB.getConnection();
-        try {
+        try (Connection connection = DB.getConnection()){
             if (connection.prepareStatement("Insert into restaurants (name, description, address, tel, size) " +
                     "values (" + "\"" + rest.name + "\""
                     + ", \"" + rest.description + "\"" + ", \"" + rest.location + "\"" +
@@ -174,15 +162,8 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
+
         return ok(Json.toJson(rest));
     }
 
@@ -190,9 +171,7 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         VictualAndDrink victual = Json.fromJson(json, VictualAndDrink.class);
 
-        Connection connection = DB.getConnection();
-
-        try {
+        try (Connection connection = DB.getConnection()) {
 
             if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + victual.name + "\""
@@ -202,14 +181,6 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return ok(Json.toJson(victual));
@@ -220,9 +191,8 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         VictualAndDrink victual = Json.fromJson(json, VictualAndDrink.class);
         String myRestName = session("myRestName");
-        Connection connection = DB.getConnection();
 
-        try {
+        try (Connection connection = DB.getConnection()){
 
             if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + victual.name + "\""
@@ -232,14 +202,6 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return ok(Json.toJson(victual));
@@ -250,8 +212,7 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         VictualAndDrink drink = Json.fromJson(json, VictualAndDrink.class);
 
-        Connection connection = DB.getConnection();
-        try {
+        try (Connection connection = DB.getConnection()) {
 
             if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + drink.name + "\""
@@ -261,14 +222,6 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return ok(Json.toJson(drink));
@@ -278,8 +231,8 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         VictualAndDrink drink = Json.fromJson(json, VictualAndDrink.class);
         String myRestName = session("myRestName");
-        Connection connection = DB.getConnection();
-        try {
+
+        try (Connection connection = DB.getConnection()) {
 
             if (connection.prepareStatement("Insert into victualsanddrinks (name, description, price, type, restaurantId) " +
                     "values (" + "\"" + drink.name + "\""
@@ -289,18 +242,40 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return ok(Json.toJson(drink));
 
+    }
+
+    public static Result rateRestaurantAJAX() {
+        JsonNode ajax_json = request().body().asJson();
+
+        String mark;
+
+        if (ajax_json != null)
+            mark = ajax_json.toString();
+        else
+            return badRequest();
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if(mark.length() > 0) {
+            String[] tokens = mark.split(":");
+            String key = tokens[0];
+            for(int i = 0; i < key.length(); i++){
+                if(key.charAt(i) == '{' || key.charAt(i) == '\"'){
+                    continue;
+                }
+                stringBuilder.append(key.charAt(i));
+            }
+        }
+
+        int rating = Character.getNumericValue(stringBuilder.toString().charAt(stringBuilder.toString().length() - 1));
+
+        System.out.println("RATING: " + rating);
+
+        return ok();
     }
 
     public static Result removeVictualOrDrink() {
@@ -309,10 +284,8 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         VictualAndDrink vd = Json.fromJson(json, VictualAndDrink.class);
 
-
-        Connection connection = DB.getConnection();
         System.out.println("NAME = "+vd.name+"\nRESTID = " + myRestName);
-        try {
+        try (Connection connection = DB.getConnection()) {
 
             connection.prepareStatement("delete from victualsanddrinks where name=" +
                     "\"" + vd.name + "\""
@@ -321,26 +294,19 @@ public class Restaurants extends Controller {
 
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return ok();
     }
 
+    @SuppressWarnings("Duplicates")
     public static Result addSeatSection() {
 
         JsonNode json = request().body().asJson();
         RestSection section = Json.fromJson(json, RestSection.class);
         if(section.sectionColor != null) {
-        Connection connection = DB.getConnection();
-        try {
+
+        try (Connection connection = DB.getConnection()){
 
             if (connection.prepareStatement("Insert into sectornames (sectorName, sectorColor, restaurantId)" +
                     "values (" + "\"" + section.sectionName + "\""
@@ -349,14 +315,6 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return ok(Json.toJson(section));
@@ -364,17 +322,14 @@ public class Restaurants extends Controller {
         else  return status(409, "No more section colors");
     }
 
-
-
+    @SuppressWarnings("Duplicates")
     public static Result editSeatSection() {
 
         String myRestName = session("myRestName");
         JsonNode json = request().body().asJson();
         RestSection section = Json.fromJson(json, RestSection.class);
         if(section.sectionColor != null) {
-            Connection connection = DB.getConnection();
-
-            try {
+            try (Connection connection = DB.getConnection()){
 
                 if (connection.prepareStatement("Insert into sectornames (sectorName, sectorColor, restaurantId)" +
                         "values (" + "\"" + section.sectionName + "\""
@@ -383,14 +338,6 @@ public class Restaurants extends Controller {
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
-            } finally {
-                if (connection != null) {
-                    try {
-                        connection.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
 
             return ok(Json.toJson(section));
@@ -404,9 +351,7 @@ public class Restaurants extends Controller {
         RestSection section = Json.fromJson(json, RestSection.class);
         //  String color = json.get("sectorColor").textValue();   bad request ??
 
-        Connection connection = DB.getConnection();
-
-        try {
+        try ( Connection connection = DB.getConnection()){
 
             connection.prepareStatement("delete from sectornames where sectorColor=" +
                     "\"" + section.sectionColor + "\""
@@ -418,14 +363,6 @@ public class Restaurants extends Controller {
 
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return ok(Json.toJson(section));
@@ -439,10 +376,9 @@ public class Restaurants extends Controller {
 
         ObjectMapper mapper = new ObjectMapper();
         Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
-        Connection connection = DB.getConnection();
         showMenuSeatPage = false;
 
-        try {
+        try (Connection connection = DB.getConnection()){
             for(ArrayList value : result.values()) {
                 for (Object s : value) {
                     String polje = s.toString();
@@ -475,10 +411,8 @@ public class Restaurants extends Controller {
         String myRestName = session("myRestName");
         ObjectMapper mapper = new ObjectMapper();
         Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
-        Connection connection = DB.getConnection();
 
-
-        try {
+        try (Connection connection = DB.getConnection()){
             for(ArrayList value : result.values()) {
                 for (Object s : value) {
 
@@ -554,6 +488,7 @@ public class Restaurants extends Controller {
 
     }
 
+    @SuppressWarnings("Duplicates")
     public static Result EditMenuAndSeating() {
         String loggedUser = session("connected");
         String verified = session("verified");
@@ -565,8 +500,8 @@ public class Restaurants extends Controller {
         double restSize=0; int noOfSectors=0;
         if(!(userType.equals("rest-manager")) || loggedUser == null || verified.equals("0"))
             return redirect("/");
-        Connection connection = DB.getConnection();
-        try {
+
+        try (Connection connection = DB.getConnection()) {
 
                 ResultSet set2 = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
                         "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
@@ -604,15 +539,8 @@ public class Restaurants extends Controller {
 
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
+
         restSize = Math.sqrt(restSize);
         int intSize = (int)restSize;
         return ok(editMenuAndSeating.render(menu,seats,intSize,sectors));
@@ -635,8 +563,7 @@ public class Restaurants extends Controller {
         created.restaurant = requestData.get("forRestSelect");
         System.out.println("\n " + created.restaurant + "\n");
 
-        Connection connection = DB.getConnection();
-        try {
+        try (Connection connection = DB.getConnection()) {
             if(connection.prepareStatement("Insert into users (name, surname, email, password, verified, type) " +
                     "values (" + "\"" + created.name + "\""
                     + ", \"" + created.surname + "\""
@@ -654,16 +581,7 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-
 
         return ok(home.render("Welcome",new play.twirl.api.Html("<center>Restaurant manager has been added successfully!</center>") ));
 
@@ -678,8 +596,7 @@ public class Restaurants extends Controller {
         created.email = requestData.get("email");
         created.password = requestData.get("pass");
 
-        Connection connection = DB.getConnection();
-        try {
+        try (Connection connection = DB.getConnection()) {
             if(connection.prepareStatement("Insert into users (name, surname, email, password, verified, type) " +
                     "values (" + "\"" + created.name + "\""
                     + ", \"" + created.surname + "\""
@@ -691,16 +608,7 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-
 
         return ok(home.render("Welcome",new play.twirl.api.Html("<center>System manager has been added successfully!</center>") ));
 
@@ -714,8 +622,7 @@ public class Restaurants extends Controller {
         created.email = requestData.get("email");
         created.password = requestData.get("pass");
 
-        Connection connection = DB.getConnection();
-        try {
+        try (Connection connection = DB.getConnection()) {
             if(connection.prepareStatement("Insert into users (name, surname, email, password, verified, type) " +
                     "values (" + "\"" + created.name + "\""
                     + ", \"" + created.surname + "\""
@@ -727,14 +634,6 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return ok(home.render("Welcome",new play.twirl.api.Html("<center>Bidder has been added successfully!</center>") ));
@@ -755,8 +654,7 @@ public class Restaurants extends Controller {
         created.clothNo = requestData.get("clothNo");
         created.shoeNo = requestData.get("shoesNo");
 
-        Connection connection = DB.getConnection();
-        try {
+        try (Connection connection = DB.getConnection()) {
             if(connection.prepareStatement("Insert into users (name, surname, email, password, verified, type) " +
                     "values (" + "\"" + created.name + "\""
                     + ", \"" + created.surname + "\""
@@ -777,16 +675,7 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-
 
         return ok(home.render("Welcome",new play.twirl.api.Html("<center>Employee has been added successfully!</center>") ));
 
@@ -803,8 +692,8 @@ public class Restaurants extends Controller {
                 return status(409, "Already used restName");
             }
         }
-        Connection connection = DB.getConnection();
-        try{
+
+        try (Connection connection = DB.getConnection()){
 
             if(connection.prepareStatement("Update restaurants" +
                     " set name =" + "\"" + rest.name + "\"" +
@@ -816,14 +705,6 @@ public class Restaurants extends Controller {
 
         } catch (SQLException e){
             e.printStackTrace();
-        } finally {
-            if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException q){
-                    q.printStackTrace();
-                }
-            }
         }
 
         session("myRestName", rest.name);
@@ -843,9 +724,7 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         WorkTime wt = Json.fromJson(json, WorkTime.class);
 
-        Connection connection = DB.getConnection();
-
-        try {
+        try (Connection connection = DB.getConnection()){
 
             ResultSet set = connection.prepareStatement("Select date from workingday where userId = " +
                     "(select userId from users where email = " + "\"" + wt.workerEmail + "\"" + ");").executeQuery();
@@ -862,16 +741,7 @@ public class Restaurants extends Controller {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-
 
         return ok();
     }

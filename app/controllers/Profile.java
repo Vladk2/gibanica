@@ -47,10 +47,7 @@ public class Profile extends Controller {
 
             double restSize=0;
 
-            Connection connection = null;
-
-            try {
-                connection = DB.getConnection();
+            try (Connection connection = DB.getConnection()){
 
                 ResultSet set = connection.prepareStatement("Select posX, posY, sectorColor from seatconfig where restaurantId = " +
                         "(select restaurantId from workers where userId = (select userId from users where email = " +
@@ -99,14 +96,6 @@ public class Profile extends Controller {
 
             } catch (SQLException e){
                 e.printStackTrace();
-            } finally {
-                if(connection != null){
-                    try {
-                        connection.close();
-                    } catch (SQLException ez) {
-                        ez.printStackTrace();
-                    }
-                }
             }
 
             return badRequest("Something strange happened ):");
@@ -123,9 +112,7 @@ public class Profile extends Controller {
         String new_fname = requestData.get("fname");
         String new_lname = requestData.get("lname");
 
-        Connection connection = DB.getConnection();
-
-        try{
+        try (Connection connection = DB.getConnection()){
             ResultSet set = connection.prepareStatement("Select password, email from users where password="
                         + "\"" + old_pw + "\" and email=" + "\"" + loggedUser + "\"" + ";").executeQuery();
 
@@ -165,16 +152,8 @@ public class Profile extends Controller {
                 session("connectedLName", new_lname);
                 return ok(home.render("Welcome", new play.twirl.api.Html("<center>Good job, <b>" + loggedUser + "</b>, your account info has been changed!</center>")));
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-           if(connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException q){
-                    q.printStackTrace();
-                }
-            }
         }
 
         return ok("Wrong password");

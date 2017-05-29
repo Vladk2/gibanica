@@ -233,23 +233,23 @@
                                             @for(restaurant <- restaurants) {
                                                 <tr>
                                                     <td>
-                                                        <div class="ocena-oglasa" ng-controller="OcenaNekretnineCtrl">
-                                                            <form ng-submit="ocene()">
-                                                                <div class="rate">
-                                                                    <input type="radio" id="star5" name="rate" value="5&{{jedNekretnina.id}}" ng-model="ocena"/>
-                                                                    <label for="star5" title="text">5 stars</label>
-                                                                    <input type="radio" id="star4" name="rate" value="4&{{jedNekretnina.id}}" ng-model="ocena"/>
-                                                                    <label for="star4" title="text">4 stars</label>
-                                                                    <input type="radio" id="star3" name="rate" value="3&{{jedNekretnina.id}}" ng-model="ocena"/>
-                                                                    <label for="star3" title="text">3 stars</label>
-                                                                    <input type="radio" id="star2" name="rate" value="2&{{jedNekretnina.id}}" ng-model="ocena"/>
-                                                                    <label for="star2" title="text">2 stars</label>
-                                                                    <input type="radio" id="star1" name="rate" value="1&{{jedNekretnina.id}}" ng-model="ocena"/>
-                                                                    <label for="star1" title="text">1 star</label>
-                                                                </div>
-                                                                    <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
-                                                            </form>
-                                                        </div>
+                                                        <form id="w">
+                                                            <fieldset id="fset">
+                                                            <div class="rate">
+                                                                <input type="radio" id="star5" name="rate"/>
+                                                                <label for="star5" title="text">5 stars</label>
+                                                                <input type="radio" id="star4" name="rate"/>
+                                                                <label for="star4" title="text">4 stars</label>
+                                                                <input type="radio" id="star3" name="rate"/>
+                                                                <label for="star3" title="text">3 stars</label>
+                                                                <input type="radio" id="star2" name="rate"/>
+                                                                <label for="star2" title="text">2 stars</label>
+                                                                <input type="radio" id="star1" name="rate"/>
+                                                                <label for="star1" title="text">1 star</label>
+                                                            </div>
+                                                            </fieldset>
+                                                                <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
+                                                        </form>
                                                     </td>
                                                     <td>@restaurant.name</td>
                                                     <td>@restaurant.description</td>
@@ -539,6 +539,41 @@
                             $("#selectSectorLabel").hide();
                             $("#selectSector").val("nula bajo");
                         }
+                    });
+
+                    var i = 0;
+
+                    $("#w").click(function(event){
+                        if(i != 0)
+                            return;
+                        else
+                            i++;
+                        $("input[type='radio']").click(function(){
+
+                            var form_ = {
+                                "star1": $("input[id='star1']:checked").val(),
+                                "star2": $("input[id='star2']:checked").val(),
+                                "star3": $("input[id='star3']:checked").val(),
+                                "star4": $("input[id='star4']:checked").val(),
+                                "star5": $("input[id='star5']:checked").val()
+                            };
+
+                            $.ajax({
+                               type: "POST",
+                               url: "/rateRestaurant",
+                               data: JSON.stringify(form_),
+                               contentType: 'application/json',
+                               success: function () {
+                                    $("#fset").prop("disabled", true);
+                               },
+                               error: function () {
+                                    alert("NIJE USPELO");
+                               }
+
+                            });
+                            event.preventDefault();
+                        });
+
                     });
 
                     $("#addWorkingHours").click(function() {
