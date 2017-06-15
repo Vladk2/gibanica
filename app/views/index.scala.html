@@ -88,9 +88,14 @@
                         <b class="formText">
                             E-mail:</b> <input type="email" class="form-control" name="Regemail" required> <br>
                         <b class="formText" >
-                            Password:</b> <input type="password" class="form-control" name="pass" required> <br>
+                            Password:</b> <input type="password" class="form-control" name="pass" id="pass"
+                                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                oninvalid="setCustomValidity('Minimum length 8, must contain upper and lower case letters and a number')"
+                                oninput="setCustomValidity('')"
+                                required> <br>
                         <b class="formText">
-                            Repeat password:</b> <input type="password" class="form-control" name="repPass" required> <br>
+                            Repeat password:</b> <input type="password" class="form-control" name="repPass" id="repPass"
+                                required> <br>
 
                         <button type="submit" class="btn btn-warning btn-block btn-lg" style="color: black;
                             width: 40%"><b>REGISTER</b> </button>
@@ -98,6 +103,8 @@
                     </form>
                     <br>
                     <p hidden id="resp" style="color: red"> </p>
+                    <script src="assets/javascripts/validatePassword.js"></script>
+
 
                 </div>
             </div>
