@@ -1,0 +1,21 @@
+@(user: String, email: String)
+
+@home("Verify account") {
+
+    <script>
+            $(document).ready(function () {
+                $("#profile").hide();
+                $("#restaurants").hide();
+                $("#friends").hide();
+            });
+    </script>
+
+    <center>
+        <h4> Hello there <b>@user</b>! You must verify your account in order to start using it. <br>
+        Activation link has been sent to your email address: <b>@email</b></h4> <br>
+
+
+
+    </center>
+
+}

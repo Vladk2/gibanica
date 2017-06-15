@@ -55,28 +55,30 @@ public class Login extends Controller {
                 verified = set.getInt(6);
             }
             if(pw.equals(created.password) && email.equals(created.email)) {
-                session("connected", email);
-                session("connectedFName", ime);
-                session("connectedLName", prezime);
-                session("connectedPass", pw);
-                session("userType", tip);
-                session("verified", Integer.toString(verified));
-                if((session("userType")).equals("rest-manager")){
+                    session("connected", email);
+                    session("connectedFName", ime);
+                    session("connectedLName", prezime);
+                    session("connectedPass", pw);
+                    session("userType", tip);
+                    session("verified", Integer.toString(verified));
+                    if((session("userType")).equals("rest-manager")){
 
-                    ResultSet set2 = connection.prepareStatement("Select name from restaurants where restaurantId = " +
-                            "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
-                             "\"" + created.email + "\"" + "));").executeQuery();
+                        ResultSet set2 = connection.prepareStatement("Select name from restaurants where restaurantId = " +
+                                "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
+                                "\"" + created.email + "\"" + "));").executeQuery();
 
-                    while(set2.next()){
-                        session("myRestName", set2.getString(1));
+                        while(set2.next()){
+                            session("myRestName", set2.getString(1));
 
+                        }
                     }
-                }
-                String loggedUser = session("connected");
-                if((tip.equals("bidder") || tip.equals("waiter") || tip.equals("chef") || tip.equals("bartender")) && verified==0)
-                    return ok(firstLog.render(email));
-                else
-                return ok(home.render("Welcome",new play.twirl.api.Html("<center><h2>Welcome, " + loggedUser + "!</h2></center>") )); // login succedded
+                    String loggedUser = session("connected");
+                    if((tip.equals("bidder") || tip.equals("waiter") || tip.equals("chef") || tip.equals("bartender")) && verified==0)
+                        return ok(firstLog.render(email));
+                    else if (tip.equals("guest") && verified == 0)
+                        return ok(firstLogGuest.render(ime, email));
+                    else
+                        return ok(home.render("Welcome",new play.twirl.api.Html("<center><h2>Welcome, " + loggedUser + "!</h2></center>") )); // login succedded
             }
 
         } catch (SQLException e){

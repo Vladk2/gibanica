@@ -44,6 +44,7 @@ public class Application extends Controller {
         String loggedUser = session("connected");
         String verified = session("verified");
         String tip = session("userType");
+        String name = session("connectedFName");
         if(loggedUser==null) {
 
             Connection connection = DB.getConnection();
@@ -73,6 +74,8 @@ public class Application extends Controller {
         }
         else if((tip.equals("bidder") || tip.equals("waiter") || tip.equals("chef") || tip.equals("bartender")) && verified.equals("0"))
             return ok(firstLog.render(loggedUser));
+        else if((tip.equals("guest") && verified.equals("0")))
+            return ok(firstLogGuest.render(name, loggedUser));
         else return ok(render("Welcome",new play.twirl.api.Html("<center><h2>Welcome, " + loggedUser + "!</h2></center>") ));
     }
 
