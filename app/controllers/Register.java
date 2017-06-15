@@ -159,14 +159,14 @@ public class Register extends Controller {
 
             try {
                 connection = DB.getConnection();
-                getCount = connection.prepareStatement("select count(*) from baklava.users where verificationuuid=?;");
+                getCount = connection.prepareStatement("select count(*) from baklava.users where verificationuuid=? and verified=0;");
                 getCount.setString(1, id);
                 ResultSet count = getCount.executeQuery();
                 count.next();
                 resultSetSize = count.getInt(1);
 
                 if (resultSetSize == 1) {
-                    getUser = connection.prepareStatement("select * from baklava.users where verificationuuid=?;");
+                    getUser = connection.prepareStatement("select * from baklava.users where verificationuuid=? and verified=0;");
                     getUser.setString(1, id);
                     ResultSet resultSet = getUser.executeQuery();
                     resultSet.next();
@@ -180,7 +180,7 @@ public class Register extends Controller {
 
                     connection.setAutoCommit(false);
 
-                    updateVerified = connection.prepareStatement("update baklava.users set verified = 1 where verificationuuid = ?");
+                    updateVerified = connection.prepareStatement("update baklava.users set verified = 1 where verificationuuid = ? and verified=0");
                     updateVerified.setString(1, id);
                     updateVerified.executeUpdate();
 
