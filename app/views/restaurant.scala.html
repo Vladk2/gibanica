@@ -233,7 +233,7 @@
                                             @for(restaurant <- restaurants) {
                                                 <tr>
                                                     <td>
-                                                        <form id="120rst">
+                                                        <form id="@(restaurant.id + "rst")">
                                                             <fieldset id="fset">
                                                             <div class="rate">
                                                                 <input type="radio" id="star5" name="rate"/>

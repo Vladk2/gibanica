@@ -12,7 +12,8 @@ public class Restaurant {
     public String tel;
     public String rSize;
 
-    public Restaurant(String name, String description, String location, String tel, String rSize) {
+    public Restaurant(String id, String name, String description, String location, String tel, String rSize) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.location = location;

@@ -54,12 +54,13 @@ public class Restaurants extends Controller {
         else {
             try (Connection connection = DB.getConnection()) {
 
-                String query = "Select name, description, address, tel, size from restaurants";
+                String query = "Select restaurantId, name, description, address, tel, size from restaurants";
                 ResultSet set = connection.prepareStatement(query).executeQuery();
                 while(set.next()){
                     Restaurant restaurant =
                             new Restaurant(set.getString(1), set.getString(2),
-                                    set.getString(3), set.getString(4), set.getString(5));
+                                    set.getString(3), set.getString(4), set.getString(5),
+                                    set.getString(6));
                     if(restaurant.name.equals(myRestName) && (session("userType")).equals("rest-manager"))
                         myRestaurant = restaurant;
                     restaurants.add(restaurant);
