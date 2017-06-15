@@ -552,11 +552,11 @@
                         $("input[type='radio']").click(function(){
 
                             var form_ = {
-                                "star1": $("input[id$='star1']:checked").val(),
-                                "star2": $("input[id$='star2']:checked").val(),
-                                "star3": $("input[id$='star3']:checked").val(),
-                                "star4": $("input[id$='star4']:checked").val(),
-                                "star5": $("input[id$='star5']:checked").val(),
+                                "star1": $("input[id$='star1']").is(':checked') ? '1' : '0',
+                                "star2": $("input[id$='star2']").is(':checked') ? '2' : '0',
+                                "star3": $("input[id$='star3']").is(':checked') ? '3' : '0',
+                                "star4": $("input[id$='star4']").is(':checked') ? '4' : '0',
+                                "star5": $("input[id$='star5']").is(':checked') ? '5' : '0',
                                 "form_id": $("form[id][id$='rst']").attr('id')
                             };
 

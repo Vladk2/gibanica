@@ -260,14 +260,16 @@ public class Restaurants extends Controller {
 
         System.out.println(restaurant_id);
 
+        response.remove("form_id");
+
         String mark = null;
 
         for(Map.Entry<String, String> el : response.entrySet()){
-            if(el.getKey().startsWith("star"))
-               mark = el.getKey();
+            if(!el.getValue().equals("0"))
+               mark = el.getValue();
         }
 
-        int mark_final = Integer.parseInt(mark.substring(4, mark.length()));
+        int mark_final = Integer.parseInt(mark);
 
         System.out.println(mark_final);
 
