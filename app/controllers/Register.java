@@ -86,7 +86,8 @@ public class Register extends Controller {
 
                     System.out.println("Success");
 
-
+                    //testing
+                    SendEmail.send("gogeccc@gmail.com", "foobar", "foobar");
 
                 } else {
                     System.out.println("mail already exists");
@@ -194,11 +195,6 @@ public class Register extends Controller {
                 } else {
                     return notFound();
                 }
-
-
-
-
-
 
             } catch (SQLException sqle){
 
