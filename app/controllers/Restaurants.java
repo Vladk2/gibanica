@@ -5,7 +5,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import models.*;
 import play.*;
 
@@ -13,8 +13,6 @@ import play.*;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.DB;
-import play.db.Database;
-import play.db.Databases;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -24,7 +22,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 
 public class Restaurants extends Controller {
@@ -250,24 +247,38 @@ public class Restaurants extends Controller {
     }
 
     public static Result rateRestaurantAJAX() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode ajax_json = request().body().asJson();
-        HashMap<String, String> response = objectMapper.convertValue(ajax_json, HashMap.class);
-        System.out.println(response.toString());
+        try (Connection connection = DB.getConnection()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            HashMap<String, String> response = objectMapper.convertValue(ajax_json, HashMap.class);
+            System.out.println(response.toString());
 
-        int restaurant_id =
-                Integer.parseInt(response.get("form_id")); // - 1 for string size
+            int restaurant_id =
+                    Integer.parseInt(response.get("form_id")); // - 1 for string size
 
-        System.out.println(restaurant_id);
+            System.out.println(restaurant_id);
 
-        int mark_final = Integer.parseInt(response.get("rating"));
+            int mark_final = Integer.parseInt(response.get("rating"));
 
-        System.out.println(mark_final);
+            System.out.println(mark_final);
 
-        // form_id je u sustini id restorana iz baze. prilikom prikaza na html stranici
-        // formi ce biti dodeljen taj id + 'rst' -> restaurant
+            // form_id je u sustini id restorana iz baze. prilikom prikaza na html stranici
+            // formi ce biti dodeljen taj id + 'rst' -> restaurant
 
-        return ok();
+            String statement = String.format("Insert into restaurantsRating (userId, restaurantId, rating) values " +
+                    "(%d, %d, %d);", Integer.parseInt(session("userId")), restaurant_id, mark_final);
+
+            connection.prepareStatement(statement).execute();
+
+            return ok();
+
+        } catch(MySQLIntegrityConstraintViolationException duplicate_key){
+            duplicate_key.printStackTrace();
+            return badRequest("Vec ste ocenili ovaj restoran.");
+        } catch (Exception e){
+            e.printStackTrace();
+            return badRequest("Desilo se nesto cudno.");
+        }
     }
 
     public static Result removeVictualOrDrink() {

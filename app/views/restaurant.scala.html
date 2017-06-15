@@ -571,8 +571,8 @@
                                success: function () {
                                    $("#" + form_["form_id"] + "fset").prop("disabled", true);
                                },
-                               error: function () {
-                                    alert("Something went wrong.");
+                               error: function(error) {
+                                  alert(error.responseText);
                                }
 
                             });
