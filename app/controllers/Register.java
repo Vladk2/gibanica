@@ -78,7 +78,8 @@ public class Register extends Controller {
                     regUser.setString(4, created.password);
                     regUser.setString(5, created.tip);
                     regUser.setString(6, Integer.toString(created.verified));
-                    regUser.setString(7, UUID.randomUUID().toString());
+                    String uuid = UUID.randomUUID().toString();
+                    regUser.setString(7, uuid);
 
                     regUser.executeUpdate();
 
@@ -87,10 +88,12 @@ public class Register extends Controller {
                     System.out.println("Success");
 
                     //testing
-                    SendEmail.send("gogeccc@gmail.com", "foobar", "foobar");
+                    //request.get
+                    SendEmail.send(created.email, "Activation link for Gibanica", "Your activation link is: \n" +
+                            "http://" + request().host() + "/verify?id=" + uuid);
 
                 } else {
-                    System.out.println("mail already exists");
+                    System.out.println("email already exists");
                 }
 
 
@@ -132,7 +135,7 @@ public class Register extends Controller {
                 session("connectedPass", created.password);
                 session("userType", created.tip);
                 session("verified", "0");
-                return ok(submit.render(created));
+                return ok(firstLogGuest.render(created.name, created.email));
             } else {
                 return ok("Email address is already registered, please provide another email address");
             }
@@ -141,6 +144,7 @@ public class Register extends Controller {
 
         else return ok("Password does not match the confirm password");
     }
+
 
     public static Result verify(String id) throws SQLException {
         if(id.length() == 36) {
@@ -167,11 +171,11 @@ public class Register extends Controller {
                     ResultSet resultSet = getUser.executeQuery();
                     resultSet.next();
 
-                    verified.name = resultSet.getString(1);
-                    verified.surname = resultSet.getString(2);
-                    verified.email = resultSet.getString(3);
-                    verified.password = resultSet.getString(4);
-                    verified.tip = resultSet.getString(5);
+                    verified.name = resultSet.getString(2);
+                    verified.surname = resultSet.getString(3);
+                    verified.email = resultSet.getString(4);
+                    verified.password = resultSet.getString(5);
+                    verified.tip = resultSet.getString(7);
                     verified.verified = 1;
 
                     connection.setAutoCommit(false);
@@ -191,7 +195,7 @@ public class Register extends Controller {
                     session("userType", verified.tip);
                     session("verified", "1");
                     
-                    return ok(views.html.verified.render(verified));
+                    return ok(views.html.verified.render(verified.name, verified.email));
                 } else {
                     return notFound();
                 }
