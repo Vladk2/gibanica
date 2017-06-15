@@ -256,21 +256,11 @@ public class Restaurants extends Controller {
         System.out.println(response.toString());
 
         int restaurant_id =
-                Integer.parseInt(response.get("form_id").substring(0,
-                        response.get("form_id").length() - 3)); // - 1 for string size
+                Integer.parseInt(response.get("form_id")); // - 1 for string size
 
         System.out.println(restaurant_id);
 
-        response.remove("form_id");
-
-        String mark = null;
-
-        for(Map.Entry<String, String> el : response.entrySet()){
-            if(!el.getValue().equals("0"))
-               mark = el.getValue();
-        }
-
-        int mark_final = Integer.parseInt(mark);
+        int mark_final = Integer.parseInt(response.get("rating"));
 
         System.out.println(mark_final);
 
