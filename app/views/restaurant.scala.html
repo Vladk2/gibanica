@@ -234,18 +234,18 @@
                                                 <tr>
                                                     <td>
                                                         <form id="@(restaurant.id + "rst")">
-                                                            <fieldset id="fset">
+                                                            <fieldset id="@(restaurant.id + "fset")">
                                                             <div class="rate">
-                                                                <input type="radio" id="star5" name="rate"/>
-                                                                <label for="star5" title="text">5 stars</label>
-                                                                <input type="radio" id="star4" name="rate"/>
-                                                                <label for="star4" title="text">4 stars</label>
-                                                                <input type="radio" id="star3" name="rate"/>
-                                                                <label for="star3" title="text">3 stars</label>
-                                                                <input type="radio" id="star2" name="rate"/>
-                                                                <label for="star2" title="text">2 stars</label>
-                                                                <input type="radio" id="star1" name="rate"/>
-                                                                <label for="star1" title="text">1 star</label>
+                                                                <input type="radio" id="@(restaurant.id + "s5")" name="rate"/>
+                                                                <label for="@(restaurant.id + "s5")" title="text">5 stars</label>
+                                                                <input type="radio" id="@(restaurant.id + "s4")" name="rate"/>
+                                                                <label for="@(restaurant.id + "s4")" title="text">4 stars</label>
+                                                                <input type="radio" id="@(restaurant.id + "s3")" name="rate"/>
+                                                                <label for="@(restaurant.id + "s3")" title="text">3 stars</label>
+                                                                <input type="radio" id="@(restaurant.id + "s2")" name="rate"/>
+                                                                <label for="@(restaurant.id + "s2")" title="text">2 stars</label>
+                                                                <input type="radio" id="@(restaurant.id + "s1")" name="rate"/>
+                                                                <label for="@(restaurant.id + "s1")" title="text">1 star</label>
                                                             </div>
                                                             </fieldset>
                                                                 <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
@@ -552,11 +552,11 @@
                         $("input[type='radio']").click(function(){
 
                             var form_ = {
-                                "star1": $("input[id$='star1']").is(':checked') ? '1' : '0',
-                                "star2": $("input[id$='star2']").is(':checked') ? '2' : '0',
-                                "star3": $("input[id$='star3']").is(':checked') ? '3' : '0',
-                                "star4": $("input[id$='star4']").is(':checked') ? '4' : '0',
-                                "star5": $("input[id$='star5']").is(':checked') ? '5' : '0',
+                                "star1": $("input[id$='s1']").is(':checked') ? '1' : '0',
+                                "star2": $("input[id$='s2']").is(':checked') ? '2' : '0',
+                                "star3": $("input[id$='s3']").is(':checked') ? '3' : '0',
+                                "star4": $("input[id$='s4']").is(':checked') ? '4' : '0',
+                                "star5": $("input[id$='s5']").is(':checked') ? '5' : '0',
                                 "form_id": $("form[id][id$='rst']").attr('id')
                             };
 
@@ -566,7 +566,7 @@
                                data: JSON.stringify(form_),
                                contentType: 'application/json',
                                success: function () {
-                                    $("#fset").prop("disabled", true);
+                                    $("fieldset[id$='fset']").prop("disabled", true);
                                },
                                error: function () {
                                     alert("NIJE USPELO");
