@@ -221,20 +221,10 @@
                             "userEmail": "@userEmail"
                         };
 
-                        $.ajax({
-                            type: "POST",
-                            url: "/visitInfo",
-                            data: JSON.stringify(request),
-                            contentType: 'application/json',
-                            success: function (response) {
-                               var from_server = $.parseJSON(response);
-                               $("#modal-id").append("<p>" + from_server["userEmail"] + "</p>");
-                               $("#rateMealAndService").modal('toggle');
-                            },
-                            error: function(error) {
-                                alert(error.responseText);
-                            }
-                        });
+                        $("#modal-id").append("<p>" + request["userEmail"] + "</p>");
+                        $("#rateMealAndService").modal('toggle');
+
+
                         event.preventDefault();
 
                     });

@@ -58,11 +58,6 @@ public class Ratings extends Controller {
         return badRequest("Vi niste gost");
     }
 
-    public static Result visitInfo(){
-        JsonNode ajax_json = request().body().asJson();
-        return ok(ajax_json.toString());
-    }
-
     public static Result rateRestaurantAJAX() {
         try (Connection connection = DB.getConnection()) {
             connection.setAutoCommit(false);
