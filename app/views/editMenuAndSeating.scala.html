@@ -38,7 +38,7 @@
                 background-color: black;
                 border: 1px solid orange;">  </div>  <br>
                 @for(sector <- sectors) {
-                    <div id="@sector.sectionColor|block">
+                    <div  id="@sector.sectionColor|block">
                     @sector.sectionName
                     : <span style="color:#e85c00;margin-left:0px;font-size: 14px;cursor:pointer" class="glyphicon glyphicon-remove removeSector" id="@sector.sectionColor|remove" aria-hidden="true"></span> <div class='sectionPicker' id="@sector.sectionColor" style="width: 32px;
                         height: 32px;
@@ -67,7 +67,7 @@
                                 i = sizeSqrt
                             }
                         }
-                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor" class="divTableCell" style="background-color:
+                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor" class="divTableCell" style="cursor:pointer;background-color:
                     @seat.sectionColor;"></div>
                     @if(i == 1) {
                             <!-- DivTableRow end --> </div>

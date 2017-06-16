@@ -57,7 +57,7 @@
                                                         <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
                                                 </form>
                                             </td>
-                                            <td class="restaurants" id="@(restaurant.id + "name")">@restaurant.name</td>
+                                            <td class="restNameVisits" style="cursor:pointer;" id="@(restaurant.id + "name")"><b>@restaurant.name</b> </td>
                                             <td>@restaurant.description</td>
                                             <td>@restaurant.location</td>
                                             <td>@restaurant.tel</td>
@@ -202,7 +202,7 @@
 
                     });
 
-                    $(".restaurants").on('click', function(event){
+                    $(".restNameVisits").on('click', function(event){
 
                         //ocisti modal pre svakog novog prikaza
                         $("#modal-id").empty();

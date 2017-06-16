@@ -662,8 +662,7 @@
                                     <p id="stepErrMessage" style="color: red"> </p>
                                     <a class="btn btn-warning" id="nextStepRest" title="Manage seating and food/drink menu" style="width: 100px;">
                                         NEXT </a>
-                                    <a class="btn btn-warning addRestFinish" id="finishWithoutStep" title="Finish and leave it to a restaurant manager" style="width: 100px;">
-                                        FINISH </a><br>
+
 
 
                                 </div>
@@ -808,68 +807,6 @@
                         });
 
 
-                        // close modal after adding a restaurant
-                        $(".addRestFinish").click(function () {
-
-                            if (!$("#rname").val()) {
-                                $("#stepErrMessage").html("You must enter a restaurant's name").fadeIn();
-                            }
-                            else {
-                                $("#stepErrMessage").html("");
-                                var rName = $('#rname').val();
-                                var rDesc = $('#rdesc').val();
-                                var rLocation = $("#rlocation").val();
-                                var rTel = $("#rtel").val();
-                                var sizeComboBox = $("#pickSize").val();
-                                var rSizeSplit = sizeComboBox.split('(');
-                                var rSize = rSizeSplit[0];
-
-                                var restInfo = {
-                                    'name': rName, 'description': rDesc, 'location': rLocation,
-                                    'tel': rTel, 'rSize': rSize
-                                };
-                                myJsRoutes.controllers.Restaurants.addRestInfoAJAX().ajax({
-                                    data: JSON.stringify(restInfo),
-                                    contentType: 'application/json',
-                                    success: function (rest) {
-
-                                        $("#stepErrMessage").html("");
-                                        $("#forRestSelect").append('<option>' + rest.name + '</option>');
-                                        var raspored = [];
-                                        $(".divTableCell").each(function () {
-                                            var pozicija = $(this).attr('id');
-                                            raspored.push(pozicija);
-                                        });
-
-                                        myJsRoutes.controllers.Restaurants.saveSeatConf().ajax({
-                                            data: JSON.stringify({raspored: raspored}),
-                                            dataType: 'json',
-                                            contentType: 'application/json',
-                                            success: function () {
-                                            }
-                                        });
-
-
-                                        $('#addARestaurant').modal('toggle');
-                                        $('#vicList tr').remove();
-                                        $('#drinkList tr').remove();
-
-                                        $("#mapa").hide();
-                                        $('#addARestaurant').find("input")
-                                                .val('')
-                                                .end();
-                                        $("#restAddSuccess").html("  <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <strong>Success!</strong> A new restaurant has been added.").fadeIn();
-                                    },
-                                    error: function () {
-                                        $("#stepErrMessage").html("Restaurant's name is already in use!").fadeIn();
-                                        $('#rname').val("");
-                                    }
-
-                                });
-
-
-                            }
-                        });
 
                         $(document).ready(function () {
 
