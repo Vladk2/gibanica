@@ -351,12 +351,13 @@
                             </div>
                              <!--  modal body -->
                             <div class="floating-box"
-                            style="width: 400px; display: inline-block;  height: 500px; margin: 20px;">
+                            style="width: 400px; display: inline-block;  height: 250px; margin: 20px;">
                                 <div>
-                                    <div>
+                                    <div align="center">
+                                        <p>Rate your food for this visit</p>
                                         <form class="rating_food" id="rate_food">
                                             <fieldset class="food_fsets" id="rate_food_fset">
-                                            <div class="rate">
+                                            <div class="modal_rate" id="rate_food_inputs">
                                                 <input type="radio" class="food_stars" id="food_star5" name="rate"/>
                                                 <label for="food_star5" title="text">5 stars</label>
                                                 <input type="radio" class="food_stars" id="food_star4" name="rate"/>
@@ -373,9 +374,10 @@
                                     </div>
 
                                     <div>
+                                        <p>Rate restaurant`s service for this visit</p>
                                         <form class="rating_service" id="rate_service">
                                             <fieldset class="service_fsets" id="rate_service_fset">
-                                            <div class="rate">
+                                            <div class="modal_rate" id="rate_service_inputs">
                                                 <input type="radio" class="stars" id="service_star5" name="rate"/>
                                                 <label for="service_star5" title="text">5 stars</label>
                                                 <input type="radio" class="stars" id="service_star4" name="rate"/>

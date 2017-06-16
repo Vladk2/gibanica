@@ -89,6 +89,48 @@
         .rate > label:hover ~ input:checked ~ label {
             color: #c59b08;
         }
+
+        .modal_rate {
+            float: inherit;
+            height: 46px;
+            padding: 0 10px;
+        }
+
+        .modal_rate:not(:checked) > input {
+            position: absolute;
+            top: -9999px;
+        }
+
+        .modal_rate:not(:checked) > label {
+            float: inherit;
+            width: 1em;
+            overflow: hidden;
+            white-space: nowrap;
+            cursor: pointer;
+            font-size: 30px;
+            color: #ccc;
+        }
+
+        .modal_rate:not(:checked) > label:before {
+            content: '★ ';
+        }
+
+        .modal_rate > input:checked ~ label {
+            color: #ffc700;
+        }
+
+        .modal_rate:not(:checked) > label:hover,
+        .modal_rate:not(:checked) > label:hover ~ label {
+            color: #deb217;
+        }
+
+        .modal_rate > input:checked + label:hover,
+        .modal_rate > input:checked + label:hover ~ label,
+        .modal_rate > input:checked ~ label:hover,
+        .modal_rate > input:checked ~ label:hover ~ label,
+        .modal_rate > label:hover ~ input:checked ~ label {
+            color: #c59b08;
+        }
         </style>
 
     </head>
@@ -123,6 +165,8 @@
                             color: #f47441" id="profButton"> Profile </b></a>       </li>
                         <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
                             color: #f47441" id="restButton"> Restaurants </b></a></li>
+                        <li id="visits" > <a href="/visits" ><b style="font-size: 130%;
+                            color: #f47441"> Visits </b></a></li>
                         <li id="friends" > <a href="#" ><b style="font-size: 130%;
                             color: #f47441"> Friends </b></a></li>
                         <li class="divider" style="background-color: white"></li>
