@@ -160,6 +160,10 @@
                     </div>
                 </div>
 
+            <audio id="cow">
+                <source src="@routes.Assets.at("effects/Cow%20Moo%20Sound%20Effect.mp3")">
+            </audio>
+
             <script>
                 $(document).ready(function () {
                     var i = 0;
@@ -206,6 +210,7 @@
 
                         //ocisti modal pre svakog novog prikaza
                         $("#modal-id").empty();
+                        $("#cow")[0].play();
 
                         var restaurant = $(this).attr('id');
                         var id = restaurant.substring(0, restaurant.length - 4);
