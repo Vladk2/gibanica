@@ -1,4 +1,4 @@
-@(userEmail: String)
+@(userEmail: String, restaurants: List[Restaurant])
 
 @home("Visits"){
     <div>
@@ -6,7 +6,241 @@
             margin-right: 40px;">logged in: <b>@userEmail</b> </i> <br> <br>
 
         <center>
+        @if(session.get("userType").equals("guest")) {
+            <div class="container">
+                <div class="row">
 
+                    <div class="col-md-10 col-md-offset-1">
+
+                        <div class="panel panel-default panel-table">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col col-xs-6">
+                                            <!-- <h3 class="panel-title">Restaurants</h3> -->
+                                    </div>
+                                    <div class="col col-xs-6 text-right">
+                                            <!-- <button type="button" class="btn btn-sm btn-primary btn-create">Add New</button> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-striped table-bordered table-list">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Address</th>
+                                            <th>Telephone</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    @for(restaurant <- restaurants) {
+                                        <tr>
+                                            <td>
+                                                <form class="rating" id="@(restaurant.id + "rst")">
+                                                    <fieldset class="fsets" id="@(restaurant.id + "fset")">
+                                                    <div class="rate">
+                                                        <input type="radio" class="stars" id="@(restaurant.id + "s5")" name="rate"/>
+                                                        <label for="@(restaurant.id + "s5")" title="text">5 stars</label>
+                                                        <input type="radio" class="stars" id="@(restaurant.id + "s4")" name="rate"/>
+                                                        <label for="@(restaurant.id + "s4")" title="text">4 stars</label>
+                                                        <input type="radio" class="stars" id="@(restaurant.id + "s3")" name="rate"/>
+                                                        <label for="@(restaurant.id + "s3")" title="text">3 stars</label>
+                                                        <input type="radio" class="stars" id="@(restaurant.id + "s2")" name="rate"/>
+                                                        <label for="@(restaurant.id + "s2")" title="text">2 stars</label>
+                                                        <input type="radio" class="stars" id="@(restaurant.id + "s1")" name="rate"/>
+                                                        <label for="@(restaurant.id + "s1")" title="text">1 star</label>
+                                                    </div>
+                                                    </fieldset>
+                                                        <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
+                                                </form>
+                                            </td>
+                                            <td class="restaurants" id="@(restaurant.id + "name")">@restaurant.name</td>
+                                            <td>@restaurant.description</td>
+                                            <td>@restaurant.location</td>
+                                            <td>@restaurant.tel</td>
+
+                                        </tr>
+                                    }
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <div class="panel-footer">
+                                <div class="row">
+                                    <div class="col col-xs-4">
+                                    </div>
+                                    <div class="col col-xs-8">
+                                        <ul class="pagination hidden-xs pull-right">
+                                            <li><a href="#">1</a></li>
+                                            <li><a href="#">2</a></li>
+                                            <li><a href="#">3</a></li>
+                                            <li><a href="#">4</a></li>
+                                            <li><a href="#">5</a></li>
+                                        </ul>
+                                        <ul class="pagination visible-xs pull-right">
+                                            <li><a href="#">«</a></li>
+                                            <li><a href="#">»</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL ZA OCENJIVANJE HRANE I USLUGE -->
+                <div class="modal fade" id="rateMealAndService">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <!--  modal header -->
+                            <div class="modal-header">
+                                <h3 class="modal-title" style="color: black;
+                                    font-family: Verdana;
+                                    font-size: 24pt"> Rate food and service </h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                             <!--  modal body -->
+                            <div class="floating-box"
+                            style="width: 400px; display: inline-block;  height: 250px; margin: 20px;">
+                                <div>
+                                    <div align="center">
+                                        <p>Rate your food for this visit</p>
+                                        <form class="rating_food" id="rate_food">
+                                            <fieldset class="food_fsets" id="rate_food_fset">
+                                            <div class="modal_rate" id="rate_food_inputs">
+                                                <input type="radio" class="food_stars" id="food_star5" name="rate"/>
+                                                <label for="food_star5" title="text">5 stars</label>
+                                                <input type="radio" class="food_stars" id="food_star4" name="rate"/>
+                                                <label for="food_star4" title="text">4 stars</label>
+                                                <input type="radio" class="food_stars" id="food_star3" name="rate"/>
+                                                <label for="food_star3" title="text">3 stars</label>
+                                                <input type="radio" class="food_stars" id="food_star2" name="rate"/>
+                                                <label for="food_star2" title="text">2 stars</label>
+                                                <input type="radio" class="food_stars" id="food_star1" name="rate"/>
+                                                <label for="food_star1" title="text">1 star</label>
+                                            </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+
+                                    <div>
+                                        <p>Rate restaurant`s service for this visit</p>
+                                        <form class="rating_service" id="rate_service">
+                                            <fieldset class="service_fsets" id="rate_service_fset">
+                                            <div class="modal_rate" id="rate_service_inputs">
+                                                <input type="radio" class="stars" id="service_star5" name="rate"/>
+                                                <label for="service_star5" title="text">5 stars</label>
+                                                <input type="radio" class="stars" id="service_star4" name="rate"/>
+                                                <label for="service_star4" title="text">4 stars</label>
+                                                <input type="radio" class="stars" id="service_star3" name="rate"/>
+                                                <label for="service_star3" title="text">3 stars</label>
+                                                <input type="radio" class="stars" id="service_star2" name="rate"/>
+                                                <label for="service_star2" title="text">2 stars</label>
+                                                <input type="radio" class="stars" id="service_star1" name="rate"/>
+                                                <label for="service_star1" title="text">1 star</label>
+                                            </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div id="modal-id">
+
+                                </div>
+                            </div>
+                            <!--  modal footer -->
+                            <div class="modal-footer">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <script>
+                $(document).ready(function () {
+                    var i = 0;
+
+                    $(".rating").click(function (event) {
+                        var id = $(this).attr('id');
+
+                        console.log(id);
+
+                        if (i != 0)
+                            return;
+                        else {
+                            i++;
+                        }
+                        $(".stars").click(function () {
+                            var star_id = $(this).attr('id');
+                            var form_ = {
+                                "rating": $(this).is(':checked') ? star_id[star_id.length - 1] : '0',
+                                "form_id": star_id.substring(0, star_id.length - 2)
+                            };
+
+                            console.log(form_["rating"]);
+                            console.log(form_["form_id"]);
+
+                            $.ajax({
+                                type: "POST",
+                                url: "/rateRestaurant",
+                                data: JSON.stringify(form_),
+                                contentType: 'application/json',
+                                success: function () {
+                                    $("#" + form_["form_id"] + "fset").prop("disabled", true);
+                                },
+                                error: function (error) {
+                                    alert(error.responseText);
+                                }
+
+                            });
+                            event.preventDefault();
+                        });
+
+                    });
+
+                    $(".restaurants").on('click', function(event){
+
+                        //ocisti modal pre svakog novog prikaza
+                        $("#modal-id").empty();
+
+                        var restaurant = $(this).attr('id');
+                        var id = restaurant.substring(0, restaurant.length - 4);
+
+                        $(".rating_food").attr('id', id + 'rate_food');
+                        $(".rating_service").attr('id', id + "rate_service");
+
+                        console.log($(".rating_food").attr('id'));
+                        console.log($(".rating_service").attr('id'));
+
+                        var request = {
+                            "restaurant": id,
+                            "userEmail": "@userEmail"
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/visitInfo",
+                            data: JSON.stringify(request),
+                            contentType: 'application/json',
+                            success: function (response) {
+                               var from_server = $.parseJSON(response);
+                               $("#modal-id").append("<p>" + from_server["userEmail"] + "</p>");
+                               $("#rateMealAndService").modal('toggle');
+                            },
+                            error: function(error) {
+                                alert(error.responseText);
+                            }
+                        });
+                        event.preventDefault();
+
+                    });
+                });
+            </script>
+        }
 
         </center>
     </div>
