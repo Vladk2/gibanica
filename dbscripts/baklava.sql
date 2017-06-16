@@ -87,11 +87,11 @@ insert into baklava.usertypes values('chef');
 insert into baklava.usertypes values('bidder');
 
 -- test korisnici
-insert into baklava.users(name, surname, email, password, verified, type) 
+insert into baklava.users(name, surname, email, password, verified, type)
 	values('gost', 'gostić', 'gost@gost.com', 'password', 1, 'guest');
-insert into baklava.users(name, surname, email, password, verified, type) 
+insert into baklava.users(name, surname, email, password, verified, type)
 	values('sistem', 'menadzer', 'system@manager.com', 'password', 1, 'system-manager');
-insert into baklava.users(name, surname, email, password, verified, type) 
+insert into baklava.users(name, surname, email, password, verified, type)
 	values('restoran', 'menadzer', 'restoran@manager.com', 'password', 1, 'rest-manager');
-insert into baklava.users(name, surname, email, password, verified, type) 
+insert into baklava.users(name, surname, email, password, verified, type)
 	values('waiter', 'waiter', 'waiter@waiter.com', 'password', 1, 'waiter');
