@@ -38,14 +38,16 @@ public class Login extends Controller {
             /*ResultSet set = connection.prepareStatement("Select email, password from users where email="
                     + "\"" + created.email + "\"" + " and password=" + "\"" + created.password
                     + "\"" + ";").executeQuery();*/
-            ResultSet set = connection.prepareStatement("Select password, email, name, surname, type, verified from users where password="
+            ResultSet set = connection.prepareStatement("Select password, email, name, surname, type, verified, userId from users where password="
                     + "\"" + created.password + "\" and email=" + "\"" + created.email + "\"" + ";").executeQuery();
             String email = "";
             String pw = "";
             String tip = "";
             String ime = "";
             String prezime = "";
+            String id = "";
             int verified = -1;
+
             while(set.next()){
                 pw = set.getString(1);
                 email = set.getString(2);
@@ -53,6 +55,7 @@ public class Login extends Controller {
                 prezime = set.getString(4);
                 tip = set.getString(5);
                 verified = set.getInt(6);
+                id = set.getString(7);
             }
             if(pw.equals(created.password) && email.equals(created.email)) {
                     session("connected", email);
@@ -60,6 +63,7 @@ public class Login extends Controller {
                     session("connectedLName", prezime);
                     session("connectedPass", pw);
                     session("userType", tip);
+                    session("userId", id);
                     session("verified", Integer.toString(verified));
                     if((session("userType")).equals("rest-manager")){
 

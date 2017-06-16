@@ -251,7 +251,7 @@
                                                                 <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
                                                         </form>
                                                     </td>
-                                                    <td>@restaurant.name</td>
+                                                    <td class="restaurants" id="@(restaurant.id + "name")">@restaurant.name</td>
                                                     <td>@restaurant.description</td>
                                                     <td>@restaurant.location</td>
                                                     <td>@restaurant.tel</td>
@@ -333,6 +333,71 @@
 
                                 <!--  modal footer -->
                             <div class="modal-footer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL ZA OCENJIVANJE HRANE I USLUGE -->
+                <div class="modal fade" id="rateMealAndService">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <!--  modal header -->
+                            <div class="modal-header">
+                                <h3 class="modal-title" style="color: black;
+                                    font-family: Verdana;
+                                    font-size: 24pt"> Rate food and service </h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                             <!--  modal body -->
+                            <div class="floating-box"
+                            style="width: 400px; display: inline-block;  height: 500px; margin: 20px;">
+                                <div>
+                                    <div>
+                                        <form class="rating_food" id="rate_food">
+                                            <fieldset class="food_fsets" id="rate_food_fset">
+                                            <div class="rate">
+                                                <input type="radio" class="food_stars" id="food_star5" name="rate"/>
+                                                <label for="food_star5" title="text">5 stars</label>
+                                                <input type="radio" class="food_stars" id="food_star4" name="rate"/>
+                                                <label for="food_star4" title="text">4 stars</label>
+                                                <input type="radio" class="food_stars" id="food_star3" name="rate"/>
+                                                <label for="food_star3" title="text">3 stars</label>
+                                                <input type="radio" class="food_stars" id="food_star2" name="rate"/>
+                                                <label for="food_star2" title="text">2 stars</label>
+                                                <input type="radio" class="food_stars" id="food_star1" name="rate"/>
+                                                <label for="food_star1" title="text">1 star</label>
+                                            </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+
+                                    <div>
+                                        <form class="rating_service" id="rate_service">
+                                            <fieldset class="service_fsets" id="rate_service_fset">
+                                            <div class="rate">
+                                                <input type="radio" class="stars" id="service_star5" name="rate"/>
+                                                <label for="service_star5" title="text">5 stars</label>
+                                                <input type="radio" class="stars" id="service_star4" name="rate"/>
+                                                <label for="service_star4" title="text">4 stars</label>
+                                                <input type="radio" class="stars" id="service_star3" name="rate"/>
+                                                <label for="service_star3" title="text">3 stars</label>
+                                                <input type="radio" class="stars" id="service_star2" name="rate"/>
+                                                <label for="service_star2" title="text">2 stars</label>
+                                                <input type="radio" class="stars" id="service_star1" name="rate"/>
+                                                <label for="service_star1" title="text">1 star</label>
+                                            </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div id="modal-id">
+
+                                </div>
+                            </div>
+                            <!--  modal footer -->
+                            <div class="modal-footer">
+
                             </div>
                         </div>
                     </div>
@@ -615,6 +680,44 @@
                         $("#toTime").val("16:00:00");
                         $("#forDay").attr("value", output);
                         $("#WorkTimeMessage").hide();
+                    });
+
+                    $(".restaurants").on('click', function(event){
+
+                        //ocisti modal pre svakog novog prikaza
+                        $("#modal-id").empty();
+
+                        var restaurant = $(this).attr('id');
+                        var id = restaurant.substring(0, restaurant.length - 4);
+
+                        $(".rating_food").attr('id', id + 'rate_food');
+                        $(".rating_service").attr('id', id + "rate_service");
+
+                        console.log($(".rating_food").attr('id'));
+                        console.log($(".rating_service").attr('id'));
+
+                        var request = {
+                            "restaurant": id,
+                            "userEmail": "@userEmail"
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/visitInfo",
+                            data: JSON.stringify(request),
+                            contentType: 'application/json',
+                            success: function (response) {
+                               var from_server = $.parseJSON(response);
+                               $("#modal-id").append("<p>Restaurant id: " + from_server["restaurant"] + "</p>");
+                               $("#modal-id").append("<p>User's email: " + from_server["userEmail"] + "</p>");
+                               $("#rateMealAndService").modal('toggle');
+                            },
+                            error: function(error) {
+                                alert(error.responseText);
+                            }
+                        });
+                        event.preventDefault();
+
                     });
 
             </script>
