@@ -1,0 +1,64 @@
+@home("Order"){
+    <div>
+        <i style="float: right;
+            margin-right: 40px;">logged in: <b>@session.get("connected")</b> </i> <br> <br>
+
+        <center>
+
+            @if(session.get("userType").equals("waiter")) {
+                <div class="container-fluid" style="width: 70%; background-color: #e0ebeb; border-color: black;
+                border-style: solid; border-width: 1px; border-radius: 20px">
+                    <h1>Create new order</h1>
+                    <br> <br>
+                    <form>
+                    <div class="col-sm-3 col-md-4 col-lg-2" >
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="usr" placeholder="table ID">
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4 col-lg-8" >
+
+                        <div class="col-sm-3 col-md-4 col-lg-4" >
+
+
+
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 col-lg-4" style="text-align: center;">
+                          <input type="text" class="form-control" id="usr" placeholder="cena" readonly>
+                        </div>
+
+                          <div class="col-sm-3 col-md-4 col-lg-4" >
+
+
+
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3 col-md-4 col-lg-2" >
+                        <p>Govedji restoran</p>
+                    </div>
+
+                    <br><br><br>
+                    <div class="col-lg-4">
+
+                        <select class="input-large form-control">
+                            <option value="Cevapi">Cevapi</option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-4">
+
+                    </div>
+
+                    <div class="col-lg-4">
+                    </div>
+                    </form>
+                </div>
+            }
+
+        </center>
+
+    </div>
+}
