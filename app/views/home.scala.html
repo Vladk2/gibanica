@@ -145,13 +145,7 @@
 
     <body style="background-color: #fff1cc">
 
-        @if(session.get("userType").equals("guest")){
-            <script >
-                    $(document).ready(function () {
-                        $("#visits").show();
-                    });
-            </script>
-        }
+     
             <!--  Top Menu Bar -->
         <nav class="navbar navbar-inverse" >
             <div class="container" >
@@ -180,8 +174,10 @@
                             color: #f47441" id="profButton"> Profile </b></a>       </li>
                         <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
                             color: #f47441" id="restButton"> Restaurants </b></a></li>
-                        <li id="visits"  style="display: none"> <a href="/visits" ><b style="font-size: 130%;
-                            color: #f47441" id="visitsButton"> Visits </b></a></li>
+                        @if(session.get("userType").equals("guest")) {
+                            <li id="visits"> <a href="/visits" ><b style="font-size: 130%;
+                                color: #f47441" id="visitsButton"> Visits </b></a></li>
+                        }
                         <li id="friends" > <a href="#" ><b style="font-size: 130%;
                             color: #f47441"> Friends </b></a></li>
                         <li class="divider" style="background-color: white"></li>
