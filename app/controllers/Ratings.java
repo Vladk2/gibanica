@@ -58,6 +58,73 @@ public class Ratings extends Controller {
         return badRequest("Vi niste gost");
     }
 
+    @SuppressWarnings("Duplicates")
+    public static Result rateFoodAJAX() {
+        try (Connection connection = DB.getConnection()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            HashMap<String, String> response = objectMapper.convertValue(ajax_json, HashMap.class);
+
+            /* update table restaurantsRating (userId, restaurantId, visitId, ratingFood) iz requesta */
+
+            connection.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "Update restaurantsRating set mealRating = ? where userId = (Select userId " +
+                            "from users where email = ?) and restaurantId = ? and " +
+                            "visitId = ?;"
+            );
+
+            preparedStatement.setInt(1, Integer.parseInt(response.get("food_rating")));
+            preparedStatement.setString(2, response.get("userId"));
+            preparedStatement.setInt(3, Integer.parseInt(response.get("restaurantId")));
+            preparedStatement.setInt(4,Integer.parseInt(response.get("visitId")));
+
+            preparedStatement.execute();
+
+            connection.commit();
+
+
+            return ok(ajax_json.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return badRequest("Nesto se cudno desilo");
+        }
+    }
+
+    @SuppressWarnings("Duplicates")
+    public static Result rateServiceAJAX() {
+        try (Connection connection = DB.getConnection()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            HashMap<String, String> response = objectMapper.convertValue(ajax_json, HashMap.class);
+
+            /* update table restaurantsRating (userId, restaurantId, visitId, ratingFood) iz requesta */
+
+            connection.setAutoCommit(false);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "Update restaurantsRating set serviceRating = ? where userId = (Select userId " +
+                            "from users where email = ?) and restaurantId = ? and " +
+                            "visitId = ?"
+            );
+
+            preparedStatement.setInt(1, Integer.parseInt(response.get("service_rating")));
+            preparedStatement.setString(2, response.get("userId"));
+            preparedStatement.setInt(3, Integer.parseInt(response.get("restaurantId")));
+            preparedStatement.setInt(4,Integer.parseInt(response.get("visitId")));
+
+            preparedStatement.execute();
+
+            connection.commit();
+
+            return ok(ajax_json.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return badRequest("Nesto se cudno desilo");
+        }
+    }
+
     public static Result rateRestaurantAJAX() {
         try (Connection connection = DB.getConnection()) {
             connection.setAutoCommit(false);
