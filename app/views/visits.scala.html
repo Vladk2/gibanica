@@ -133,15 +133,15 @@
                                         <form class="rating_service" id="rate_service">
                                             <fieldset class="service_fsets" id="rate_service_fset">
                                             <div class="modal_rate" id="rate_service_inputs">
-                                                <input type="radio" class="stars" id="service_star5" name="rate"/>
+                                                <input type="radio" class="service_stars" id="service_star5" name="rate"/>
                                                 <label for="service_star5" title="text">5 stars</label>
-                                                <input type="radio" class="stars" id="service_star4" name="rate"/>
+                                                <input type="radio" class="service_stars" id="service_star4" name="rate"/>
                                                 <label for="service_star4" title="text">4 stars</label>
-                                                <input type="radio" class="stars" id="service_star3" name="rate"/>
+                                                <input type="radio" class="service_stars" id="service_star3" name="rate"/>
                                                 <label for="service_star3" title="text">3 stars</label>
-                                                <input type="radio" class="stars" id="service_star2" name="rate"/>
+                                                <input type="radio" class="service_stars" id="service_star2" name="rate"/>
                                                 <label for="service_star2" title="text">2 stars</label>
-                                                <input type="radio" class="stars" id="service_star1" name="rate"/>
+                                                <input type="radio" class="service_stars" id="service_star1" name="rate"/>
                                                 <label for="service_star1" title="text">1 star</label>
                                             </div>
                                             </fieldset>
@@ -170,7 +170,90 @@
                     // promena boje dugmeta kad je na profilnoj
                     $("#visitsButton").css("color", "#ffb79b");
 
+                $(document).ready(function() {
                     var i = 0;
+                    var j = 0;
+                    var k = 0;
+
+                    $(".rating_food").click(function(event) {
+                        var id = $(this).attr('id');
+
+                        console.log(id);
+
+                        if (j != 0)
+                            return;
+                        else {
+                            j++;
+                        }
+                        $(".food_stars").click(function() {
+                            var star_id = $(this).attr('id');
+                            var form_ = {
+                                "food_rating": $(this).is(':checked') ? star_id[star_id.length - 1] : '0',
+                                "restaurantId": $(".rating_food").attr('id'),
+                                "userId": "@userEmail",
+                                "visitId": 4
+                            };
+
+                            console.log(form_["food_rating"]);
+                            console.log(form_["restaurantId"]);
+
+                            $.ajax({
+                                type: "POST",
+                                url: "/rateFood",
+                                data: JSON.stringify(form_),
+                                contentType: 'application/json',
+                                success: function (response) {
+                                    //$(".food_fsets").prop("disabled", true);
+                                    $("#modal-id").append(response);
+                                },
+                                error: function (error) {
+                                    alert(error.responseText);
+                                }
+
+                            });
+                            event.preventDefault();
+                        });
+                    });
+
+                    $(".rating_service").on('click', function(){
+                       var id = $(this).attr('id');
+
+                        console.log(id);
+
+                        if (j != 0)
+                            return;
+                        else {
+                            j++;
+                        }
+                        $(".service_stars").click(function() {
+                            var star_id = $(this).attr('id');
+                            var form_ = {
+                                "food_rating": $(this).is(':checked') ? star_id[star_id.length - 1] : '0',
+                                "restaurantId": $(".rating_service").attr('id'),
+                                "userId": "@userEmail",
+                                "visitId": 4
+                            };
+
+                            console.log(form_["food_rating"]);
+                            console.log(form_["restaurantId"]);
+
+                            $.ajax({
+                                type: "POST",
+                                url: "/rateService",
+                                data: JSON.stringify(form_),
+                                contentType: 'application/json',
+                                success: function (response) {
+                                    //$(".food_fsets").prop("disabled", true);
+                                    $("#modal-id").append(response);
+                                },
+                                error: function (error) {
+                                    alert(error.responseText);
+                                }
+
+                            });
+                            event.preventDefault();
+                        });
+                    });
 
                     $(".rating").click(function (event) {
                         var id = $(this).attr('id');
