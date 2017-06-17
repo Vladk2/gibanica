@@ -70,9 +70,9 @@ public class Ratings extends Controller {
             connection.setAutoCommit(false);
 
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "Update table restaurantsRating set mealRating = ? where userId = (Select userId " +
-                            "from users where email = ?), restaurantId = ?, " +
-                            "visitId = ?"
+                    "Update restaurantsRating set mealRating = ? where userId = (Select userId " +
+                            "from users where email = ?) and restaurantId = ? and " +
+                            "visitId = ?;"
             );
 
             preparedStatement.setInt(1, Integer.parseInt(response.get("food_rating")));
@@ -104,8 +104,8 @@ public class Ratings extends Controller {
             connection.setAutoCommit(false);
 
             PreparedStatement preparedStatement = connection.prepareStatement(
-                    "Update table restaurantsRating set serviceRating = ? where userId = (Select userId " +
-                            "from users where email = ?), restaurantId = ?, " +
+                    "Update restaurantsRating set serviceRating = ? where userId = (Select userId " +
+                            "from users where email = ?) and restaurantId = ? and " +
                             "visitId = ?"
             );
 

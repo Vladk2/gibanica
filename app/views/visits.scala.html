@@ -185,15 +185,18 @@
                         }
                         $(".food_stars").click(function() {
                             var star_id = $(this).attr('id');
+                            var restaurantId = $(".rating_food").attr('id');
                             var form_ = {
                                 "food_rating": $(this).is(':checked') ? star_id[star_id.length - 1] : '0',
-                                "restaurantId": $(".rating_food").attr('id'),
+                                "restaurantId": restaurantId.substring(0, restaurantId.length - 9),
                                 "userId": "@userEmail",
-                                "visitId": 4
+                                "visitId": "1"
                             };
 
                             console.log(form_["food_rating"]);
                             console.log(form_["restaurantId"]);
+                            console.log(form_["userId"]);
+                            console.log(form_["visitId"]);
 
                             $.ajax({
                                 type: "POST",
@@ -218,18 +221,19 @@
 
                         console.log(id);
 
-                        if (j != 0)
+                        if (k != 0)
                             return;
                         else {
-                            j++;
+                            k++;
                         }
                         $(".service_stars").click(function() {
                             var star_id = $(this).attr('id');
+                            var restaurantId = $(".rating_service").attr('id');
                             var form_ = {
-                                "food_rating": $(this).is(':checked') ? star_id[star_id.length - 1] : '0',
-                                "restaurantId": $(".rating_service").attr('id'),
+                                "service_rating": $(this).is(':checked') ? star_id[star_id.length - 1] : '0',
+                                "restaurantId": restaurantId.substring(0, restaurantId.length - 12),
                                 "userId": "@userEmail",
-                                "visitId": 4
+                                "visitId": "1"
                             };
 
                             console.log(form_["food_rating"]);
