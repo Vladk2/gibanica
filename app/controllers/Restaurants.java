@@ -18,6 +18,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.*;
 
+import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -297,6 +298,7 @@ public class Restaurants extends Controller {
         JsonNode json = request().body().asJson();
         RestSection section = Json.fromJson(json, RestSection.class);
         if(section.sectionColor != null) {
+
             try (Connection connection = DB.getConnection()){
 
                 if (connection.prepareStatement("Insert into sectornames (sectorName, sectorColor, restaurantId)" +
@@ -337,7 +339,7 @@ public class Restaurants extends Controller {
     }
 
 
-    public static Result saveSeatConf() {
+    public static Result saveSeatConf() throws SQLException {
 
 
         JsonNode j =  request().body().asJson();
@@ -345,8 +347,25 @@ public class Restaurants extends Controller {
         ObjectMapper mapper = new ObjectMapper();
         Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
         showMenuSeatPage = false;
+        Connection connection = null;
+        PreparedStatement insertSeat = null;
+        StringJoiner sj = new StringJoiner(", ");
+        for(ArrayList value : result.values()) {
+            for (Object s : value) {
+                StringBuilder build = new StringBuilder("Insert into seatconfig (posX, posY, sectorColor, restaurantId) values ");
+                String elem = "(?, ?, ?, ?)";
+                sj.add(elem);
+            }
+        }
 
-        try (Connection connection = DB.getConnection()){
+
+        try {
+
+
+            connection = DB.getConnection();
+
+            connection.setAutoCommit(false);
+
             for(ArrayList value : result.values()) {
                 for (Object s : value) {
                     String polje = s.toString();
@@ -356,34 +375,68 @@ public class Restaurants extends Controller {
                     String[] deo2 = polje.split("\\|");
                     String boja = deo2[1];
 
-                    if (connection.prepareStatement("Insert into seatconfig (posX, posY, sectorColor, restaurantId) " +
-                            "values (" + "\"" + posX + "\""
-                            + ", \"" + posY + "\"" + ", \"" + boja + "\", ( select restaurantId from restaurants where name =" +
-                            "\"" + addedRestaurantName + "\"))" + ";").execute()) {
-                    }
+
+                    insertSeat = connection.prepareStatement("Insert into seatconfig (posX, posY, sectorColor, restaurantId)" +
+                            " values (?,?,?, ( select restaurantId from restaurants where name = ?));");
+
+                    insertSeat.setString(1, posX);
+                    insertSeat.setString(2, posY);
+                    insertSeat.setString(3, boja);
+                    insertSeat.setString(4, addedRestaurantName);
+                    insertSeat.executeUpdate();
+
                 }
 
             }
+
         }
-        catch (SQLException e) {
-            e.printStackTrace();
+        catch (SQLException sqle){
+
+            try {
+                if (connection != null && !connection.getAutoCommit()) {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                }
+                if (insertSeat != null) {
+                    insertSeat.close();
+                }
+
+            } catch(SQLException excep) {
+                excep.printStackTrace();
+            }
+            sqle.printStackTrace();
+        }
+        finally {
+
+            if(connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
         }
 
         return ok();
     }
-
-    public static Result editSeatConf() {
+   // update seatconfig set sectorColor = ? where posX = ? and posY = ? and restaurantId = (select restaurantId from restaurants where name = ?);
+    public static Result editSeatConf() throws SQLException  {
 
         JsonNode j =  request().body().asJson();
 
         String myRestName = session("myRestName");
         ObjectMapper mapper = new ObjectMapper();
         Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
+        Connection connection = null;
+        PreparedStatement updateSeat = null;
 
-        try (Connection connection = DB.getConnection()){
+        String query = "update seatconfig set sectorColor = ? where posX = ? and posY = ? and restaurantId = (select restaurantId from restaurants where name = ?);";
+        long start = System.currentTimeMillis();
+        try {
+
+            connection = DB.getConnection();
+            connection.setAutoCommit(false);
+            int i = 0;
+            updateSeat = connection.prepareStatement(query);
             for(ArrayList value : result.values()) {
                 for (Object s : value) {
-
                     String polje = s.toString();
                     String[] deo = polje.split(":");
                     String posX = deo[1];
@@ -391,18 +444,47 @@ public class Restaurants extends Controller {
                     String[] deo2 = polje.split("\\|");
                     String boja = deo2[1];
 
-                    if (connection.prepareStatement("Update seatconfig " +
-                            "set sectorColor = \"" + boja + "\" where posX = \"" + posX + "\" and posY = \"" + posY + "\" and restaurantId = ( select restaurantId from restaurants where name = " +
-                            "\"" + myRestName + "\")" + ";").execute()) {
-                    }
+                    updateSeat.setString(i + 1, boja );
+                    updateSeat.setString(i + 2, posX );
+                    updateSeat.setString(i + 3, posY );
+                    updateSeat.setString(i + 4, myRestName );
+
+                    updateSeat.addBatch();
+
+
                 }
 
             }
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+           updateSeat.executeBatch();
+          //  System.out.println("REZ JE " + rez);
+            connection.commit();
+            long end = System.currentTimeMillis();
+            System.out.println("Batch time was " + (end - start));
 
+        }
+        catch (SQLException sqle){
+
+            try {
+                if (connection != null && !connection.getAutoCommit()) {
+                    System.err.print("Transaction is being rolled back\n");
+                    connection.rollback();
+                }
+                if (updateSeat != null) {
+                    updateSeat.close();
+                }
+
+            } catch(SQLException excep) {
+                excep.printStackTrace();
+            }
+            sqle.printStackTrace();
+        }
+        finally {
+
+            if(connection != null) {
+
+                connection.close();
+            }
+        }
 
         return ok();
     }

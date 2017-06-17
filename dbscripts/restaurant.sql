@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS baklava.victualsanddrinks (
 );
 
 CREATE TABLE IF NOT EXISTS baklava.seatconfig (
+  seatId INT(12)       NOT NULL PRIMARY KEY AUTO_INCREMENT,
   posX         VARCHAR(3)  NOT NULL,
   posY         VARCHAR(3)  NOT NULL,
   sectorColor  VARCHAR(15) NOT NULL,
