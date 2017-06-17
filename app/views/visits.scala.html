@@ -295,11 +295,23 @@
 
                     });
 
+                    var root = "ws:" + '//' + location.host + "/proceed_with_order";
+
+                    var webSocket = new WebSocket(root, "protocolOne");
+
+                    webSocket.onmessage = function (event) {
+                        console.log(event.data);
+                    };
+
                     $(".restNameVisits").on('click', function(event){
 
                         //ocisti modal pre svakog novog prikaza
                         $("#modal-id").empty();
                         $("#cow")[0].play();
+
+                        //webSocket.onopen = function (event) {
+                            webSocket.send("@userEmail");
+                        //};
 
                         var restaurant = $(this).attr('id');
                         var id = restaurant.substring(0, restaurant.length - 4);
