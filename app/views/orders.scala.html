@@ -16,6 +16,7 @@
                     <div class="col-sm-3 col-md-4 col-lg-2" >
                         <div class="form-group">
                             <select class="input-large form-control" style="width: 150px">
+                                <!-- for petljom dodaj sve musteriji koje imaju rezervaciju trenutno -->
                                 <option name="brRez+imeIPrezime">2: Miljan Maljkovic</option>
                             </select>
                         </div>
@@ -59,7 +60,8 @@
                             <tbody id="vicList">
                             @for(victual <- menu) {
                                 @if(victual.tip == "victual") {
-                                    <tr style="cursor:pointer" class="orderFood"><td id="@victual.name">@victual.name</td>
+                                    <tr style="cursor:pointer" about="@victual.price" class="orderFood" id="@victual.name">
+                                        <td>@victual.name</td>
                                         <td>@victual.description</td>
                                         <td>@victual.price</td>
                                     </tr>
@@ -84,7 +86,8 @@
                         <tbody id="drinkList">
                         @for(drink <- menu) {
                             @if(drink.tip == "drink") {
-                                <tr style="cursor:pointer" class="orderFood"><td id="@drink.name">@drink.name</td>
+                                <tr style="cursor:pointer" about="@drink.price" class="orderDrink" id="@drink.name">
+                                    <td>@drink.name</td>
                                     <td>@drink.description</td>
                                     <td>@drink.price</td>
                                 </tr>
@@ -107,12 +110,7 @@
 
                                 </tr>
                             </thead>
-                            <tbody id="vicList">
-
-                                    <tr><td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
+                            <tbody id="orderList">
 
                             </tbody>
                         </table>
@@ -131,4 +129,119 @@
         </center>
 
     </div>
+
+    <script>
+        $(document).ready(function(){
+            $('.orderFood').on('click', function(e) {
+                //name to add
+                var name = $(this).attr('id');
+                //price to add
+                var price = $(this).attr('about');
+                //check if food is already in order list
+                var check = false;
+
+                $("#orderList").each(function(){
+                    $(this).find('td').each(function(){
+                        if($(this).text() === name) {
+                            var current_price = $("#" + name + "price").text();
+                            $("#" + name + "price").html(parseInt(current_price) + 1);
+                            check = true;
+                        }
+                    });
+                });
+
+                if(!check){
+                    $("#orderList").append("<tr> <td>" + name + "</td>"
+                            + "<td>" + price + "</td>"
+                            + "<td id=\"" + name + "price\">" + "1</td></tr>");
+                }
+
+                e.preventDefault();
+            });
+            $('.orderDrink').on('click', function(e) {
+                //name to add
+                var name = $(this).attr('id');
+                //price to add
+                var price = $(this).attr('about');
+                //check if food is already in order list
+                var check = false;
+
+                $("#orderList").each(function(){
+                    $(this).find('td').each(function(){
+                        if($(this).text() === name) {
+                            var current_price = $("#" + name + "price").text();
+                            $("#" + name + "price").html(parseInt(current_price) + 1);
+                            check = true;
+                        }
+                    });
+                });
+
+                if(!check){
+                    $("#orderList").append("<tr> <td>" + name + "</td>"
+                            + "<td>" + price + "</td>"
+                            + "<td id=\"" + name + "price\">" + "1</td></tr>");
+                }
+
+                e.preventDefault();
+            });
+
+            $("#addOrder").on('click', function(e){
+                // order Id ce biti broj rezervacije gde se kreira porudzbina
+                var order = {"orderId": "0", "victualsDrinks": []};
+
+                var global_price = 0.0;
+                var prices = [];
+
+                $("#orderList").each(function(){
+                    $(this).find('tr').each(function(){
+                        var i = 0;
+                        var item = {};
+                        $(this).find('td').each(function(){
+                            var item_price = 0.0;
+                            if(i === 0){
+                                item["name"] = $(this).text();
+                            } else if(i === 1){
+                                item["price"] = $(this).text();
+                            } else if(i === 2){
+                                item["quantity"] = $(this).text();
+                                item_price = parseFloat(item["price"]) * parseInt(item["quantity"]);
+                            }
+                            prices.push(item_price);
+                            i++;
+                        });
+                        order["victualsDrinks"].push(item);
+                    });
+                });
+
+                prices.forEach(function(element) {
+                    global_price += element;
+                });
+
+                order["price"] = global_price.toString();
+
+                console.log(order);
+
+                /*Object.keys(order).forEach(function() {
+                    var value = order["victualsDrinks"];
+                    console.log(value);
+                });*/
+
+                $.ajax({
+                    type: "POST",
+                    url: "/createOrder",
+                    data: JSON.stringify(order),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        alert(response);
+                    },
+                    error: function (error) {
+                        alert(error.responseText);
+                    }
+
+                });
+
+                e.preventDefault();
+            });
+        });
+    </script>
 }
