@@ -47,7 +47,7 @@
                         <b style="align-content: center;font-size: medium"> FOOD MENU </b> <br> <br>
                         <div  style="height: 130px;
                             overflow: auto">
-                        <table class="table-bordered table-striped" style="width: 450px;">
+                        <table class="table-bordered" style="width: 450px;">
                             <thead>
                                 <tr>
                                     <th style="width: 150px">Victual Name</th>
@@ -59,7 +59,7 @@
                             <tbody id="vicList">
                             @for(victual <- menu) {
                                 @if(victual.tip == "victual") {
-                                    <tr><td id="@victual.name">@victual.name</td>
+                                    <tr style="cursor:pointer" class="orderFood"><td id="@victual.name">@victual.name</td>
                                         <td>@victual.description</td>
                                         <td>@victual.price</td>
                                     </tr>
@@ -72,7 +72,7 @@
                             <b style="align-content: center;font-size: medium"> DRINK MENU </b> <br> <br>
                         <div  style="height: 130px;
                             overflow: auto">
-                        <table class="table-bordered table-striped" style="width: 450px;">
+                        <table class="table-bordered" style="width: 450px;">
                         <thead>
                             <tr>
                                 <th style="width: 150px">Drink Name</th>
@@ -84,7 +84,7 @@
                         <tbody id="drinkList">
                         @for(drink <- menu) {
                             @if(drink.tip == "drink") {
-                                <tr><td id="@drink.name">@drink.name</td>
+                                <tr style="cursor:pointer" class="orderFood"><td id="@drink.name">@drink.name</td>
                                     <td>@drink.description</td>
                                     <td>@drink.price</td>
                                 </tr>
