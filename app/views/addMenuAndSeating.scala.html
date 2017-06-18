@@ -142,34 +142,38 @@
 
             var vicName = $('#vicName').val();
             if(vicName == ""){
-                $("#vicErrMessage").html("You must enter a drink name!").fadeIn();
+                $("#vicErrMessage").html("You must enter a victual name!").fadeIn();
             }
-            if($("#" + vicName).length == 0) {
-            var vicDesc = $('#vicDesc').val();
-            var vicPrice = $('#vicPrice').val();
-            var victual = {
-                'name': vicName, 'description': vicDesc,
-                'price': vicPrice
+            else {
+                if ($("#" + vicName).length == 0) {
+                    var vicDesc = $('#vicDesc').val();
+                    var vicPrice = $('#vicPrice').val();
+                    var victual = {
+                        'name': vicName, 'description': vicDesc,
+                        'price': vicPrice
 
-            };
-            myJsRoutes.controllers.Restaurants.addVictualAJAX().ajax({
-                data: JSON.stringify(victual),
-                contentType: 'application/json',
-                success: function (jelo) {
-                    $('#vicList').append('<tr id="' + jelo.name + '"> <td>' + jelo.name + '</td> <td>'
-                            + jelo.description + '</td> <td>' + jelo.price + '</td> </tr>');
-                    $("#vicErrMessage").html("");
-                    $('#vicName').val("");
-                    $('#vicDesc').val("");
-                    $('#vicPrice').val("");
-                },
-                error: function () {
-                    $("#vicErrMessage").html("You cannot put letters in the price box").fadeIn();
-                    $('#vicPrice').val("");
+                    };
+                    myJsRoutes.controllers.Restaurants.addVictualAJAX().ajax({
+                        data: JSON.stringify(victual),
+                        contentType: 'application/json',
+                        success: function (jelo) {
+                            $('#vicList').append('<tr id="' + jelo.name + '"> <td>' + jelo.name + '</td> <td>'
+                                    + jelo.description + '</td> <td>' + jelo.price + '</td> </tr>');
+                            $("#vicErrMessage").html("");
+                            $('#vicName').val("");
+                            $('#vicDesc').val("");
+                            $('#vicPrice').val("");
+                        },
+                        error: function () {
+                            $("#vicErrMessage").html("You cannot put letters in the price box").fadeIn();
+                            $('#vicPrice').val("");
+                        }
+                    });
                 }
-            });
-        }
-            else { $("#vicErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn(); }
+                else {
+                    $("#vicErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn();
+                }
+            }
         });
 
         // add Drink ajax call
@@ -180,31 +184,35 @@
             if(drinkName == ""){
                 $("#drinkErrMessage").html("You must enter a drink name!").fadeIn();
             }
-            if($("#" + drinkName).length == 0) {
-                var drinkDesc = $('#drinkDesc').val();
-                var drinkPrice = $('#drinkPrice').val();
-                var victual = {
-                    'name': drinkName, 'description': drinkDesc,
-                    'price': drinkPrice
-                };
-                myJsRoutes.controllers.Restaurants.addDrinkAJAX().ajax({
-                    data: JSON.stringify(victual),
-                    contentType: 'application/json',
-                    success: function (pice) {
-                        $('#drinkList').append('<tr> <td id="' + pice.name + '">' + pice.name + '</td> <td>'
-                                + pice.description + '</td> <td>' + pice.price + '</td> </tr>');
-                        $("#drinkErrMessage").html("");
-                        $('#drinkName').val("");
-                        $('#drinkDesc').val("");
-                        $('#drinkPrice').val("");
-                    },
-                    error: function () {
-                        $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
-                        $('#drinkPrice').val("");
-                    }
-                });
+            else {
+                if ($("#" + drinkName).length == 0) {
+                    var drinkDesc = $('#drinkDesc').val();
+                    var drinkPrice = $('#drinkPrice').val();
+                    var victual = {
+                        'name': drinkName, 'description': drinkDesc,
+                        'price': drinkPrice
+                    };
+                    myJsRoutes.controllers.Restaurants.addDrinkAJAX().ajax({
+                        data: JSON.stringify(victual),
+                        contentType: 'application/json',
+                        success: function (pice) {
+                            $('#drinkList').append('<tr> <td id="' + pice.name + '">' + pice.name + '</td> <td>'
+                                    + pice.description + '</td> <td>' + pice.price + '</td> </tr>');
+                            $("#drinkErrMessage").html("");
+                            $('#drinkName').val("");
+                            $('#drinkDesc').val("");
+                            $('#drinkPrice').val("");
+                        },
+                        error: function () {
+                            $("#drinkErrMessage").html("You cannot put letters in the price box").fadeIn();
+                            $('#drinkPrice').val("");
+                        }
+                    });
+                }
+                else {
+                    $("#drinkErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn();
+                }
             }
-            else { $("#drinkErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn(); }
 
         });
 

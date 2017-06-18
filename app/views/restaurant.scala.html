@@ -68,13 +68,26 @@
                             float: left;
                             color: black;
                             margin: 10px;"><b>ASSIGN WORKING HOURS</b></a>
+                        <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#requestBid" style="width: 240px;
+                            float: left;
+                            color: black;
+                            margin: 10px;"><b>REQUEST A BID</b></button>
+                        <a class="btn btn-warning btn-block" href="/offers" style="width: 240px;
+                            float: left;
+                            color: black;
+                            margin: 10px;"><b>OFFERS</b></a> <br>
                         <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addAnEmployee" style="width: 240px;
                             float: left;
-                            margin: 10px;
+                            margin-left: 150px;
+                            margin-right: 10px;
+                            margin-top: 10px;
                             color: black"><b>ADD AN EMPLOYEE</b></button>
                         <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#addABidder" style="width: 240px;
+                            float: left;
                             color: black;
-                            margin: 10px;"><b>ADD A BIDDER</b></button> <br>
+                            margin: 10px;
+                            "><b>ADD A BIDDER</b></button> <br>
+
                         <hr style="width: 100%;
                             color: black;
                             height: 1px;
@@ -485,6 +498,7 @@
                 </div>
 
             <script>
+                    // script for assign working hours modal
                     // datum za radno vreme ------
                     var d = new Date();
                     var month = d.getMonth()+1;
@@ -494,6 +508,7 @@
                             (day<10 ? '0' : '') + day;
                     $("#forDay").attr("min", output);
                     $("#forDay").attr("value", output);
+
                     // ------
 
                     $(document).ready(function () {
@@ -531,23 +546,39 @@
                         var sektor = $("#selectSector").val();
                         var workerEmail = $("#selectWorker option:selected").attr("id");
 
-                        var worktime = {
-                            'date': dan, 'startTime': odKad, 'endTime': doKad,
-                            'workingSector': sektor, 'workerEmail': workerEmail
-                        };
-                        myJsRoutes.controllers.Restaurants.addWorkTime().ajax({
-                            data: JSON.stringify(worktime),
-                            contentType: 'application/json',
-                            success: function () {
-                                $("#WorkTimeMessage").html("<div class='alert alert-success' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Working hours added! </div>");
-                                $("#WorkTimeMessage").show();
-                            },
-                            error: function() {
-                                $("#WorkTimeMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Employee already works on that day! </div>");
-                                $("#WorkTimeMessage").show();
+                        var minDate = new Date(output);
+                        var maxDate = new Date("2020/1/16");
+                        var odabranDate = new Date(dan);
+                        if(odabranDate < minDate)
+                        {
+                            $("#WorkTimeMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Please choose some day from future! :) </div>");
+                            $("#WorkTimeMessage").show();
+                        }
+                        else if(odabranDate > maxDate ){
+                            $("#WorkTimeMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Let's not think that far ahead :) </div>");
+                            $("#WorkTimeMessage").show();
+                        }
+                        else {
 
-                            }
-                         });
+                            var worktime = {
+                                'date': dan, 'startTime': odKad, 'endTime': doKad,
+                                'workingSector': sektor, 'workerEmail': workerEmail
+                            };
+                            myJsRoutes.controllers.Restaurants.addWorkTime().ajax({
+                                data: JSON.stringify(worktime),
+                                contentType: 'application/json',
+                                success: function () {
+                                    $("#WorkTimeMessage").html("<div class='alert alert-success' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Working hours added! </div>");
+                                    $("#WorkTimeMessage").show();
+                                },
+                                error: function () {
+                                    $("#WorkTimeMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Employee already works on that day! </div>");
+                                    $("#WorkTimeMessage").show();
+
+                                }
+                            });
+
+                        }
 
                         });
 
@@ -562,6 +593,235 @@
 
 
             </script>
+
+                <!--- MODAL ZA POTRAZNJU  -->
+            <div class="modal fade" id="requestBid" >
+                <div class="modal-dialog" >
+                    <div class="modal-content" >
+                            <!--  modal header -->
+                        <div class="modal-header">
+                            <h3 class="modal-title" style="color: black;
+                                font-family: Verdana;
+                                font-size: 24pt"> WRITE A NEW REQUEST </h3>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                            <!--  modal body -->
+                        <br> <br>
+                        <label for="fromTime">Bidding starts from:</label> <br>
+                            <input class="form-control" style="margin-bottom: 15px;
+                                width: 250px;" type="date" min="" max="2018-12-31" id="biddStart" name="biddStart" required>
+                        <label for="toTime">Bidding ends:</label> <br>
+                            <input class="form-control" style="margin-bottom: 15px;
+                                width: 250px;" type="date" min="" max="2018-12-31" id="biddEnd" name="biddEnd" required>
+
+                        <br>
+
+                        <div name="foodAdding">
+                            <h3 style=""> Needed groceries: </h3>
+                            <hr style="width: 100%;
+                                color: black;
+                                height: 1px;
+                                background-color: #d8d8d8;" />
+
+                            <label for="vicName">Food/Drink Name:</label> <br>
+                            <input class="form-control" style="margin-bottom: 15px;
+                                width: 300px;" type="text" name="foodName" id="foodName" >
+
+                            <label for="vicPrice">Amount:</label> <br>
+                            <input class="form-control" style="margin-bottom: 15px;
+                                width: 300px;" type="text" name="foodAmount" id="foodAmount" >
+                            <p id="vicErrMessage" style="color: red;
+                                display: none"> </p>
+                            <a class="btn btn-warning" id="addVictual" style="width: 150px"> ADD </a> <br> <br>
+                            <div style="height: 130px;
+                                overflow: auto">
+                                <table class="table-bordered table-striped" id="groceriesTable" style="width: 530px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 450px">Name</th>
+                                            <th style="width: 70px">Amount</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vicList">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <br> <br> <br>
+
+                        <div style="height:50px;display:none" id="AddRequestMessage"> </div> <br>
+
+
+
+                        <button class="btn btn-warning btn-block" id="addRequest"  style="width: 125px; float:left; margin-top:4px; margin-left:185px;
+                            "> SEND REQUEST </button>
+                        <button class="btn btn-warning btn-block" id="closeRequestModal"  style="width: 80px;float:left; margin-left:20px;
+                             "> CLOSE </button> <br> <br>
+                            <div> <p style="margin:50px;"></p> </div>
+
+
+
+
+                        <!--  modal footer -->
+                    <div class="modal-footer">
+                    </div>
+                </div>
+             </div>
+            </div>
+
+                <script>   // script for add request modal
+                        var groceries = [];
+
+                        $("#addVictual").click(function () {
+
+                            var vicName = $('#foodName').val();
+                            var amount = $('#foodAmount').val();
+
+                            var ok = true;
+                            if(vicName == "" || amount == "") {
+                                $("#vicErrMessage").html("You must fill both name and the amount.").fadeIn();
+                                ok = false;
+                            }
+                            else {
+                                if ($("#" + vicName).length != 0) {
+                                    $("#vicErrMessage").html("Sorry, you cannot add victual/drink with the same name").fadeIn();
+                                    ok = false;
+                                }
+                            }
+
+                            var am = parseInt(amount);
+                            if(!(Number.isInteger(am))) {
+                                $("#vicErrMessage").html("Amount must be an integer number!").fadeIn();
+                                ok = false;
+                            }
+                            if(am < 1){
+                                $("#vicErrMessage").html("Amount must be a positive number!").fadeIn();
+                                ok = false;
+                            }
+
+                            if(ok == true){
+                                var victual = {
+                                    'name': vicName, 'amount': amount, 'reqId' : 0
+                                };
+                                groceries.push(victual);
+
+                                $('#vicList').append('<tr id="' + vicName + '"> <td>' + vicName + '</td> <td>'
+                                        + amount + '</td> </tr>');
+                                $("#vicErrMessage").html("");
+                                $('#foodName').val("");
+                                $('#foodAmount').val("");
+
+                            }
+
+                        });
+
+                        // datum za radno vreme ------
+                        var d = new Date();
+                        var month = d.getMonth()+1;
+                        var day = d.getDate();
+                        var dayplus = d.getDate()+1;
+                        var bidStart = d.getFullYear() + '-' +
+                                (month<10 ? '0' : '') + month + '-' +
+                                (day<10 ? '0' : '') + day;
+                        var bidEnds = d.getFullYear() + '-' +
+                            (month<10 ? '0' : '') + month + '-' +
+                            (day<10 ? '0' : '') + dayplus;
+                        $("#biddStart").attr("min", bidStart);
+                        $("#biddStart").attr("value", bidStart);
+                        $("#biddEnd").attr("min", bidEnds);
+                        $("#biddEnd").attr("value", bidEnds);
+
+                        // ------
+
+                        $("#addRequest").click(function() {
+
+                            var odDate = $("#biddStart").val();
+                            var doDate = $("#biddEnd").val();
+
+                            var minDateOd = new Date(bidStart);
+                            var minDateDo = new Date(bidEnds);
+                            var maxDate = new Date("2020/1/16");
+                            var odabranOd = new Date(odDate);
+                            var odabranDo = new Date(doDate);
+                            if(odabranOd > odabranDo || odabranOd > maxDate || odabranDo > maxDate || odabranOd < minDateOd || odabranDo < minDateDo)
+                            {
+                                $("#AddRequestMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Please choose a valid date! :) </div>");
+                                $("#AddRequestMessage").show();
+                            }
+                            else if(groceries.length == 0) {
+                                $("#AddRequestMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> You must write in some groceries. </div>");
+                                $("#AddRequestMessage").show();
+                            }
+                            else {
+
+                                var requestDate = {
+                                    'dateFrom': odDate, 'dateTo': doDate
+                                };
+
+
+                                myJsRoutes.controllers.Restaurants.addRequest().ajax({
+                                    data: JSON.stringify(requestDate),
+                                    contentType: 'application/json',
+                                    success: function (req) {
+
+                                        var arrayLength = groceries.length;
+                                        for (var i = 0; i < arrayLength; i++) {
+                                            groceries[i].reqId = req.reqId;
+
+                                        }
+
+                                        myJsRoutes.controllers.Restaurants.addGroceries().ajax({
+                                            data: JSON.stringify({groceries: groceries}),
+                                            dataType: 'json',
+                                            contentType: 'application/json',
+                                            success: function () {
+
+                                            }
+
+                                        });
+
+                                        $("#AddRequestMessage").html("<div class='alert alert-success' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Request sent! You can make another one if You want :)</div>");
+                                        $("#AddRequestMessage").show();
+                                        groceries = [];
+                                        $("#groceriesTable tbody tr").remove();
+                                        $("#biddStart").val(bidStart);
+                                        $("#biddEnd").val(bidEnds);
+
+                                    },
+                                    error: function () {
+                                        $("#AddRequestMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> We have some problems.. </div>");
+                                        $("#AddRequestMessage").show();
+
+                                    }
+                                });
+
+
+
+                            }
+
+                        });
+
+                        $("#closeRequestModal").click(function() {
+                            $("#requestBid").modal('toggle');
+                            $("#biddStart").val(bidStart);
+                            $("#biddEnd").val(bidEnds);
+                            $("#foodName").val('');
+                            $("#foodAmount").val('');
+                            $("#groceriesTable tbody tr").remove();
+                            $("#AddRequestMessage").hide();
+                            groceries = [];
+                        });
+
+
+
+                </script>
+
+
+
+
 
 
                 <!--- MODAL ZA DODAVANJE REST. MENADZERA -->

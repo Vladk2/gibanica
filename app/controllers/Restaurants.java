@@ -468,6 +468,7 @@ public class Restaurants extends Controller {
                 if (connection != null && !connection.getAutoCommit()) {
                     System.err.print("Transaction is being rolled back\n");
                     connection.rollback();
+
                 }
                 if (updateSeat != null) {
                     updateSeat.close();
@@ -489,43 +490,128 @@ public class Restaurants extends Controller {
         return ok();
     }
 
-    public static Result restManagerHome() {
+    public static Result addGroceries() throws java.io.IOException, SQLException {
 
-        String loggedUser = session("connected");
-        String verified = session("verified");
 
-        List<VictualAndDrink> meals = new ArrayList<>();
+        JsonNode j =  request().body().asJson();
 
-        if(loggedUser == null || verified.equals("0"))
-            return redirect("/"); // nema ulogovanog korisnika, vraca na pocetnu stranicu
-        else {
-          /*  Connection connection = DB.getConnection();
-            try {
-                String query = "Select name, description, price from victualsanddrinks";
-                ResultSet set = connection.prepareStatement(query).executeQuery();
+        ObjectMapper mapper = new ObjectMapper();
+        Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
 
-                while(set.next()){
-                    Restaurant restaurant =
-                            new Restaurant(set.getString(1), set.getString(2));
+        showMenuSeatPage = false;
+        Connection connection = null;
+        PreparedStatement addGroceries = null;
 
-                    meals.add(restaurant);
+
+        try {
+
+            connection = DB.getConnection();
+            connection.setAutoCommit(false);
+            addGroceries = connection.prepareStatement("insert into requestedFood (name, amount, requestId) values (?, ?, ?);");
+
+            for (ArrayList value : result.values()) {
+                for (Object s : value) {
+                    String jsonString = mapper.writeValueAsString(s);
+                    RequestFood req = mapper.readValue(jsonString, RequestFood.class);
+                    addGroceries.setString(1, req.name);
+                    addGroceries.setInt(2, req.amount);
+                    addGroceries.setInt(3, req.reqId);
+
+                    addGroceries.addBatch();
+
+
                 }
-
-            } catch (SQLException e){
-                e.printStackTrace();
-            } finally {
-                if(connection != null){
-                    try {
-                        connection.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } */
-
-            return ok(restManagerHome.render(loggedUser));
+            }
+            addGroceries.executeBatch();
         }
+        catch (SQLException sqle){
+
+            try {
+                if (connection != null && !connection.getAutoCommit()) {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+
+                }
+                if (addGroceries != null) {
+                    addGroceries.close();
+                }
+
+            } catch(SQLException excep) {
+                excep.printStackTrace();
+            }
+            sqle.printStackTrace();
+        }
+        finally {
+
+            if(connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
+        }
+        return ok();
     }
+
+
+    public static Result addRequest() throws SQLException {
+        JsonNode json = request().body().asJson();
+        Request req = Json.fromJson(json, Request.class);
+        int reqId;
+
+        Connection connection = null;
+        PreparedStatement insertReq = null;
+        PreparedStatement getId = null;
+
+        try {
+
+
+            connection = DB.getConnection();
+
+            connection.setAutoCommit(false);
+
+
+            insertReq = connection.prepareStatement("insert into requests (fromDate, dueDate, isActive) values (?,?,true);");
+            insertReq.setString(1, req.dateFrom);
+            insertReq.setString(2, req.dateTo);
+            insertReq.executeUpdate();
+
+            getId = connection.prepareStatement("select last_insert_id();");
+            ResultSet result = getId.executeQuery();
+            result.next();
+            reqId = result.getInt(1);
+            System.out.print("\nID JE " + reqId + "\n");
+            req.reqId = reqId;
+        }
+
+        catch (SQLException sqle){
+
+            try {
+                if (connection != null && !connection.getAutoCommit()) {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                    return status(409, "Error while writing in db");
+
+                }
+                if (insertReq != null) {
+                    insertReq.close();
+                }
+
+
+            } catch(SQLException excep) {
+                excep.printStackTrace();
+            }
+            sqle.printStackTrace();
+        }
+        finally {
+
+            if(connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
+        }
+
+        return ok(Json.toJson(req));
+    }
+
 
 
 

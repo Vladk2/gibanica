@@ -1,4 +1,4 @@
-create database if not exists baklava;
+﻿create database if not exists baklava;
 create table if not exists baklava.usertypes(
 	type varchar(15) not null primary key
 );
@@ -10,6 +10,7 @@ create table if not exists baklava.users(
 	password varchar(200) not null,
 	verified boolean not null,
 	type varchar(15) not null,
+	verificationuuid varchar(36),
 	constraint `usertype_constraint`
 		foreign key (type) references baklava.usertypes (type)
 );
