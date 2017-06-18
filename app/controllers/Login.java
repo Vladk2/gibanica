@@ -76,6 +76,17 @@ public class Login extends Controller {
 
                         }
                     }
+                    if (tip.equals("waiter") || tip.equals("chef") || tip.equals("bartender")) {
+
+                    ResultSet set2 = connection.prepareStatement("Select name from restaurants where restaurantId = " +
+                            "(select restaurantId from workers where userId = (select userId from users where email = " +
+                            "\"" + created.email + "\"" + "));").executeQuery();
+
+                    while (set2.next()) {
+                        session("myRestName", set2.getString(1));
+
+                    }
+                }
                     String loggedUser = session("connected");
                     if((tip.equals("bidder") || tip.equals("waiter") || tip.equals("chef") || tip.equals("bartender")) && verified==0)
                         return ok(firstLog.render(email));

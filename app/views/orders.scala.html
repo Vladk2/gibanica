@@ -1,3 +1,5 @@
+@(menu: List[VictualAndDrink])
+
 @home("Order"){
     <div>
         <i style="float: right;
@@ -8,19 +10,19 @@
             @if(session.get("userType").equals("waiter")) {
                 <div class="container-fluid" style="width: 70%; background-color: #e0ebeb; border-color: black;
                 border-style: solid; border-width: 1px; border-radius: 20px">
-                    <h1>Create new order</h1>
+                    <h1>Create a new order</h1>
                     <br> <br>
                     <form>
                     <div class="col-sm-3 col-md-4 col-lg-2" >
                         <div class="form-group">
-                            <input type="text" class="form-control" id="usr" placeholder="table ID">
+                            <select class="input-large form-control" style="width: 150px">
+                                <option name="brRez+imeIPrezime">2: Miljan Maljkovic</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col-sm-6 col-md-4 col-lg-8" >
 
                         <div class="col-sm-3 col-md-4 col-lg-4" >
-
-
 
                         </div>
 
@@ -40,19 +42,81 @@
                     </div>
 
                     <br><br><br>
-                    <div class="col-lg-4">
+                    <div class="col-lg-7">
+                        <br> <br>
+                        <b style="align-content: center;font-size: medium"> FOOD MENU </b> <br> <br>
+                        <table class="table-bordered table-striped" style="width: 450px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px">Victual Name</th>
+                                    <th style="width: 260px">Victual Description</th>
+                                    <th style="width: 60px">Victual(RSD)</th>
 
-                        <select class="input-large form-control">
-                            <option value="Cevapi">Cevapi</option>
-                        </select>
+                                </tr>
+                            </thead>
+                            <tbody id="vicList">
+                            @for(victual <- menu) {
+                                @if(victual.tip == "victual") {
+                                    <tr><td id="@victual.name">@victual.name</td>
+                                        <td>@victual.description</td>
+                                        <td>@victual.price</td>
+                                    </tr>
+                                }
+                            }
+                            </tbody>
+                        </table>
+                        <br>
+                            <b style="align-content: center;font-size: medium"> DRINK MENU </b> <br> <br>
+                        <table class="table-bordered table-striped" style="width: 450px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 150px">Drink Name</th>
+                                <th style="width: 260px">Drink Description</th>
+                                <th style="width: 60px">Price(RSD)</th>
+
+                            </tr>
+                        </thead>
+                        <tbody id="drinkList">
+                        @for(drink <- menu) {
+                            @if(drink.tip == "drink") {
+                                <tr><td id="@drink.name">@drink.name</td>
+                                    <td>@drink.description</td>
+                                    <td>@drink.price</td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                        </table>
 
                     </div>
+                        <br> <br>
+                        <b style="align-content: center;font-size: medium"> ORDER </b> <br> <br>
+                    <div class="col-lg-5">
+                        <table class="table-bordered table-striped" style="width: 300px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px">Name</th>
+                                    <th style="width: 60px">Price (RSD)</th>
+                                    <th style="width: 60px">Amount</th>
 
-                    <div class="col-lg-4">
+                                </tr>
+                            </thead>
+                            <tbody id="vicList">
 
+                                    <tr><td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                            </tbody>
+                        </table>
                     </div>
 
-                    <div class="col-lg-4">
+                    <div class="col-lg-12">
+                        <br> <br>
+                        <button class="btn btn-warning btn-block " id="addOrder" style="width: 150px"><b>
+                            ADD ORDER</b></button>
+                        <br> <br>
                     </div>
                     </form>
                 </div>
