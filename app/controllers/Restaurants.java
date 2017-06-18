@@ -553,6 +553,8 @@ public class Restaurants extends Controller {
 
 
     public static Result addRequest() throws SQLException {
+
+        String myRestName = session("myRestName");
         JsonNode json = request().body().asJson();
         Request req = Json.fromJson(json, Request.class);
         int reqId;
@@ -569,9 +571,10 @@ public class Restaurants extends Controller {
             connection.setAutoCommit(false);
 
 
-            insertReq = connection.prepareStatement("insert into requests (fromDate, dueDate, isActive) values (?,?,true);");
+            insertReq = connection.prepareStatement("insert into requests (fromDate, dueDate, restaurantId, isActive) values (?,?,(select restaurantId from restaurants where name = ?), true);");
             insertReq.setString(1, req.dateFrom);
             insertReq.setString(2, req.dateTo);
+            insertReq.setString(3, myRestName);
             insertReq.executeUpdate();
 
             getId = connection.prepareStatement("select last_insert_id();");

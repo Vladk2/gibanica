@@ -3,7 +3,10 @@ CREATE TABLE IF NOT EXISTS baklava.requests (
   requestId	INT(5)		NOT NULL PRIMARY KEY AUTO_INCREMENT,
   fromDate	DATE		NOT NULL,
   dueDate	DATE		NOT NULL,
-  isActive	BOOLEAN		NOT NULL
+  isActive	BOOLEAN		NOT NULL,
+  restaurantId	INT(5)		NOT NULL,
+  CONSTRAINT `restId_in_requests`
+  FOREIGN KEY (restaurantId) REFERENCES baklava.restaurants (restaurantId)		
 );
 
 CREATE TABLE IF NOT EXISTS baklava.requestedFood (
@@ -22,8 +25,11 @@ CREATE TABLE IF NOT EXISTS baklava.offers (
   price		DOUBLE		NOT NULL,
   dueDate	DATE		NOT NULL,
   message	VARCHAR(200)    NOT NULL,
+  userId	INT(5)		NOT NULL,
   CONSTRAINT `requestId_in_offers`
-  FOREIGN KEY (requestId) REFERENCES baklava.requests (requestId)	
+  FOREIGN KEY (requestId) REFERENCES baklava.requests (requestId),
+  CONSTRAINT `userId_in_offers`
+  FOREIGN KEY (userId) REFERENCES baklava.users (userId)
 );
 
 CREATE TABLE IF NOT EXISTS baklava.notifications (
