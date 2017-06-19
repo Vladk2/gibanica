@@ -24,14 +24,17 @@ import java.sql.SQLException;
  */
 public class Orders extends Controller {
 
-    public static Result newOrder() throws  SQLException {
+    @SuppressWarnings("Duplicate")
+    public static Result editOrder() throws SQLException {
+        String myRestName = session("myRestName");
+        String loggedUser = session("connected");
+        List<VictualAndDrink> menu = new ArrayList<>();
 
-        // iscitaj listu sa imenima hrane i pica za restoran u kome radi konobar ili
-        // koji gost trenutno posecuje
-
-            String myRestName = session("myRestName");
-            String loggedUser = session("connected");
-            List<VictualAndDrink> menu = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode ajax_json = request().body().asJson();
+        Order response = objectMapper.convertValue(ajax_json, Order.class);
+        System.out.println("AJAX STRING: " + ajax_json.toString());
+        System.out.println("EDIT ORDER: " + response.toString());
 
         try (Connection connection = DB.getConnection()){
 
@@ -51,11 +54,60 @@ public class Orders extends Controller {
 
             stmt.close();
 
+            return ok(orders.render(menu, "edit", response));
+
         } catch (SQLException sqle){
             sqle.printStackTrace();
         }
 
-        return ok(orders.render(menu));
+        return badRequest("Something strane happened");
+    }
+
+    @SuppressWarnings("Duplicate")
+    public static Result newOrder() throws  SQLException {
+
+        // iscitaj listu sa imenima hrane i pica za restoran u kome radi konobar ili
+        // koji gost trenutno posecuje
+
+            String myRestName = session("myRestName");
+            String loggedUser = session("connected");
+            List<VictualAndDrink> menu = new ArrayList<>();
+            List<HashMap<String, String>> prazna_lista = new ArrayList<HashMap<String, String>>();
+
+        try (Connection connection = DB.getConnection()){
+
+            PreparedStatement stmt = null;
+
+            stmt = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
+                    "(select restaurantId from workers where userId = (select userId from users where email = ?));");
+            stmt.setString(1, loggedUser);
+            ResultSet result = stmt.executeQuery();
+
+
+            while (result.next()) {
+                VictualAndDrink vd = new VictualAndDrink(result.getString(1), result.getString(2),
+                        result.getDouble(3), result.getString(4));
+                menu.add(vd);
+            }
+
+            stmt.close();
+
+            return ok(orders.render(menu, "new", new Order()));
+
+        } catch (SQLException sqle){
+            sqle.printStackTrace();
+        }
+
+        return badRequest("Something strange happened");
+    }
+
+    public static Result editOrderAJAX(){
+        return ok();
+    }
+
+    public static Result getOrderInfoAJAX(){
+
+        return ok();
     }
 
     public static Result createOrderAJAX(){
@@ -68,14 +120,16 @@ public class Orders extends Controller {
             //id porudzbine ce biti isti kao id rezervacije
             //sto jos nije zavrseno !!!!
 
-            System.out.println(response.toString());
+            System.out.println("AJAX STRING: " + ajax_json.toString());
+            System.out.println("CREATE ORDER:" + response.toString());
 
             //nakon snimanja u bazu, salje se notifikacija konobarima i
             //barmenima za porudzbinu
             //u bazi takodje treba dodati boolean kolone koje ce oznacavati
             //da li je konobar ili barmen zavrsio svoj deo porudzbine
 
-            return ok("Uspesno kreirana porudzbina");
+            //return ok("Uspesno kreirana porudzbina");
+            return ok(ajax_json);
         } catch(Exception e){
             e.printStackTrace();
         }

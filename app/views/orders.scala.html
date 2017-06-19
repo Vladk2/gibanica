@@ -1,4 +1,5 @@
-@(menu: List[VictualAndDrink])
+@import java.util
+@(menu: List[VictualAndDrink], edit_or_create: String, order: Order)
 
 @home("Order"){
     <div>
@@ -10,15 +11,24 @@
             @if(session.get("userType").equals("waiter")) {
                 <div class="container-fluid" style="width: 70%; background-color: #e0ebeb; border-color: black;
                 border-style: solid; border-width: 1px; border-radius: 20px">
-                    <h1>Create a new order</h1>
+                    @if(edit_or_create == "new") {
+                        <h1>Create a new order</h1>
+                    }
+                    @if(edit_or_create == "edit"){
+                        <h1>Edit order</h1>
+                    }
                     <br> <br>
                     <form>
                     <div class="col-sm-3 col-md-4 col-lg-2" >
                         <div class="form-group">
-                            <select class="input-large form-control" style="width: 150px">
-                                <!-- for petljom dodaj sve musteriji koje imaju rezervaciju trenutno -->
-                                <option name="brRez+imeIPrezime">2: Miljan Maljkovic</option>
-                            </select>
+                            @if(edit_or_create == "edit"){
+                                <label>@order.getOrderId()</label>
+                            } else {
+                                <select class="input-large form-control" style="width: 150px">
+                                        <!-- for petljom dodaj sve musteriji koje imaju rezervaciju trenutno -->
+                                    <option name="brRez+imeIPrezime">2: Miljan Maljkovic</option>
+                                </select>
+                            }
                         </div>
                     </div>
                     <div class="col-sm-6 col-md-4 col-lg-8" >
@@ -28,7 +38,12 @@
                         </div>
 
                         <div class="col-sm-6 col-md-4 col-lg-4" style="text-align: center;">
-                          <input type="text" class="form-control" id="usr" placeholder="cena" readonly>
+                            @if(edit_or_create == "new") {
+                                <input type="text" class="form-control" id="global_price">
+                            }
+                            @if(edit_or_create == "edit"){
+                                <input type="text" class="form-control" id="global_price" value="@order.getPrice()">
+                            }
                         </div>
 
                           <div class="col-sm-3 col-md-4 col-lg-4" >
@@ -111,15 +126,31 @@
                                 </tr>
                             </thead>
                             <tbody id="orderList">
-
+                                @if(edit_or_create == "edit"){
+                                    @for(element <- order.getVictualsDrinks){
+                                        <tr>
+                                            <td>@element.get("name")</td>
+                                            <td id="@element.get("name")price">@element.get("price")</td>
+                                            <td>@element.get("quantity")</td>
+                                        </tr>
+                                    }
+                                }
                             </tbody>
                         </table>
                     </div>
 
                     <div class="col-lg-12">
                         <br> <br>
-                        <button class="btn btn-warning btn-block " id="addOrder" style="width: 150px"><b>
-                            ADD ORDER</b></button>
+                        @if(edit_or_create == "new") {
+                            <button class="btn btn-warning btn-block " id="addOrder" style="width: 150px">
+                                <b>ADD ORDER</b>
+                            </button>
+                        }
+                        @if(edit_or_create == "edit"){
+                            <button class="btn btn-warning btn-block " id="addOrder" style="width: 150px">
+                                <b>EDIT ORDER</b>
+                            </button>
+                        }
                         <br> <br>
                     </div>
                     </form>
@@ -198,7 +229,7 @@
 
                 order["price"] = global_price.toString();
 
-                console.log(order);
+                //console.log(order);
 
                 /*Object.keys(order).forEach(function() {
                     var value = order["victualsDrinks"];
@@ -211,7 +242,23 @@
                     data: JSON.stringify(order),
                     contentType: 'application/json',
                     success: function (response) {
-                        alert(response);
+                        console.log("Created");
+                        console.log(response);
+                        $.ajax({
+                            type: "GET",
+                            url: "/editOrder",
+                            data: JSON.stringify(response),
+                            contentType: "application/json",
+                            success: function(response){
+                                console.log("Edited");
+                                console.log(response);
+                                //return;
+                            },
+                            error: function (error) {
+                                alert(error.responseText);
+                            }
+                        });
+                        //alert(response);
                     },
                     error: function (error) {
                         alert(error.responseText);
