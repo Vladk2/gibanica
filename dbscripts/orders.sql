@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS baklava.orders (
   waiterId INT(5) NOT NULL,
   restaurantId INT(5) NOT NULL,
   price DECIMAL(6, 2) NOT NULL,
+  orderReady BOOLEAN DEFAULT 0,
+  foodReady BOOLEAN DEFAULT 0,
+  drinkReady BOOLEAN DEFAULT 0,
   CONSTRAINT `guest_ordUsrVDconstraint`
     FOREIGN KEY (guestId) REFERENCES baklava.users (userId),
   CONSTRAINT `waiter_ordUsrVDconstraint`
@@ -15,19 +18,37 @@ CREATE TABLE IF NOT EXISTS baklava.orders (
   PRIMARY KEY (orderId)
 );
 
-CREATE TABLE IF NOT EXISTS baklava.orderuservictualdrink (
+CREATE TABLE IF NOT EXISTS baklava.orderVictualDrink (
   orderId INT(5) NOT NULL,
   victualDrinkId INT(5) NOT NULL,
+  isReady BOOLEAN DEFAULT 0,
+  cookId INT(5) NOT NULL,
+  bartenderId INT(5) NOT NULL,
   CONSTRAINT `order_ordUsrVDconstraint`
     FOREIGN KEY (orderId) REFERENCES baklava.orders (orderId),
   CONSTRAINT `victualDrink_ordUsrVDconstraint`
-    FOREIGN KEY (victualDrinkId) REFERENCES baklava.victualsanddrinks (victualsAndDrinksId)
+    FOREIGN KEY (victualDrinkId) REFERENCES baklava.victualsanddrinks (victualsAndDrinksId),
+  CONSTRAINT `cook_orderVDconstraint`
+    FOREIGN KEY (cookId) REFERENCES baklava.users (userId),
+  CONSTRAINT `bartender_orderVDconstraint`
+    FOREIGN KEY (bartenderId) REFERENCES baklava.users (userId)
 );
+
+INSERT INTO orders (orderId, orderDate, orderTime, guestId, waiterId, restaurantId, price) VALUES
+  (1, "2017-06-19", "19:24:22", 1, 6, 1, 1200.99);
+
+INSERT INTO orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
+  (1, 1, 7, 8);
+INSERT INTO orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
+  (1, 2, 7, 8);
+INSERT INTO orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
+  (1, 3, 7, 8);
+
 
 SELECT DISTINCT o.guestId, u.email, uw.email, o.orderDate, o.orderTime, o.waiterId, vd.name, vd.description, vd.price
 FROM baklava.orders AS o
-  LEFT JOIN users AS u ON o.guestId = u.userId
-  LEFT JOIN users AS uw ON o.waiterId = uw.userId
-  LEFT JOIN orderuservictualdrink AS ouvd ON o.orderId = ouvd.orderId
-  LEFT JOIN victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId
+  LEFT JOIN baklava.users AS u ON o.guestId = u.userId
+  LEFT JOIN baklava.users AS uw ON o.waiterId = uw.userId
+  LEFT JOIN baklava.orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId
+  LEFT JOIN baklava.victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId
 WHERE u.userId = 1;

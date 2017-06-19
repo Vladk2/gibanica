@@ -192,7 +192,7 @@
                                 color: #f47441" id="myOffersButton"> My offers </b></a></li>
                         }
                         @if(session.get("userType").equals("waiter")){
-                            <li id="orders"> <a href="/newOrder" ><b style="font-size: 130%;
+                            <li id="order"> <a href="/newOrder" ><b style="font-size: 130%;
                                 color: #f47441" id="newOrderButton"> New Order </b></a></li>
                         }
                         @if(session.get("userType").equals("bartender") || session.get("userType").equals("chef") || session.get("userType").equals("waiter")) {

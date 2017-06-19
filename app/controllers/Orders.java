@@ -7,13 +7,14 @@ import akka.actor.*;
 import play.libs.F.*;
 import play.mvc.Result;
 import play.mvc.WebSocket;
-import views.html.orders;
+import views.html.order;
 import models.*;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.*;
 import play.db.DB;
+import views.html.orders;
+
 import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,17 +25,76 @@ import java.sql.SQLException;
  */
 public class Orders extends Controller {
 
+    public static Result orders() {
+
+        try(Connection connection = DB.getConnection()){
+            String waiter_query = "SELECT DISTINCT u.email, uw.email, o.orderDate, o.orderTime, o.waiterId," +
+                    "  vd.name, vd.description, vd.price, uc.email, ub.email from baklava.orders as o" +
+                    "  LEFT JOIN users AS u ON o.guestId = u.userId" +
+                    "  LEFT JOIN users AS uw ON o.waiterId = uw.userId" +
+                    "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
+                    "  LEFT JOIN users as uc on ouvd.cookId = uc.userId" +
+                    "  LEFT JOIN users as ub on ouvd.bartenderId = ub.userId" +
+                    "  LEFT JOIN victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId" +
+                    "  WHERE uw.userId = (Select userId from users where email = ?);";
+
+            String cook_query = "SELECT DISTINCT u.email, uw.email, o.orderDate, o.orderTime, o.waiterId," +
+                    "  vd.name, vd.description, vd.price, uc.email, ub.email from baklava.orders as o" +
+                    "  LEFT JOIN users AS u ON o.guestId = u.userId" +
+                    "  LEFT JOIN users AS uw ON o.waiterId = uw.userId" +
+                    "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
+                    "  LEFT JOIN users as uc on ouvd.cookId = uc.userId" +
+                    "  LEFT JOIN victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId" +
+                    "  WHERE uw.userId = (Select userId from users where email = ?);";
+
+            String bartender_query = "SELECT DISTINCT u.email, uw.email, o.orderDate, o.orderTime, o.waiterId," +
+                    "  vd.name, vd.description, vd.price, uc.email, ub.email from baklava.orders as o" +
+                    "  LEFT JOIN users AS u ON o.guestId = u.userId" +
+                    "  LEFT JOIN users AS uw ON o.waiterId = uw.userId" +
+                    "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
+                    "  LEFT JOIN users as ub on ouvd.bartenderId = ub.userId" +
+                    "  LEFT JOIN victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId" +
+                    "  WHERE ub.userId = (Select userId from users where email = ?);";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(waiter_query);
+            preparedStatement.setString(1, session("connected"));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+                System.out.println(resultSet.getString(1));
+                System.out.println(resultSet.getString(2));
+                System.out.println(resultSet.getString(3));
+                System.out.println(resultSet.getString(4));
+                System.out.println(resultSet.getString(5));
+                System.out.println(resultSet.getString(6));
+                System.out.println(resultSet.getString(7));
+                System.out.println(resultSet.getString(8));
+                System.out.println(resultSet.getString(9));
+                System.out.println(resultSet.getString(10));
+            }
+
+            List<HashMap<String, String>> _orders = new ArrayList<HashMap<String, String>>();
+
+
+
+            return ok(orders.render(_orders));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return badRequest("Something strange happened");
+    }
+
     @SuppressWarnings("Duplicate")
     public static Result editOrder() throws SQLException {
         String myRestName = session("myRestName");
         String loggedUser = session("connected");
         List<VictualAndDrink> menu = new ArrayList<>();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode ajax_json = request().body().asJson();
-        Order response = objectMapper.convertValue(ajax_json, Order.class);
-        System.out.println("AJAX STRING: " + ajax_json.toString());
-        System.out.println("EDIT ORDER: " + response.toString());
+        /* bice poslate informacije o porudzbine preko forme */
+        /* svaki element u listi porudzbina ce biti forma za sebe */
 
         try (Connection connection = DB.getConnection()){
 
@@ -54,7 +114,9 @@ public class Orders extends Controller {
 
             stmt.close();
 
-            return ok(orders.render(menu, "edit", response));
+
+            //return redirect("/editOrder");
+            return ok(order.render(menu, "edit", new Order()));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -92,7 +154,7 @@ public class Orders extends Controller {
 
             stmt.close();
 
-            return ok(orders.render(menu, "new", new Order()));
+            return ok(order.render(menu, "new", new Order()));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -102,11 +164,6 @@ public class Orders extends Controller {
     }
 
     public static Result editOrderAJAX(){
-        return ok();
-    }
-
-    public static Result getOrderInfoAJAX(){
-
         return ok();
     }
 
@@ -120,16 +177,14 @@ public class Orders extends Controller {
             //id porudzbine ce biti isti kao id rezervacije
             //sto jos nije zavrseno !!!!
 
-            System.out.println("AJAX STRING: " + ajax_json.toString());
-            System.out.println("CREATE ORDER:" + response.toString());
+            System.out.println(response.toString());
 
             //nakon snimanja u bazu, salje se notifikacija konobarima i
             //barmenima za porudzbinu
             //u bazi takodje treba dodati boolean kolone koje ce oznacavati
             //da li je konobar ili barmen zavrsio svoj deo porudzbine
 
-            //return ok("Uspesno kreirana porudzbina");
-            return ok(ajax_json);
+            return ok("Order successfully created");
         } catch(Exception e){
             e.printStackTrace();
         }
