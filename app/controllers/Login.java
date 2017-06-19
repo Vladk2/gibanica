@@ -121,6 +121,10 @@ public class Login extends Controller {
         session().remove("connectedFName");
         session().remove("connectedLName");
         session().remove("userType");
+        session().remove("connectedPass");
+        session().remove("userType");
+        session().remove("userId");
+        session().remove("verified");
         return ok(index.render("bla"));
     }
 
