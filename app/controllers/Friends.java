@@ -27,14 +27,16 @@ import java.util.List;
 
 public class Friends extends Controller {
 
+    public enum list {SEARCH, FRIENDS, PENDING}
+
     public static Result friendsPage() {
         return ok(friends.render());
     }
 
     public static Result friendsSearchApi(){
         // test
-//        session("connected", "gogeccc@gmail.com");
-//        session("userId", "17");
+        session("connected", "gogeccc@gmail.com");
+        session("userId", "17");
 
         String loggedIn = session("connected");
         if (loggedIn == null) {
@@ -46,7 +48,7 @@ public class Friends extends Controller {
         ArrayList<FriendsSearchData> friendsSearchDataList = null;
 
         try {
-            friendsSearchDataList = Friends.getFriends(friendsSearchData.name, friendsSearchData.surname, false);
+            friendsSearchDataList = Friends.getFriends(friendsSearchData.name, friendsSearchData.surname, list.SEARCH);
         }
         catch (SQLException e) {
             System.out.println("nesto otislo do vraga u friendsSearchApi");
@@ -59,8 +61,8 @@ public class Friends extends Controller {
 
     public static Result friendsGetAllApi() {
         // test
-//        session("connected", "gogeccc@gmail.com");
-//        session("userId", "17");
+        session("connected", "gogeccc@gmail.com");
+        session("userId", "17");
 
         String loggedIn = session("connected");
         if (loggedIn == null) {
@@ -69,7 +71,7 @@ public class Friends extends Controller {
         ArrayList<FriendsSearchData> friendsSearchDataList = null;
 
         try {
-            friendsSearchDataList = Friends.getFriends("", "", true);
+            friendsSearchDataList = Friends.getFriends("", "", list.FRIENDS);
         }
         catch (SQLException e) {
             System.out.println("nesto otislo do vraga u friendsGetAllApi");
@@ -80,7 +82,29 @@ public class Friends extends Controller {
 
     }
 
-    public static ArrayList<FriendsSearchData> getFriends(String name, String surname, boolean onlyFriends) throws SQLException{
+    public static Result friendsGetPendingApi() {
+        // test
+        session("connected", "gogeccc@gmail.com");
+        session("userId", "17");
+
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+        ArrayList<FriendsSearchData> friendsSearchDataList = null;
+
+        try {
+            friendsSearchDataList = Friends.getFriends("", "", list.PENDING);
+        }
+        catch (SQLException e) {
+            System.out.println("nesto otislo do vraga u friendsGetPendingApi");
+            e.printStackTrace();
+        }
+
+        return ok(Json.toJson(friendsSearchDataList));
+
+    }
+    public static ArrayList<FriendsSearchData> getFriends(String name, String surname, Friends.list which) throws SQLException{
         //imam userId u sesiji, gud
         //mogao bih ovo preko negog joina, ali NEEEE
         //prvo nabavi ljude koji se poklapaju sa name i surname, ez
@@ -105,16 +129,23 @@ public class Friends extends Controller {
             String userIdString = session("userId");
             int userId = Integer.parseInt(userIdString == null ? "0" : userIdString);
 
-            if (onlyFriends) {
+            if (which == list.FRIENDS || which == list.PENDING) {
                 // self sufficient querry
-                friendsSearchQuery1 = connection.prepareStatement("select name, surname, userId " +
+                String acceptedString = which == list.FRIENDS ? "1" : "0";
+                boolean acceptedBoolean = which == list.FRIENDS;
+
+                friendsSearchQuery1 = connection.prepareStatement("(select name, surname, userId, 0 " + //0 za sent
                         "from baklava.users " +
                         "where userId in (select friendId1 " +
                         "                 from baklava.friendships " +
-                        "                 where friendId2 = ? and accepted = 1 and deleted = 0) " +
-                        "or userId in (select friendId2 " +
-                        "              from baklava.friendships " +
-                        "              where friendId1 = ? and accepted = 1 and deleted = 0);");
+                        "                 where friendId2 = ? and accepted = " + acceptedString + " and deleted = 0)) " +
+                        "union " +
+                        "(select name, surname, userId, 1 " + //1 za sent
+                        "from baklava.users " +
+                        "where userId in (select friendId2 " +
+                        "                 from baklava.friendships " +
+                        "                 where friendId1 = ? and accepted = " + acceptedString + " and deleted = 0)) " +
+                        ";");
                 friendsSearchQuery1.setInt(1, userId);
                 friendsSearchQuery1.setInt(2, userId);
                 friendsSearchResultSet1 = friendsSearchQuery1.executeQuery();
@@ -125,14 +156,14 @@ public class Friends extends Controller {
                                     friendsSearchResultSet1.getString(1),
                                     friendsSearchResultSet1.getString(2),
                                     friendsSearchResultSet1.getInt(3),
-                                    false,
-                                    false, // ne zanima me je l zahtev poslat ili primljen
-                                    true  //samo da je prihvacen
+                                    friendsSearchResultSet1.getBoolean(4), //sent
+                                    !friendsSearchResultSet1.getBoolean(4), //received = !sent
+                                    acceptedBoolean
                             )
                     );
                 }
             }
-            else {
+            else if (which == list.SEARCH) {
                 //prvo nabavi rezultate pretrage
                 friendsSearchQuery1 = connection.prepareStatement(
                         "select name, surname, userId from baklava.users " +
