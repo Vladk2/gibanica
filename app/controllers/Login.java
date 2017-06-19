@@ -92,8 +92,12 @@ public class Login extends Controller {
                         return ok(firstLog.render(email));
                     else if (tip.equals("guest") && verified == 0)
                         return ok(firstLogGuest.render(ime, email));
+                    else if (tip.equals("bidder") && verified == 1)
+                        return redirect("/requests");
                     else
-                        return ok(home.render("Welcome",new play.twirl.api.Html("<center><h2>Welcome, " + loggedUser + "!</h2></center>") )); // login succedded
+                      // return ok(home.render("Welcome",new play.twirl.api.Html("<center><h2>Welcome, " + loggedUser + "!</h2></center>") )); // login succedded
+                        return redirect("/restaurants");
+
             }
 
         } catch (SQLException e){

@@ -173,18 +173,40 @@
                     <!--  Menu items -->
                 <div class="collapse navbar-collapse" id=mainNavBar >
                     <ul class="nav navbar-nav navbar-right" >
-
-
                         <li id="profile"> <a href="/profile"><b style="font-size: 130%;
-                            color: #f47441" id="profButton"> Profile </b></a>       </li>
-                        <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
-                            color: #f47441" id="restButton"> Restaurants </b></a></li>
+                            color: #f47441" id="profButton"> Profile </b></a>   </li>
                         @if(session.get("userType").equals("guest")) {
+                            <li id="home"> <a href="/home" ><b style="font-size: 130%;
+                                color: #f47441" id="homeButton"> Home </b></a></li>
+                            <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
+                            color: #f47441" id="restButton"> Restaurants </b></a></li>
                             <li id="visits"> <a href="/visits" ><b style="font-size: 130%;
                                 color: #f47441" id="visitsButton"> Visits </b></a></li>
+                            <li id="friends" > <a href="/friends" ><b style="font-size: 130%;
+                                color: #f47441" id="friendsButton"> Friends </b></a></li>
                         }
-                        <li id="friends" > <a href="/friends" ><b style="font-size: 130%;
-                            color: #f47441"> Friends </b></a></li>
+                        @if(session.get("userType").equals("bidder")) {
+                            <li id="requests"> <a href="/requests" ><b style="font-size: 130%;
+                                color: #f47441" id="reqButton"> Requests </b></a></li>
+                            <li id="myOffers"> <a href="/myOffers" ><b style="font-size: 130%;
+                                color: #f47441" id="myOffersButton"> My offers </b></a></li>
+                        }
+                        @if(session.get("userType").equals("waiter")){
+                            <li id="orders"> <a href="/newOrder" ><b style="font-size: 130%;
+                                color: #f47441" id="newOrderButton"> New Order </b></a></li>
+                        }
+                        @if(session.get("userType").equals("bartender") || session.get("userType").equals("chef") || session.get("userType").equals("waiter")) {
+                            <li id="orders"> <a href="/orders" ><b style="font-size: 130%;
+                                color: #f47441" id="ordersButton"> Orders </b></a></li>
+                        }
+                        @if(session.get("userType").equals("system-manager")) {
+                            <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
+                                color: #f47441" id="restButton"> Settings </b></a></li>
+                        }
+                        @if(session.get("userType").equals("rest-manager")) {
+                            <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
+                                color: #f47441" id="restButton"> My Restaurant </b></a></li>
+                        }
                         <li class="divider" style="background-color: white"></li>
                         <li id="logout"> <a href="/logout"><b style="font-size: 130%;
                             color: #f47441"> Log out </b></a></li>

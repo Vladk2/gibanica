@@ -24,7 +24,7 @@ import java.sql.SQLException;
  */
 public class Orders extends Controller {
 
-    public static Result orders() throws  SQLException {
+    public static Result newOrder() throws  SQLException {
 
         // iscitaj listu sa imenima hrane i pica za restoran u kome radi konobar ili
         // koji gost trenutno posecuje

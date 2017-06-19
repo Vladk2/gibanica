@@ -86,7 +86,7 @@
                         <tbody id="drinkList">
                         @for(drink <- menu) {
                             @if(drink.tip == "drink") {
-                                <tr style="cursor:pointer" about="@drink.price" class="orderDrink" id="@drink.name">
+                                <tr style="cursor:pointer" about="@drink.price" class="orderFood" id="@drink.name">
                                     <td>@drink.name</td>
                                     <td>@drink.description</td>
                                     <td>@drink.price</td>
@@ -132,6 +132,10 @@
 
     <script>
         $(document).ready(function(){
+
+            // promena boje dugmeta kad je na profilnoj
+            $("#newOrderButton").css("color", "#ffb79b");
+
             $('.orderFood').on('click', function(e) {
                 //name to add
                 var name = $(this).attr('id');
@@ -158,32 +162,7 @@
 
                 e.preventDefault();
             });
-            $('.orderDrink').on('click', function(e) {
-                //name to add
-                var name = $(this).attr('id');
-                //price to add
-                var price = $(this).attr('about');
-                //check if food is already in order list
-                var check = false;
 
-                $("#orderList").each(function(){
-                    $(this).find('td').each(function(){
-                        if($(this).text() === name) {
-                            var current_price = $("#" + name + "price").text();
-                            $("#" + name + "price").html(parseInt(current_price) + 1);
-                            check = true;
-                        }
-                    });
-                });
-
-                if(!check){
-                    $("#orderList").append("<tr> <td>" + name + "</td>"
-                            + "<td>" + price + "</td>"
-                            + "<td id=\"" + name + "price\">" + "1</td></tr>");
-                }
-
-                e.preventDefault();
-            });
 
             $("#addOrder").on('click', function(e){
                 // order Id ce biti broj rezervacije gde se kreira porudzbina

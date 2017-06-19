@@ -54,7 +54,7 @@ public class Application extends Controller {
                 ResultSet set = connection.prepareStatement("Select * from usertypes;").executeQuery();
                 List rowValues = new ArrayList();
                 while (set.next()) {
-                    System.out.println(set.getString(1));
+                   // System.out.println(set.getString(1));
                     rowValues.add(set.getString(1));
                 }
                 //listaObjekata = (String []) rowValues.toArray(new String[rowValues.size()]);

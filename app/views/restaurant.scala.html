@@ -440,7 +440,7 @@
                     </div>
                 </div>
 
-
+                @if(session.get("userType").equals("rest-manager")) {
                     <!--- MODAL ZA DODAVANJE RADNOG VREMENA -->
                 <div class="modal fade" id="addWorkingTime" >
                     <div class="modal-dialog" >
@@ -819,8 +819,7 @@
 
                 </script>
 
-
-
+            }
 
 
 
