@@ -33,10 +33,133 @@ public class Friends extends Controller {
         return ok(friends.render());
     }
 
-    public static Result friendsSearchApi(){
+    public static Result addAFriendApi() throws SQLException {
+        // test
+        //session("connected", "gogeccc@gmail.com");
+        //session("userId", "17");
+
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+        int userId = Integer.parseInt(session("userId") == null ? "0" : session("userId"));
+
+
+        JsonNode jsonReq = request().body().asJson();
+        FriendsSearchData friendsSearchData = Json.fromJson(jsonReq, FriendsSearchData.class);
+
+        Connection connection = DB.getConnection();
+        PreparedStatement addFriendshipQuery = null;
+        PreparedStatement isInQuery = null;
+
+        ResultSet isInResultSet = null;
+
+        connection.setAutoCommit(false);
+
+        try {
+
+            isInQuery = connection.prepareStatement("select ? in (select userId " +
+                    "                                   from baklava.users " +
+                    "                                   where type = 'guest' and verified = 1);");
+            isInQuery.setInt(1, friendsSearchData.userId);
+            isInResultSet = isInQuery.executeQuery();
+
+            while (isInResultSet.next()) {
+                if (!isInResultSet.getBoolean(1)) {
+                    return badRequest("userId not registered");
+                }
+            }
+
+            addFriendshipQuery = connection.prepareStatement(
+                    "insert into baklava.friendships (friendid1, friendid2)" +
+                            "values(?,  ?);");
+            addFriendshipQuery.setInt(1, userId);
+            addFriendshipQuery.setInt(2, friendsSearchData.userId);
+            addFriendshipQuery.executeUpdate();
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (addFriendshipQuery != null) {
+                addFriendshipQuery.close();
+            }
+            if (isInQuery != null) {
+                isInQuery.close();
+            }
+            if (connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
+        }
+
+        return ok("friend added");
+    }
+
+    public static Result deleteFriendshipApi() throws SQLException{
         // test
         session("connected", "gogeccc@gmail.com");
         session("userId", "17");
+
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+        int userId = Integer.parseInt(session("userId") == null ? "0" : session("userId"));
+
+
+        JsonNode jsonReq = request().body().asJson();
+        FriendsSearchData friendsSearchData = Json.fromJson(jsonReq, FriendsSearchData.class);
+
+        Connection connection = DB.getConnection();
+        PreparedStatement deleteFriendshipQuery = null;
+
+        try {
+            connection.setAutoCommit(false);
+
+            deleteFriendshipQuery = connection.prepareStatement("delete from baklava.friendships " +
+                    "where deleted = 0 and ((friendid1 = ? and friendid2 = ?) or (friendid1 = ? and friendid2 = ?));");
+            deleteFriendshipQuery.setInt(1, userId);
+            deleteFriendshipQuery.setInt(2, friendsSearchData.userId);
+            deleteFriendshipQuery.setInt(3, userId);
+            deleteFriendshipQuery.setInt(4, friendsSearchData.userId);
+
+            deleteFriendshipQuery.executeUpdate();
+
+            connection.commit();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (deleteFriendshipQuery != null) {
+                deleteFriendshipQuery.close();
+            }
+            if (connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
+        }
+
+        return ok("friendship deleted// request denied/cancelled");
+
+    }
+
+    public static Result cancelRequestApi () throws SQLException {
+        return deleteFriendshipApi();
+    }
+    public static Result rejectRequestApi () throws SQLException {
+        return deleteFriendshipApi();
+    }
+
+    public static Result friendsSearchApi(){
+        // test
+        //session("connected", "gogeccc@gmail.com");
+        //session("userId", "17");
 
         String loggedIn = session("connected");
         if (loggedIn == null) {
@@ -61,8 +184,8 @@ public class Friends extends Controller {
 
     public static Result friendsGetAllApi() {
         // test
-        session("connected", "gogeccc@gmail.com");
-        session("userId", "17");
+        //session("connected", "gogeccc@gmail.com");
+        //session("userId", "17");
 
         String loggedIn = session("connected");
         if (loggedIn == null) {
