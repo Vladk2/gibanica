@@ -36,43 +36,51 @@ public class Bids extends Controller {
     @SuppressWarnings("Duplicates")
     public static Result requests() {
 
-            // ---- prikazi ovu stranicu samo ako je korisnik ulogovani i verifikovani bidder.
-            if(loggedUser == null || verified.equals("0"))
-                return redirect("/");
-            else if(!tip.equals("bidder"))
-                return redirect("/");
-            // ----------------------------
+        groceries.clear();
+        requests.clear();
+        // ---- prikazi ovu stranicu samo ako je korisnik ulogovani i verifikovani bidder.
+        if(loggedUser == null || verified.equals("0"))
+            return redirect("/");
+        else if(!tip.equals("bidder"))
+            return redirect("/");
+        // ----------------------------
 
-            try (Connection connection = DB.getConnection()) {
+        try (Connection connection = DB.getConnection()) {
 
-                PreparedStatement stmt = null;
-
-                stmt = connection.prepareStatement("Select name, amount, requestId from requestedFood;");
-                ResultSet result = stmt.executeQuery();
-                while (result.next()) {
-                    RequestFood rf = new RequestFood(result.getString(1), result.getInt(2),
-                            result.getInt(3));
-                    groceries.add(rf);
-                }
-                stmt.close();
-
-                stmt = connection.prepareStatement("Select requestId, fromDate, dueDate from requests where isActive = 1;");
-                result = stmt.executeQuery();
-                while (result.next()) {
-                    Request rq = new Request(result.getInt(1), result.getString(2),
-                            result.getString(3));
-                    requests.add(rq);
-                }
-                stmt.close();
-
-            } catch (SQLException sqle) {
-                sqle.printStackTrace();
+            PreparedStatement stmt = null;
+            PreparedStatement stmt2 = null;
+            stmt = connection.prepareStatement("Select name, amount, requestId from requestedFood;");
+            ResultSet result = stmt.executeQuery();
+            while (result.next()) {
+                RequestFood rf = new RequestFood(result.getString(1), result.getInt(2),
+                        result.getInt(3));
+                groceries.add(rf);
             }
+            stmt.close();
 
-            return ok(bidRequests.render(requests, groceries));
+            stmt = connection.prepareStatement("Select requestId, fromDate, dueDate, restaurantId from requests where isActive = 1;");
+            result = stmt.executeQuery();
+            while (result.next()) {
+                stmt2 = connection.prepareStatement("Select name from restaurants where restaurantId = ?;");
+                stmt2.setString(1, result.getString(4));
+                ResultSet result2 = stmt2.executeQuery();
+                result2.next();
+                String restName = result2.getString(1);
+                Request rq = new Request(result.getInt(1), result.getString(2),
+                        result.getString(3), restName);
+                requests.add(rq);
+            }
+            stmt.close();
+            stmt2.close();
 
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
         }
+
+        return ok(bidRequests.render(requests, groceries));
+
     }
+}
 
 
 

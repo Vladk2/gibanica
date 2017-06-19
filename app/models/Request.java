@@ -9,6 +9,7 @@ public class Request {
     public int reqId;
     public String dateFrom;
     public String dateTo;
+    public String restName;
 
     public Request(String dateFrom, String dateTo) {
         this.dateFrom = dateFrom;
@@ -16,10 +17,11 @@ public class Request {
     }
 
 
-    public Request(int reqId, String dateFrom, String dateTo) {
+    public Request(int reqId, String dateFrom, String dateTo, String restName) {
         this.reqId = reqId;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
+        this.restName = restName;
     }
 
     public Request() {
