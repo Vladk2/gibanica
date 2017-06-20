@@ -27,14 +27,139 @@ import java.util.List;
 
 public class Friends extends Controller {
 
+    public enum list {SEARCH, FRIENDS, PENDING}
+
     public static Result friendsPage() {
         return ok(friends.render());
     }
 
+    public static Result addAFriendApi() throws SQLException {
+        // test
+        //session("connected", "gogeccc@gmail.com");
+        //session("userId", "17");
+
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+        int userId = Integer.parseInt(session("userId") == null ? "0" : session("userId"));
+
+
+        JsonNode jsonReq = request().body().asJson();
+        FriendsSearchData friendsSearchData = Json.fromJson(jsonReq, FriendsSearchData.class);
+
+        Connection connection = DB.getConnection();
+        PreparedStatement addFriendshipQuery = null;
+        PreparedStatement isInQuery = null;
+
+        ResultSet isInResultSet = null;
+
+        connection.setAutoCommit(false);
+
+        try {
+
+            isInQuery = connection.prepareStatement("select ? in (select userId " +
+                    "                                   from baklava.users " +
+                    "                                   where type = 'guest' and verified = 1);");
+            isInQuery.setInt(1, friendsSearchData.userId);
+            isInResultSet = isInQuery.executeQuery();
+
+            while (isInResultSet.next()) {
+                if (!isInResultSet.getBoolean(1)) {
+                    return badRequest("userId not registered");
+                }
+            }
+
+            addFriendshipQuery = connection.prepareStatement(
+                    "insert into baklava.friendships (friendid1, friendid2)" +
+                            "values(?,  ?);");
+            addFriendshipQuery.setInt(1, userId);
+            addFriendshipQuery.setInt(2, friendsSearchData.userId);
+            addFriendshipQuery.executeUpdate();
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (addFriendshipQuery != null) {
+                addFriendshipQuery.close();
+            }
+            if (isInQuery != null) {
+                isInQuery.close();
+            }
+            if (connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
+        }
+
+        return ok("friend added");
+    }
+
+    public static Result deleteFriendshipApi() throws SQLException{
+        // test
+        session("connected", "gogeccc@gmail.com");
+        session("userId", "17");
+
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+        int userId = Integer.parseInt(session("userId") == null ? "0" : session("userId"));
+
+
+        JsonNode jsonReq = request().body().asJson();
+        FriendsSearchData friendsSearchData = Json.fromJson(jsonReq, FriendsSearchData.class);
+
+        Connection connection = DB.getConnection();
+        PreparedStatement deleteFriendshipQuery = null;
+
+        try {
+            connection.setAutoCommit(false);
+
+            deleteFriendshipQuery = connection.prepareStatement("delete from baklava.friendships " +
+                    "where deleted = 0 and ((friendid1 = ? and friendid2 = ?) or (friendid1 = ? and friendid2 = ?));");
+            deleteFriendshipQuery.setInt(1, userId);
+            deleteFriendshipQuery.setInt(2, friendsSearchData.userId);
+            deleteFriendshipQuery.setInt(3, userId);
+            deleteFriendshipQuery.setInt(4, friendsSearchData.userId);
+
+            deleteFriendshipQuery.executeUpdate();
+
+            connection.commit();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (deleteFriendshipQuery != null) {
+                deleteFriendshipQuery.close();
+            }
+            if (connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
+        }
+
+        return ok("friendship deleted// request denied/cancelled");
+
+    }
+
+    public static Result cancelRequestApi () throws SQLException {
+        return deleteFriendshipApi();
+    }
+    public static Result rejectRequestApi () throws SQLException {
+        return deleteFriendshipApi();
+    }
+
     public static Result friendsSearchApi(){
         // test
-//        session("connected", "gogeccc@gmail.com");
-//        session("userId", "17");
+        //session("connected", "gogeccc@gmail.com");
+        //session("userId", "17");
 
         String loggedIn = session("connected");
         if (loggedIn == null) {
@@ -46,7 +171,7 @@ public class Friends extends Controller {
         ArrayList<FriendsSearchData> friendsSearchDataList = null;
 
         try {
-            friendsSearchDataList = Friends.getFriends(friendsSearchData.name, friendsSearchData.surname, false);
+            friendsSearchDataList = Friends.getFriends(friendsSearchData.name, friendsSearchData.surname, list.SEARCH);
         }
         catch (SQLException e) {
             System.out.println("nesto otislo do vraga u friendsSearchApi");
@@ -59,8 +184,8 @@ public class Friends extends Controller {
 
     public static Result friendsGetAllApi() {
         // test
-//        session("connected", "gogeccc@gmail.com");
-//        session("userId", "17");
+        //session("connected", "gogeccc@gmail.com");
+        //session("userId", "17");
 
         String loggedIn = session("connected");
         if (loggedIn == null) {
@@ -69,7 +194,7 @@ public class Friends extends Controller {
         ArrayList<FriendsSearchData> friendsSearchDataList = null;
 
         try {
-            friendsSearchDataList = Friends.getFriends("", "", true);
+            friendsSearchDataList = Friends.getFriends("", "", list.FRIENDS);
         }
         catch (SQLException e) {
             System.out.println("nesto otislo do vraga u friendsGetAllApi");
@@ -80,7 +205,29 @@ public class Friends extends Controller {
 
     }
 
-    public static ArrayList<FriendsSearchData> getFriends(String name, String surname, boolean onlyFriends) throws SQLException{
+    public static Result friendsGetPendingApi() {
+        // test
+        session("connected", "gogeccc@gmail.com");
+        session("userId", "17");
+
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+        ArrayList<FriendsSearchData> friendsSearchDataList = null;
+
+        try {
+            friendsSearchDataList = Friends.getFriends("", "", list.PENDING);
+        }
+        catch (SQLException e) {
+            System.out.println("nesto otislo do vraga u friendsGetPendingApi");
+            e.printStackTrace();
+        }
+
+        return ok(Json.toJson(friendsSearchDataList));
+
+    }
+    public static ArrayList<FriendsSearchData> getFriends(String name, String surname, Friends.list which) throws SQLException{
         //imam userId u sesiji, gud
         //mogao bih ovo preko negog joina, ali NEEEE
         //prvo nabavi ljude koji se poklapaju sa name i surname, ez
@@ -105,16 +252,23 @@ public class Friends extends Controller {
             String userIdString = session("userId");
             int userId = Integer.parseInt(userIdString == null ? "0" : userIdString);
 
-            if (onlyFriends) {
+            if (which == list.FRIENDS || which == list.PENDING) {
                 // self sufficient querry
-                friendsSearchQuery1 = connection.prepareStatement("select name, surname, userId " +
+                String acceptedString = which == list.FRIENDS ? "1" : "0";
+                boolean acceptedBoolean = which == list.FRIENDS;
+
+                friendsSearchQuery1 = connection.prepareStatement("(select name, surname, userId, 0 " + //0 za sent
                         "from baklava.users " +
                         "where userId in (select friendId1 " +
                         "                 from baklava.friendships " +
-                        "                 where friendId2 = ? and accepted = 1 and deleted = 0) " +
-                        "or userId in (select friendId2 " +
-                        "              from baklava.friendships " +
-                        "              where friendId1 = ? and accepted = 1 and deleted = 0);");
+                        "                 where friendId2 = ? and accepted = " + acceptedString + " and deleted = 0)) " +
+                        "union " +
+                        "(select name, surname, userId, 1 " + //1 za sent
+                        "from baklava.users " +
+                        "where userId in (select friendId2 " +
+                        "                 from baklava.friendships " +
+                        "                 where friendId1 = ? and accepted = " + acceptedString + " and deleted = 0)) " +
+                        ";");
                 friendsSearchQuery1.setInt(1, userId);
                 friendsSearchQuery1.setInt(2, userId);
                 friendsSearchResultSet1 = friendsSearchQuery1.executeQuery();
@@ -125,14 +279,14 @@ public class Friends extends Controller {
                                     friendsSearchResultSet1.getString(1),
                                     friendsSearchResultSet1.getString(2),
                                     friendsSearchResultSet1.getInt(3),
-                                    false,
-                                    false, // ne zanima me je l zahtev poslat ili primljen
-                                    true  //samo da je prihvacen
+                                    friendsSearchResultSet1.getBoolean(4), //sent
+                                    !friendsSearchResultSet1.getBoolean(4), //received = !sent
+                                    acceptedBoolean
                             )
                     );
                 }
             }
-            else {
+            else if (which == list.SEARCH) {
                 //prvo nabavi rezultate pretrage
                 friendsSearchQuery1 = connection.prepareStatement(
                         "select name, surname, userId from baklava.users " +
