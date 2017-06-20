@@ -37,11 +37,11 @@
                                         </thead>
                                         <tbody>
                                             @for(element <- orders) {
-                                                <tr>
-                                                    <td>@element.get("guestEmail")</td>
-                                                    <td>@element.get("orderTime")</td>
-                                                    <td>@element.get("orderReady")</td>
-                                                    <td><em class="fa fa-gear"></em></td>
+                                                <tr class="ordersRow">
+                                                    <td id="kol1:@element.get("orderId")" class="orderColumn">@element.get("guestEmail")</td>
+                                                    <td id="kol2:@element.get("orderId")" class="orderColumn">@element.get("orderTime")</td>
+                                                    <td id="kol3:@element.get("orderId")" class="orderColumn">@element.get("orderReady")</td>
+                                                    <td class=""><em class="fa fa-gear"></em></td>
                                                 </tr>
                                             }
                                         </tbody>
@@ -63,4 +63,27 @@
                 </div>
         </center>
     </div>
+
+
+    <script>
+            $(function(){
+                var orderId;
+                $(".orderColumn").hover(function(){
+                            var this_id = $(this).attr('id');
+                            var orId = this_id.split(':');
+                            orderId = orId[1];
+                            $("#kol1\\:" + orderId).css("background", "#e56e42");
+                            $("#kol2\\:" + orderId).css("background", "#e56e42");
+                            $("#kol3\\:" + orderId).css("background", "#e56e42");
+                        },
+                        function(){
+
+                            $("#kol1\\:" + orderId).css("background", "#FFF");
+                            $("#kol2\\:" + orderId).css("background", "#FFF");
+                            $("#kol3\\:" + orderId).css("background", "#FFF");
+                        });
+            });
+    </script>
+
 }
+
