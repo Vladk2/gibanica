@@ -129,13 +129,13 @@
             // enable-uj dugme sa SAVE tek kad se promeni neka od vrednosti u text boxevima
             $(document).ready(function () {
 
-                $("#fname").change(function () {
+                $("#fname").keyup(function () {
                     $("#saveChanges").prop('disabled', false);
                 });
-                $("#lname").change(function () {
+                $("#lname").keyup(function () {
                     $("#saveChanges").prop('disabled', false);
                 });
-                $("#npass").change(function () {
+                $("#npass").keyup(function () {
                     $("#saveChanges").prop('disabled', false);
                 });
 

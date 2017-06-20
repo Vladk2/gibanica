@@ -1,11 +1,18 @@
-@(requests: List[Request], groceries: List[RequestFood])
+@(requests: List[Request], groceries: List[RequestFood], myOffers: List[Offer])
+@import java.math.BigInteger; var alreadyOffered = 0;
 @home("Bid Requests") {
 
   <center>
 
+  @if(flash.containsKey("addOfferSuccess")) {
+      <div class="alert alert-success" id="offerAddedSuccess" style="width=30%" >
+          <a style="width=30%" href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b>
+          Success! </b>@flash.get("addOfferSuccess")
+      </div>
+  }
 
       @for(request <- requests) {
-    <div title="reqBy@request.restName" class="requestDiv " id="" style="width:30%;border-style: dotted; border-color: #333333">
+    <div name="reqBy@request.restName" class="requestDiv " id="" style="width:30%;border-style: dotted; border-color: #333333">
       <div style="width: 100%; height:100px">
 
         <div style="float:left;margin-left: 5%"> <br>
@@ -43,9 +50,22 @@
         </table> <br>
 
       </div>
+        @{alreadyOffered = 0}
+        @for(offer <- myOffers) {
+            @if(request.reqId == offer.reqId) {
+                @{alreadyOffered=1}
+            }
+        }
+        @if(alreadyOffered == 1){
+            <b style="color:darkorange">OFFER SENT</b>
+            <p> Go to <a style="color:darkorange" href="/myOffers">My Offers</a> if you want to edit offer for this request </p>
+        } else {
       <button class="btn btn-warning btn-block addOfferBtn" id="addOffer:@request.reqId" data-toggle="modal"
               data-target="#addOfferModal" style="width: 130px;color:black"><b>
                             MAKE AN OFFER</b></button> <br>
+        }
+
+
 
     </div> <br> <br>
 
@@ -168,12 +188,11 @@
                        dataType: 'json',
                        contentType: 'application/json',
                        success: function () {
-                           $("#OfferMessage").html("<div class='alert alert-success'> <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Offer sent! :)</div>");
-                           $("#OfferMessage").show();
 
                            $("#bidPrice").val('');
                            $("#bidNote").val('');
                            $("#bidDate").val(bidDate);
+                           window.location.replace("/offerAddedFlash");
                        },
                        error: function () {
                            $("#OfferMessage").html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> We have some problems.. </div>");
@@ -196,18 +215,18 @@
 
           $("#trazi").click(function() {
 
-              $('.requestDiv').each(function(i, obj) {
+              $('.requestDiv').each(function() {
                   $(this).show();
               });
 
               var filter = $("#toSearch").val();
 
-              $('.reqByRes').each(function(i, obj) {
+              $('.reqByRes').each(function() {
 
                   var this_id = $(this).attr("id");
 
                   if($(this).text().indexOf(filter) == -1){
-                      $("div[title=\"reqBy"+this_id+"\"]").hide(300);
+                      $("div[name=\"reqBy"+this_id+"\"]").hide(300);
                     //  $("#reqBy"+this_id).hide(300);
 
                   }
