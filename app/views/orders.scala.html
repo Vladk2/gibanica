@@ -32,16 +32,22 @@
                                                 <th>Guest</th>
                                                 <th>Order Time</th>
                                                 <th>Is Ready</th>
-                                                <th>Edit Order</th>
+                                                @if(session.get("userType") == "waiter") {
+                                                    <th>Edit Order</th>
+                                                }
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @for(element <- orders) {
-                                                <tr class="ordersRow">
+                                                <tr class="ordersRow" style="cursor:pointer">
                                                     <td id="kol1:@element.get("orderId")" class="orderColumn">@element.get("guestEmail")</td>
                                                     <td id="kol2:@element.get("orderId")" class="orderColumn">@element.get("orderTime")</td>
                                                     <td id="kol3:@element.get("orderId")" class="orderColumn">@element.get("orderReady")</td>
-                                                    <td class=""><em class="fa fa-gear"></em></td>
+                                                    @if(session.get("userType") == "waiter") {
+                                                        <td id="kol4:@element.get("orderId")" class="editColumn">
+                                                            <em class="fa fa-gear"></em>
+                                                        </td>
+                                                    }
                                                 </tr>
                                             }
                                         </tbody>
@@ -66,23 +72,59 @@
 
 
     <script>
-            $(function(){
+        $(document).ready(function() {
+            $("#ordersButton").css("color", "#ffb79b");
+            $(function () {
                 var orderId;
-                $(".orderColumn").hover(function(){
-                            var this_id = $(this).attr('id');
-                            var orId = this_id.split(':');
-                            orderId = orId[1];
-                            $("#kol1\\:" + orderId).css("background", "#e56e42");
-                            $("#kol2\\:" + orderId).css("background", "#e56e42");
-                            $("#kol3\\:" + orderId).css("background", "#e56e42");
-                        },
-                        function(){
-
-                            $("#kol1\\:" + orderId).css("background", "#FFF");
-                            $("#kol2\\:" + orderId).css("background", "#FFF");
-                            $("#kol3\\:" + orderId).css("background", "#FFF");
-                        });
+                $(".orderColumn").hover(function () {
+                    var this_id = $(this).attr('id');
+                    var orId = this_id.split(':');
+                    orderId = orId[1];
+                    $("#kol1\\:" + orderId).css("background", "#e56e42");
+                    $("#kol2\\:" + orderId).css("background", "#e56e42");
+                    $("#kol3\\:" + orderId).css("background", "#e56e42");
+                },
+                function () {
+                    $("#kol1\\:" + orderId).css("background", "#FFF");
+                    $("#kol2\\:" + orderId).css("background", "#FFF");
+                    $("#kol3\\:" + orderId).css("background", "#FFF");
+                });
             });
+            $('.editColumn').hover(function(){
+                $(this).css("background", "#e559ce");
+            },
+            function(){
+                $(this).css("background", "#FFF");
+            });
+            $('.orderColumn').on('click', function(){
+               // uzmi id porudzbine, posalji ajaxom na server
+               // onda prikazi modal sa listom hrane/pica i indikatorom
+               // za svaki deo porudzbine da li je spreman
+               var form_id = $(this).attr('id').split(':');
+
+               var request = {"orderId": form_id[1]};
+
+               $.ajax({
+                   type: "POST",
+                   url: "/previewOrder",
+                   data: JSON.stringify(request),
+                   contentType: 'application/json',
+                   success: function (response) {
+                       console.log("Server response: ");
+                       console.log(response);
+                   },
+                   error: function (error) {
+                       alert(error.responseText);
+                   }
+               });
+
+            });
+            $('.editColumn').on('click', function(){
+
+               var form_id = $(this).attr('id').split(':');
+               console.log(form_id[1]);
+            });
+        });
     </script>
 
 }

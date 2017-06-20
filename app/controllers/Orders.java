@@ -174,13 +174,13 @@ public class Orders extends Controller {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode ajax_json = request().body().asJson();
-            Order response = objectMapper.convertValue(ajax_json, Order.class);
+            Order request = objectMapper.convertValue(ajax_json, Order.class);
 
             //upisivanje porudzbine u bazu
             //id porudzbine ce biti isti kao id rezervacije
             //sto jos nije zavrseno !!!!
 
-            System.out.println(response.toString());
+            System.out.println(request.toString());
 
             //nakon snimanja u bazu, salje se notifikacija konobarima i
             //barmenima za porudzbinu
@@ -193,6 +193,29 @@ public class Orders extends Controller {
         }
 
         return badRequest("Nesto cudno");
+    }
+
+    public static Result previewOrderAJAX(){
+
+        try (Connection connection = DB.getConnection()) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            HashMap<String, Integer> request = objectMapper.convertValue(ajax_json, HashMap.class);
+
+            System.out.println(request.toString());
+
+            String query = "";
+
+            PreparedStatement preparedStatement = null;
+
+            return ok(ajax_json);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception exception){
+            exception.printStackTrace();
+        }
+
+        return badRequest("Something strange happened");
     }
 
     private static HashMap<String, ActorRef> clients = new HashMap<String, ActorRef>();
