@@ -42,7 +42,13 @@
                                                 <tr class="ordersRow" style="cursor:pointer">
                                                     <td id="kol1:@element.get("orderId")" class="orderColumn">@element.get("guestEmail")</td>
                                                     <td id="kol2:@element.get("orderId")" class="orderColumn">@element.get("orderTime")</td>
-                                                    <td id="kol3:@element.get("orderId")" class="orderColumn">@element.get("orderReady")</td>
+                                                    @if(element.get("orderReady").equals("0")) {
+                                                        <td class="readyColumn">
+                                                            <input type="checkbox" class="orderReady" id="@element.get("orderId"):check">
+                                                        </td>
+                                                    } else {
+                                                        <td id="kol3:@element.get("orderId")" class="orderColumn">Ready</td>
+                                                    }
                                                     @if(session.get("userType") == "waiter") {
                                                         <td id="kol4:@element.get("orderId")" class="editColumn">
                                                             <em class="fa fa-gear"></em>
@@ -132,12 +138,21 @@
                     $("#kol3\\:" + orderId).css("background", "#FFF");
                 });
             });
+
             $('.editColumn').hover(function(){
                 $(this).css("background", "#e559ce");
             },
             function(){
                 $(this).css("background", "#FFF");
             });
+
+            $('.readyColumn').hover(function(){
+                $(this).css("background", "#e59a96");
+            },
+            function(){
+                $(this).css("background", "#FFF");
+            });
+
             $('.orderColumn').on('click', function(){
                // uzmi id porudzbine, posalji ajaxom na server
                // onda prikazi modal sa listom hrane/pica i indikatorom
@@ -156,15 +171,24 @@
                        var json_response = JSON.parse(response);
 
                        json_response["items"].forEach(function(element){
-                           var check_box = "<input class=\"check_as_rdy\" " +
-                                   "type=\"checkbox\" id=\"" + element["name"] + ":check\">";
+                           var is_waiter = "@session.get("userType")";
+                           var check_box;
+                           if(is_waiter === 'waiter'){
+                                check_box = "<input class=\"check_as_rdy\" " +
+                                       "type=\"checkbox\" id=\"" + element["name"] + ":check:" + element["orderId"] + "\"disabled>";
+                           } else {
+                               check_box = "<input class=\"check_as_rdy\" " +
+                                       "type=\"checkbox\" id=\"" + element["name"] + ":check:" + element["orderId"] + "\">";
+                           }
                            var for_display = element["isReady"] === "1" ? "ready" : check_box;
 
                            // otvori modal i popuni podacima
-                           var row = "<tr>" + "<td>" + element["name"] + "</td>"
+                           var row = "<tr>"
+                               + "<td>" + element["name"] + "</td>"
                                + "<td>" + element["price"] + "</td>"
                                + "<td>" + element["quantity"] + "</td>"
-                               + "<td>" + for_display + "</td>" + "</td>";
+                               + "<td id=\"" + element["name"] + ":ready\">" + for_display + "</td>"
+                               + "</tr>";
 
                            $("#modal-body").append(row);
                        });
@@ -177,9 +201,35 @@
                });
 
             });
+            $(document).on('click', '.check_as_rdy', function() {
+                /* pokupi id ordera i ime hrane*/
+                var order_item_id = $(this).attr('id').split(':');
+                var request = {'orderId': order_item_id[2],
+                               'name': order_item_id[0]
+                };
 
-            $('.check_as_rdy').on('click', function() {
-               console.log($(this).attr('id'));
+                $(this).parent().append("<p>ready</p>");
+                $(this).remove();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/updateOrderItem',
+                    data: JSON.stringify(request),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        // obrisi checkbox - NECE OVDE DA RADI
+                        // gubi referencu na ID checkbox-a
+                        console.log(response);
+                    },
+                    error: function (error){
+                        alert(error.responseText);
+                    }
+                });
+            });
+
+            $('.orderReady').on('click', function(){
+                /* ajax call -> porudzbina je spremna */
+                console.log($(this).attr('id'));
             });
 
             $('.editColumn').on('click', function(){
@@ -188,6 +238,7 @@
                console.log(form_id[1]);
             });
         });
+
     </script>
 
 }

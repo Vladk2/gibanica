@@ -86,7 +86,7 @@ public class Orders extends Controller {
             e.printStackTrace();
         }
 
-        return badRequest("Something strange happened");
+        return internalServerError("Something strange happened");
     }
 
     @SuppressWarnings("Duplicates")
@@ -135,7 +135,7 @@ public class Orders extends Controller {
             sqle.printStackTrace();
         }
 
-        return badRequest("Something strane happened");
+        return internalServerError("Something strane happened");
     }
 
     @SuppressWarnings("Duplicates")
@@ -183,7 +183,7 @@ public class Orders extends Controller {
             sqle.printStackTrace();
         }
 
-        return badRequest("Something strange happened");
+        return internalServerError("Something strange happened");
     }
 
     @SuppressWarnings("Duplicates")
@@ -200,7 +200,7 @@ public class Orders extends Controller {
         return ok();
     }
 
-    @SuppressWarnings("Duplicate")
+    @SuppressWarnings("Duplicates")
     public static Result createOrderAJAX(){
         if(session("userType") == null)
             return redirect("/");
@@ -233,7 +233,7 @@ public class Orders extends Controller {
             e.printStackTrace();
         }
 
-        return badRequest("Nesto cudno");
+        return internalServerError("Something strange happened");
     }
 
     @SuppressWarnings("Duplicates")
@@ -252,25 +252,27 @@ public class Orders extends Controller {
         try (Connection connection = DB.getConnection()) {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode ajax_json = request().body().asJson();
-            HashMap<String, Integer> request = objectMapper.convertValue(ajax_json, HashMap.class);
+            HashMap<String, String> request = objectMapper.convertValue(ajax_json, HashMap.class);
 
-            String cook_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady from victualsanddrinks as v " +
+            String cook_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady, o.orderId from victualsanddrinks as v " +
                     "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
                     "left join orders as o on ovd.orderId = o.orderId " +
                     "left join users as uc on ovd.cookId = uc.userId " +
-                    "where uc.userId = (Select userId from users where email=?) and v.type=\"victual\";";
+                    "where uc.userId = (Select userId from users where email=?) and v.type=\"victual\" " +
+                    "and o.orderId=?;";
 
-            String waiter_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady from victualsanddrinks as v " +
+            String waiter_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady, o.orderId from victualsanddrinks as v " +
                     "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
                     "left join orders as o on ovd.orderId = o.orderId " +
                     "left join users as uw on o.waiterId = uw.userId " +
-                    "where uw.userId = (select userId from users where email=?);";
+                    "where uw.userId = (select userId from users where email=?) and o.orderId=?;";
 
-            String bartender_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady from victualsanddrinks as v " +
+            String bartender_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady, o.orderId from victualsanddrinks as v " +
                     "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
                     "left join orders as o on ovd.orderId = o.orderId " +
                     "left join users as ub on ovd.bartenderId = ub.userId " +
-                    "where ub.userId = (select userId from users where email=?) and v.type=\"drink\";";
+                    "where ub.userId = (select userId from users where email=?) and v.type=\"drink\" " +
+                    "and o.orderId=?;";
 
             PreparedStatement preparedStatement = null;
 
@@ -284,6 +286,7 @@ public class Orders extends Controller {
                 return forbidden();
 
             preparedStatement.setString(1, session("connected"));
+            preparedStatement.setString(2, request.get("orderId"));
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -298,6 +301,7 @@ public class Orders extends Controller {
                 element.put("price", resultSet.getString(2));
                 element.put("quantity", resultSet.getString(3));
                 element.put("isReady", resultSet.getString(4));
+                element.put("orderId", resultSet.getString(5));
                 items.add(element);
             }
 
@@ -312,7 +316,52 @@ public class Orders extends Controller {
             exception.printStackTrace();
         }
 
-        return badRequest("Something strange happened");
+        return internalServerError("Something strange happened");
+    }
+
+    @SuppressWarnings("Duplicates")
+    public static Result updateOrderItemAJAX(){
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
+
+        try (Connection connection = DB.getConnection()) {
+            /* radice se transakcija sa zakljucavanjem reda koji se updejtuje */
+
+            connection.setAutoCommit(false);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            HashMap<String, String> request = objectMapper.convertValue(ajax_json, HashMap.class);
+
+            System.out.println(request.toString());
+
+            String statement = "Update orderVictualDrink set isReady = 1 where orderId = ? and " +
+                    "victualDrinkId = (Select victualsAndDrinksId from victualsanddrinks where name = ?);";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, request.get("orderId"));
+            preparedStatement.setString(2, request.get("name"));
+
+            if(preparedStatement.executeUpdate() > 0) {
+                connection.commit();
+                return ok("Successfully updated");
+            }
+            else
+                return internalServerError();
+        } catch (SQLException sqle){
+            sqle.printStackTrace();
+        } catch (Exception exc){
+            exc.printStackTrace();
+        }
+
+        return internalServerError("Something strange happened");
     }
 
     private static HashMap<String, ActorRef> clients = new HashMap<String, ActorRef>();
