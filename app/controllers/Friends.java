@@ -30,7 +30,13 @@ public class Friends extends Controller {
     public enum list {SEARCH, FRIENDS, PENDING}
 
     public static Result friendsPage() {
-        return ok(friends.render());
+
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+        return ok(friends.render(loggedIn));
     }
 
     public static Result addAFriendApi() throws SQLException {
@@ -90,6 +96,9 @@ public class Friends extends Controller {
             if (isInQuery != null) {
                 isInQuery.close();
             }
+            if (isInResultSet != null) {
+                isInResultSet.close();
+            }
             if (connection != null) {
                 connection.setAutoCommit(true);
                 connection.close();
@@ -101,8 +110,8 @@ public class Friends extends Controller {
 
     public static Result deleteFriendshipApi() throws SQLException{
         // test
-        session("connected", "gogeccc@gmail.com");
-        session("userId", "17");
+//        session("connected", "gogeccc@gmail.com");
+//        session("userId", "17");
 
         String loggedIn = session("connected");
         if (loggedIn == null) {
@@ -125,8 +134,8 @@ public class Friends extends Controller {
                     "where deleted = 0 and ((friendid1 = ? and friendid2 = ?) or (friendid1 = ? and friendid2 = ?));");
             deleteFriendshipQuery.setInt(1, userId);
             deleteFriendshipQuery.setInt(2, friendsSearchData.userId);
-            deleteFriendshipQuery.setInt(3, userId);
-            deleteFriendshipQuery.setInt(4, friendsSearchData.userId);
+            deleteFriendshipQuery.setInt(3, friendsSearchData.userId);
+            deleteFriendshipQuery.setInt(4, userId);
 
             deleteFriendshipQuery.executeUpdate();
 
@@ -154,6 +163,55 @@ public class Friends extends Controller {
     }
     public static Result rejectRequestApi () throws SQLException {
         return deleteFriendshipApi();
+    }
+
+    public static Result acceptFriend() throws SQLException{
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+        JsonNode jsonReq = request().body().asJson();
+        FriendsSearchData friendsSearchData = Json.fromJson(jsonReq, FriendsSearchData.class);
+
+        int userId = Integer.parseInt(session("userId"));
+
+        if (friendsSearchData.userId <= 0) {
+            return badRequest();
+        }
+
+        Connection connection = null;
+        PreparedStatement acceptQuery = null;
+
+        try {
+            connection = DB.getConnection();
+            connection.setAutoCommit(false);
+
+            acceptQuery = connection.prepareStatement("update friendships set accepted = 1 " +
+                    "where friendid2 = ? and friendid1 = ? and deleted = 0;");
+            acceptQuery.setInt(1, userId);
+            acceptQuery.setInt(2, friendsSearchData.userId);
+
+            acceptQuery.executeUpdate();
+
+            connection.commit();
+
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (acceptQuery != null){
+                acceptQuery.close();
+            }
+            if (connection != null) {
+                connection.setAutoCommit(true);
+                connection.close();
+            }
+        }
+
+        return ok("done");
+
     }
 
     public static Result friendsSearchApi(){
@@ -207,8 +265,8 @@ public class Friends extends Controller {
 
     public static Result friendsGetPendingApi() {
         // test
-        session("connected", "gogeccc@gmail.com");
-        session("userId", "17");
+//        session("connected", "gogeccc@gmail.com");
+//        session("userId", "17");
 
         String loggedIn = session("connected");
         if (loggedIn == null) {
@@ -311,7 +369,7 @@ public class Friends extends Controller {
                     );
                 }
 
-                //sad nabavi sve frienshipe u kojima friendId1 = userid ili friendid2 = userid
+                //sad nabavi sve frienshipe gde ima userid
                 friendsSearchQuery2 = connection.prepareStatement("select friendId1, friendId2, accepted from baklava.friendships " +
                         "where (friendId1 = ? or friendId2 = ?) and deleted = 0");
                 friendsSearchQuery2.setInt(1, userId);
@@ -323,8 +381,13 @@ public class Friends extends Controller {
                     int friendId1 = friendsSearchResultSet2.getInt(1);
                     int friendId2 = friendsSearchResultSet2.getInt(2);
                     boolean accepted = friendsSearchResultSet2.getBoolean(3);
-                    boolean sent = friendId1 == userId;
-                    boolean received = friendId2 == userId;
+                    boolean sent;
+                    if (friendId1 == userId) sent = true;
+                    else sent = false;
+                    boolean received;
+                    if (friendId2 == userId) received = true;
+                    else received = false;
+                    System.out.println(sent + " " + received);
                     // ocekujem konziztentnost; ili je poslato ili primljeno, ne oba
                     int friendId = sent && !received ? friendId2 : friendId1;
 
@@ -353,6 +416,12 @@ public class Friends extends Controller {
             }
             if (friendsSearchQuery2 != null) {
                 friendsSearchQuery2.close();
+            }
+            if (friendsSearchResultSet1 != null) {
+                friendsSearchResultSet1.close();
+            }
+            if (friendsSearchResultSet2 != null) {
+                friendsSearchResultSet2.close();
             }
             if (connection != null) {
                 connection.close();

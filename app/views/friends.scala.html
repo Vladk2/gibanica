@@ -1,73 +1,101 @@
+@(userEmail: String)
 @home("Friends") {
-
+    <i style="float: right;
+        margin-right: 40px;">logged in: <b>@userEmail</b> </i> <br> <br>
 
     <div class="container">
         <div class="row">
-
             <div class="col-md-10 col-md-offset-1">
-
                 <div class="panel panel-default panel-table">
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col col-xs-6">
-                                    <!-- <h3 class="panel-title">Restaurants</h3> -->
+                                    <form id="searchForm">
+                                        Name: <input type="text" id="searchTextName"
+                                            oninput="setCustomValidity('')"> <br>
+                                        Surname: <input type="text" id="searchTextSurname"
+                                            oninput="setCustomValidity('')"> <br>
+                                            <button type="button" id="searchButton" onclick="fetchSearchResults()">Search</button>
+                                    </form>
                             </div>
                             <div class="col col-xs-6 text-right">
                                     <!-- <button type="button" class="btn btn-sm btn-primary btn-create">Add New</button> -->
+                                <input id="hideSearchDivButton" type="button" value="Hide/show"
+                                style="position:absolute; top:0; right:0;"
+                                onclick="hideShowElement('searchDiv')">
                             </div>
                         </div>
                     </div>
-                    <div class="panel-body">
+                    <div class="panel-body" id="searchDiv" style="display: none">
                         <table class="table table-striped table-bordered table-list">
-                            <thead>
-                                <tr>
-                                        <!--<th><em class="fa fa-cog"></em></th>-->
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Address</th>
-                                    <th>Telephone</th>
-
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                                <tr>
-                                    <td class="restaurants" id="1name">Govedji</td>
-                                    <td>glupa hrana</td>
-                                    <td>novi sad, Bulevar jovana ducica</td>
-                                    <td>555 555 555</td>
-
-                                </tr>
-
+                            <tbody id="searchResultsTableBody">
                             </tbody>
                         </table>
 
                     </div>
-                    <div class="panel-footer">
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="panel panel-default panel-table">
+                    <div class="panel-heading">
                         <div class="row">
-                            <div class="col col-xs-4">
+                            <div class="col col-xs-6">
+                                <h4>Pending friend requests</h4>
                             </div>
-                            <div class="col col-xs-8">
-                                <ul class="pagination hidden-xs pull-right">
-                                    <li><a href="#">1</a></li>
-                                    <li><a href="#">2</a></li>
-                                    <li><a href="#">3</a></li>
-                                    <li><a href="#">4</a></li>
-                                    <li><a href="#">5</a></li>
-                                </ul>
-                                <ul class="pagination visible-xs pull-right">
-                                    <li><a href="#">«</a></li>
-                                    <li><a href="#">»</a></li>
-                                </ul>
+                            <div class="col col-xs-6 text-right">
+                                <input id="hidePendingDivButton" type="button" value="Hide/show"
+                                style="position:absolute; top:0; right:0;"
+                                onclick="hideShowElement('pendingDiv')">
                             </div>
                         </div>
                     </div>
+                    <div class="panel-body" id="pendingDiv" style="display: none">
+                        <table class="table table-striped table-bordered table-list">
+                            <tbody id="pendingTableBody">
+                            </tbody>
+                        </table>
+
+                    </div>
                 </div>
 
-            </div></div></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="panel panel-default panel-table">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col col-xs-6">
+                                <h4>Friends list</h4>
+                            </div>
+                            <div class="col col-xs-6 text-right">
+                                <input id="hideFriendsDivButton" type="button" value="Hide/show"
+                                style="position:absolute; top:0; right:0;"
+                                onclick="hideShowElement('friendsDiv')">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body" id="friendsDiv" style="display: none">
+                        <table class="table table-striped table-bordered table-list">
+                            <tbody id="friendsTableBody">
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <script>
             $("#friendsButton").css("color", "#ffb79b");
     </script>
+    <script src="assets/javascripts/friendsScript.js"></script>
 
 }
