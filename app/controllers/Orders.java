@@ -25,6 +25,7 @@ import java.sql.SQLException;
  */
 public class Orders extends Controller {
 
+    @SuppressWarnings("Duplicates")
     public static Result orders() {
 
         if(session("userType") == null)
@@ -88,8 +89,18 @@ public class Orders extends Controller {
         return badRequest("Something strange happened");
     }
 
-    @SuppressWarnings("Duplicate")
+    @SuppressWarnings("Duplicates")
     public static Result editOrder() throws SQLException {
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
+
         String myRestName = session("myRestName");
         String loggedUser = session("connected");
         List<VictualAndDrink> menu = new ArrayList<>();
@@ -127,8 +138,17 @@ public class Orders extends Controller {
         return badRequest("Something strane happened");
     }
 
-    @SuppressWarnings("Duplicate")
+    @SuppressWarnings("Duplicates")
     public static Result newOrder() throws  SQLException {
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
 
         // iscitaj listu sa imenima hrane i pica za restoran u kome radi konobar ili
         // koji gost trenutno posecuje
@@ -166,11 +186,32 @@ public class Orders extends Controller {
         return badRequest("Something strange happened");
     }
 
+    @SuppressWarnings("Duplicates")
     public static Result editOrderAJAX(){
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
         return ok();
     }
 
+    @SuppressWarnings("Duplicate")
     public static Result createOrderAJAX(){
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode ajax_json = request().body().asJson();
@@ -195,20 +236,76 @@ public class Orders extends Controller {
         return badRequest("Nesto cudno");
     }
 
+    @SuppressWarnings("Duplicates")
     public static Result previewOrderAJAX(){
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
+
 
         try (Connection connection = DB.getConnection()) {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode ajax_json = request().body().asJson();
             HashMap<String, Integer> request = objectMapper.convertValue(ajax_json, HashMap.class);
 
-            System.out.println(request.toString());
+            String cook_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady from victualsanddrinks as v " +
+                    "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
+                    "left join orders as o on ovd.orderId = o.orderId " +
+                    "left join users as uc on ovd.cookId = uc.userId " +
+                    "where uc.userId = (Select userId from users where email=?) and v.type=\"victual\";";
 
-            String query = "";
+            String waiter_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady from victualsanddrinks as v " +
+                    "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
+                    "left join orders as o on ovd.orderId = o.orderId " +
+                    "left join users as uw on o.waiterId = uw.userId " +
+                    "where uw.userId = (select userId from users where email=?);";
+
+            String bartender_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady from victualsanddrinks as v " +
+                    "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
+                    "left join orders as o on ovd.orderId = o.orderId " +
+                    "left join users as ub on ovd.bartenderId = ub.userId " +
+                    "where ub.userId = (select userId from users where email=?) and v.type=\"drink\";";
 
             PreparedStatement preparedStatement = null;
 
-            return ok(ajax_json);
+            if(session("userType").equals("waiter"))
+                preparedStatement = connection.prepareStatement(waiter_query);
+            else if(session("userType").equals("chef"))
+                preparedStatement = connection.prepareStatement(cook_query);
+            else if(session("userType").equals("bartender"))
+                preparedStatement = connection.prepareStatement(bartender_query);
+            else
+                return forbidden();
+
+            preparedStatement.setString(1, session("connected"));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            HashMap<String, List<HashMap<String, String>>> response =
+                    new HashMap<String,List<HashMap<String, String>>>();
+
+            List<HashMap<String, String>> items = new ArrayList<HashMap<String, String>>();
+
+            while(resultSet.next()){
+                HashMap<String, String> element = new HashMap<>();
+                element.put("name", resultSet.getString(1));
+                element.put("price", resultSet.getString(2));
+                element.put("quantity", resultSet.getString(3));
+                element.put("isReady", resultSet.getString(4));
+                items.add(element);
+            }
+
+            response.put("items", items);
+
+            String json = objectMapper.writeValueAsString(response);
+
+            return ok(json);
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (Exception exception){
