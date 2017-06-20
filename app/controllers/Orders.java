@@ -98,8 +98,7 @@ public class Orders extends Controller {
         if(session("userType") == null)
             return redirect("/");
         else {
-            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
-                    && !session("userType").equals("bartender")) {
+            if (!session("userType").equals("waiter")) {
                 System.out.println(session("userType"));
                 return forbidden();
             }
@@ -143,13 +142,12 @@ public class Orders extends Controller {
     }
 
     @SuppressWarnings("Duplicates")
-    public static Result newOrder() throws  SQLException {
+    public static Result newOrder() throws SQLException {
         if(session("userType") == null)
             return redirect("/");
         else {
-            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
-                    && !session("userType").equals("bartender")) {
-                System.out.println(session("userType"));
+            if (!session("userType").equals("waiter")) {
+                //System.out.println(session("userType"));
                 return forbidden();
             }
         }
@@ -164,13 +162,13 @@ public class Orders extends Controller {
 
         try (Connection connection = DB.getConnection()){
 
-            PreparedStatement stmt = null;
+            PreparedStatement preparedStatement = null;
 
-            stmt = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
+            preparedStatement = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
                     "(select restaurantId from workers where userId = (select userId from users where email = ?));");
-            stmt.setString(1, loggedUser);
-            ResultSet result = stmt.executeQuery();
+            preparedStatement.setString(1, loggedUser);
 
+            ResultSet result = preparedStatement.executeQuery();
 
             while (result.next()) {
                 VictualAndDrink vd = new VictualAndDrink(result.getString(1), result.getString(2),
@@ -178,7 +176,22 @@ public class Orders extends Controller {
                 menu.add(vd);
             }
 
-            stmt.close();
+            result.close();
+
+            // izlistaj imena gostiju koji trenutno imaju rezervisan sto
+
+            String get_guests = "";
+
+            // izlistaj kuvare i sankere kojima ce se dodeliti porudzbina
+
+            String get_workers = "select u.name, u.surname from users as u " +
+                    "left join workers as w on u.userId = w.userId " +
+                    "left join restaurants as r on r.restaurantId = w.restaurantId " +
+                    "where u.email = ?;";
+
+
+
+            preparedStatement.close();
 
             return ok(order.render(menu,
                     "new", new Order()));
@@ -195,8 +208,7 @@ public class Orders extends Controller {
         if(session("userType") == null)
             return redirect("/");
         else {
-            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
-                    && !session("userType").equals("bartender")) {
+            if (!session("userType").equals("waiter")) {
                 System.out.println(session("userType"));
                 return forbidden();
             }
@@ -209,9 +221,7 @@ public class Orders extends Controller {
         if(session("userType") == null)
             return redirect("/");
         else {
-            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
-                    && !session("userType").equals("bartender")) {
-                System.out.println(session("userType"));
+            if (!session("userType").equals("waiter")) {
                 return forbidden();
             }
         }
@@ -368,6 +378,7 @@ public class Orders extends Controller {
             }
 
             connection.commit();
+            preparedStatement.close();
             return ok("Successfully updated");
         } catch (SQLException sqle){
             if(connection != null)
@@ -411,8 +422,12 @@ public class Orders extends Controller {
 
         public void onReceive(Object message) throws Exception {
             if (message instanceof String) {
-                clients.put(message.toString(), out);
-                clients.get(message.toString()).tell("I received your message: " + message, self());
+                ObjectMapper objectMapper = new ObjectMapper();
+                HashMap<String, String> request_message = objectMapper.readValue(message.toString(), HashMap.class);
+                if(request_message.get("type").equals("connection"))
+                    clients.put(request_message.get("user"), out);
+                clients.get("konobar@konobar.com").tell("Pozdraviii", self());
+                //clients.get(message.toString()).tell("I received your message: " + message, self());
             }
         }
     }

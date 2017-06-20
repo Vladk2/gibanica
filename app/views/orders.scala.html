@@ -135,6 +135,24 @@
 
     <script>
         $(document).ready(function() {
+
+            var root = "ws:" + '//' + location.host + "/proceed_with_order";
+
+            var webSocket = new WebSocket(root, "protocolOne");
+
+            webSocket.onmessage = function (event) {
+                console.log(event.data);
+            };
+
+            webSocket.onopen = function (event) {
+                var connection_string = {
+                    "type": "connection",
+                    "user": "@session.get("connected")"
+                };
+                webSocket.send(JSON.stringify(connection_string));
+            };
+
+
             $("#ordersButton").css("color", "#ffb79b");
             $(function () {
                 var orderId;
