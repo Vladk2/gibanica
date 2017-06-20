@@ -162,6 +162,19 @@
             background-color: #f0ad4e;
         }
 
+        .icon {
+            width:30px;
+            height:30px;
+            position: relative;
+        }
+        .notifyNo{
+            background:white;
+            color: orangered;
+            font-size: medium;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
 
 
         .searchInput::-webkit-input-placeholder { color: darkorange; }
@@ -232,6 +245,23 @@
                             <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
                                 color: #f47441" id="restButton"> My Restaurant </b></a></li>
                         }
+                        <li class="icon dropdown" style="margin-right: 15px;"> <a data-toggle="dropdown" href="#" style="color:#f47441;font-size:18pt;" class="dropdown-toggle glyphicon glyphicon-bell "></a>
+                            <div style="min-width: 55%;border-radius:5px;text-align: center" class="notifyNo"><b>2</b></div>
+
+
+                            <div class="dropdown-menu" style="padding: 50%;
+                                opacity: 0.9;
+                                margin-top: 20px;
+                                padding-bottom: 25px;
+                                width: 200px;
+                                background-color: black;
+                                color: #f47441">
+                                <b>Bajo, ovo je prva notifikacija</b> <hr style="border-color:dimgrey">
+                                <b>Obavestavamo Vas da je ostalo svega 3 dana dok sve na ovom jebenom sajtu ne proradi. :) hehe</b> <hr style="border-color:dimgrey">
+                                <i style="color:white">See all notifications</i>
+                            </div>
+                        </li>
+
                         <li class="divider" style="background-color: white"></li>
                         <li id="logout"> <a href="/logout"><b style="font-size: 130%;
                             color: #f47441"> Log out </b></a></li>
@@ -243,7 +273,7 @@
 
 
                         <div class="input-group" style="margin-top:10px">
-                            <input type="text" class="form-control searchInput" id="toSearch" placeholder="Search by restaurant's name..." name="srch-term"  style="background-color:black;color:white;border-color:orange;min-width:150px; width:250px">
+                            <input type="text" class="form-control searchInput" id="toSearch" placeholder="Search by restaurant's name..." name="srch-term"  style="background-color:black;color:white;border-color:orange;min-width:120px; width:220px">
                             <div class="input-group-btn">
                                 <button class="btn btn-warning" id="trazi" style="height:34px;"><i class="glyphicon glyphicon-search"></i></button>
                             </div>
