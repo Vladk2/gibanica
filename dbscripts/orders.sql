@@ -34,14 +34,14 @@ CREATE TABLE IF NOT EXISTS baklava.orderVictualDrink (
     FOREIGN KEY (bartenderId) REFERENCES baklava.users (userId)
 );
 
-INSERT INTO orders (orderId, orderDate, orderTime, guestId, waiterId, restaurantId, price) VALUES
+INSERT INTO baklava.orders (orderId, orderDate, orderTime, guestId, waiterId, restaurantId, price) VALUES
   (1, "2017-06-19", "19:24:22", 1, 6, 1, 1200.99);
 
-INSERT INTO orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
+INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
   (1, 1, 7, 8);
-INSERT INTO orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
+INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
   (1, 2, 7, 8);
-INSERT INTO orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
+INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
   (1, 3, 7, 8);
 
 

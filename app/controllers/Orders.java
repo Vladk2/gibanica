@@ -27,56 +27,57 @@ public class Orders extends Controller {
 
     public static Result orders() {
 
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
         try(Connection connection = DB.getConnection()){
-            String waiter_query = "SELECT DISTINCT u.email, uw.email, o.orderDate, o.orderTime, o.waiterId," +
-                    "  vd.name, vd.description, vd.price, uc.email, ub.email from baklava.orders as o" +
+            String waiter_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.orderReady," +
+                    "  u.email from baklava.orders as o" +
                     "  LEFT JOIN users AS u ON o.guestId = u.userId" +
                     "  LEFT JOIN users AS uw ON o.waiterId = uw.userId" +
-                    "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
-                    "  LEFT JOIN users as uc on ouvd.cookId = uc.userId" +
-                    "  LEFT JOIN users as ub on ouvd.bartenderId = ub.userId" +
-                    "  LEFT JOIN victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId" +
                     "  WHERE uw.userId = (Select userId from users where email = ?);";
 
-            String cook_query = "SELECT DISTINCT u.email, uw.email, o.orderDate, o.orderTime, o.waiterId," +
-                    "  vd.name, vd.description, vd.price, uc.email, ub.email from baklava.orders as o" +
+            String cook_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.orderReady," +
+                    "  u.email from baklava.orders as o " +
                     "  LEFT JOIN users AS u ON o.guestId = u.userId" +
-                    "  LEFT JOIN users AS uw ON o.waiterId = uw.userId" +
                     "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
-                    "  LEFT JOIN users as uc on ouvd.cookId = uc.userId" +
-                    "  LEFT JOIN victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId" +
-                    "  WHERE uw.userId = (Select userId from users where email = ?);";
+                    "  WHERE ouvd.cookId = (Select userId from users where email = ?);";
 
-            String bartender_query = "SELECT DISTINCT u.email, uw.email, o.orderDate, o.orderTime, o.waiterId," +
-                    "  vd.name, vd.description, vd.price, uc.email, ub.email from baklava.orders as o" +
+            String bartender_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.orderReady," +
+                    "  u.email from baklava.orders as o " +
                     "  LEFT JOIN users AS u ON o.guestId = u.userId" +
-                    "  LEFT JOIN users AS uw ON o.waiterId = uw.userId" +
                     "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
-                    "  LEFT JOIN users as ub on ouvd.bartenderId = ub.userId" +
-                    "  LEFT JOIN victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId" +
-                    "  WHERE ub.userId = (Select userId from users where email = ?);";
+                    "  WHERE ouvd.bartenderId = (Select userId from users where email = ?);";
 
-            PreparedStatement preparedStatement = connection.prepareStatement(waiter_query);
+            PreparedStatement preparedStatement = null;
+
+            if(session("userType").equals("waiter"))
+                preparedStatement = connection.prepareStatement(waiter_query);
+            else if(session("userType").equals("chef"))
+                preparedStatement = connection.prepareStatement(cook_query);
+            else if(session("userType").equals("bartender"))
+                preparedStatement = connection.prepareStatement(bartender_query);
+
             preparedStatement.setString(1, session("connected"));
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            while(resultSet.next()){
-                System.out.println(resultSet.getString(1));
-                System.out.println(resultSet.getString(2));
-                System.out.println(resultSet.getString(3));
-                System.out.println(resultSet.getString(4));
-                System.out.println(resultSet.getString(5));
-                System.out.println(resultSet.getString(6));
-                System.out.println(resultSet.getString(7));
-                System.out.println(resultSet.getString(8));
-                System.out.println(resultSet.getString(9));
-                System.out.println(resultSet.getString(10));
-            }
-
             List<HashMap<String, String>> _orders = new ArrayList<HashMap<String, String>>();
 
-
+            while(resultSet.next()){
+                HashMap<String, String> obj = new HashMap<>();
+                obj.put("orderId", resultSet.getString(1));
+                obj.put("orderTime", resultSet.getString(3));
+                obj.put("orderReady", resultSet.getString(4));
+                obj.put("guestEmail", resultSet.getString(5));
+                _orders.add(obj);
+            }
 
             return ok(orders.render(_orders));
 
@@ -116,7 +117,8 @@ public class Orders extends Controller {
 
 
             //return redirect("/editOrder");
-            return ok(order.render(menu, "edit", new Order()));
+            return ok(order.render(menu,
+                    "edit", new Order()));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -154,7 +156,8 @@ public class Orders extends Controller {
 
             stmt.close();
 
-            return ok(order.render(menu, "new", new Order()));
+            return ok(order.render(menu,
+                    "new", new Order()));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
