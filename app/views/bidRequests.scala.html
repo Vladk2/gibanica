@@ -52,8 +52,12 @@
       </div>
         @{alreadyOffered = 0}
         @for(offer <- myOffers) {
-            @if(request.reqId == offer.reqId) {
-                @{alreadyOffered=1}
+            @if(offer.userId == session.get("userId")) {
+                @if(request.reqId == offer.reqId) {
+                    @{
+                        alreadyOffered = 1
+                    }
+                }
             }
         }
         @if(alreadyOffered == 1){

@@ -37,7 +37,8 @@ public class Application extends Controller {
                 routes.javascript.Restaurants.addRequest(),
                 routes.javascript.Restaurants.addGroceries(),
                 routes.javascript.Bids.makeOffer(),
-                routes.javascript.Bids.editOffer()
+                routes.javascript.Bids.editOffer(),
+                routes.javascript.Bids.acceptOffer()
 
                 )
         );

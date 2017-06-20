@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS baklava.requests (
   dueDate	DATE		NOT NULL,
   isActive	BOOLEAN		NOT NULL,
   restaurantId	INT(5)		NOT NULL,
-  acceptedOfferId INT(5),
+  acceptedOfferId INT(5)	DEFAULT 0,
   CONSTRAINT `restId_in_requests`
   FOREIGN KEY (restaurantId) REFERENCES baklava.restaurants (restaurantId)		
 );

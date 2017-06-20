@@ -1,4 +1,4 @@
-@(requests: List[Request], groceries: List[RequestFood], myOffers: List[Offer],acceptedRequests: List[Request] )
+@(requests: List[Request], groceries: List[RequestFood], offers: List[Offer],acceptedRequests: List[Request] )
 
 @home("My offers") {
 
@@ -13,16 +13,18 @@
         <div class="tab-content">
         @for(request <- requests) {
             <div class="activeOffer tab-pane fade in active "> </div>
-            @for(offer <- myOffers) {
-                @if(offer.userId == session.get("userId")) {
-                @if(request.reqId == offer.reqId) {
+            @for(offer <- offers) {
+                @if(offer.reqId == request.reqId) {
+                @if(request.restName == session.get("myRestName")) {
+
                     <div class=" offerDiv activeOffer tab-pane fade in active ">
             <div name="reqBy@request.restName" class=" " id="" style="width:30%;border-style: dotted; border-color: #333333">
                 <div style="width: 100%; height:100px">
 
                     <div style="float:left;margin-left: 5%"> <br>
                         <p><b>Request</b>  #@request.reqId</p>
-                        <p><b>Restaurant: </b><span class="reqByRes" id="@request.restName">@request.restName</span></p>
+                        <p><b>Bidder: </b> @offer.bidderName, <i>@offer.bidderEmail</i></p>
+
                     </div>
 
                     <div style="float:right;margin-right: 5%"> <br>
@@ -57,39 +59,40 @@
                 </div>
                 <br>
                 <div>
+                     <b> OFFER DETAILS: </b> <hr style="border-color:dimgrey">
                 <div style="float:left">
                 <label for="fromTime">Delivery date:</label> <br>
-                <input class="form-control editInput" style="margin-bottom: 15px; margin-left: 10px;
+                <input class="form-control editInput" disabled style="margin-bottom: 15px; margin-left: 10px;
                     width: 150px;" type="date" value="@offer.dueDate" min="" max="2018-12-31" id="dueDate:@request.reqId" required>
                 </div>
                 <div style="float:left">
                 <label for="toTime">Price (RSD):</label> <br>
-                <input  class="form-control editInput" value="@offer.price" style="margin-bottom: 15px; margin-left: 10px;
+                <input  class="form-control editInput" disabled value="@offer.price" style="margin-bottom: 15px; margin-left: 10px;
                     width: 95px;" type="text" id="bidPrice:@request.reqId" name="bidPrice" required>
                 </div>
 
                 <label for="toTime">Message (optional):</label> <br>
-                <textarea class="editInput" rows="5" style="border-radius: 8px;
+                <textarea class="editInput" disabled rows="5" style="border-radius: 8px;
                     width: 270px;text-align: left;"  id="bidNote:@request.reqId" >@offer.message</textarea>
                 </div>
                 <br>
-                <div style="height:50px;display:none" id="EditOfferMessage@request.reqId"> </div> <br>
+                <div style="height:50px;display:none" id="AcceptOfferMessage@request.reqId"> </div> <br>
 
-                <button class="btn btn-warning btn-block editOfferBtn" id="editOfferBtn:@request.reqId"
+                <button class="btn btn-block btn-success acceptOfferBtn" id="acceptOfferBtn:@request.reqId:@offer.offerId"
                  style="width: 130px;color:black" ><b>
-                    SAVE CHANGES</b></button> <br>
+                    ACCEPT OFFER</b></button> <br>
 
             </div>
                     <br> <br> </div>
                 }
-            }
+                }
             }
         }
 
         @for(request <- acceptedRequests) {
-            <div class="offerDiv acceptedOffer tab-pane fade in active"> </div>
-            @for(offer <- myOffers) {
-                @if(offer.userId == session.get("userId")) {
+            <div class=" acceptedOffer tab-pane fade in active"> </div>
+            @for(offer <- offers) {
+                @if(offer.reqId == request.reqId) {
                 @if(request.acceptedOfferId == offer.offerId) {
                     <div class="offerDiv acceptedOffer tab-pane fade in active">
                     <div name="reqBy@request.restName"  id="" style="width:30%;border-style: dotted; border-color: green">
@@ -97,7 +100,7 @@
 
                             <div > <br>
                                 <p><b>Request</b>  #@request.reqId</p>
-                                <p><b>Restaurant: </b><span class="reqByRes" id="@request.restName">@request.restName</span></p>
+                                <p><b>Bidder: </b> @offer.bidderName, <i>@offer.bidderEmail</i></p>
                             </div>
 
 
@@ -130,17 +133,17 @@
                         <div>
                             <div style="float:left">
                                 <label for="fromTime">Delivery date:</label> <br>
-                                <input class="form-control editInput" disabled style="margin-bottom: 15px; margin-left: 10px;
+                                <input class="form-control" disabled style="margin-bottom: 15px; margin-left: 10px;
                                     width: 150px;" type="date" value="@offer.dueDate" min="" max="2018-12-31" id="dueDate:@request.reqId" required>
                             </div>
                             <div style="float:left">
                                 <label for="toTime">Price (RSD):</label> <br>
-                                <input  class="form-control editInput" disabled value="@offer.price" style="margin-bottom: 15px; margin-left: 10px;
+                                <input  class="form-control" disabled value="@offer.price" style="margin-bottom: 15px; margin-left: 10px;
                                     width: 95px;" type="text" id="bidPrice:@request.reqId" name="bidPrice" required>
                             </div>
 
                             <label for="toTime">Message (optional):</label> <br>
-                            <textarea class="editInput" disabled rows="5" style="border-radius: 8px;
+                            <textarea  disabled rows="5" style="border-radius: 8px;
                                 width: 270px;text-align: left;"  id="bidNote:@request.reqId" >@offer.message</textarea>
                         </div>
                         <br>
@@ -164,104 +167,40 @@
             // change color of the 'requests' option in the navbar
             $("#myOffersButton").css("color", "#ffb79b");
          //   $("#searchDiv").css("visibility","visible");
-                $('.editOfferBtn').attr('disabled','disabled');
 
-                $(".editInput").keyup(function () {
-                    var this_id = $(this).attr('id');
-                    var reqid = this_id.split(':');
-                    var req = reqid[1];
-                    $("#editOfferBtn\\:" + req).removeAttr('disabled');
-                });
 
 
             });
 
             var reqId;
-
-            $(".editOfferBtn").click(function () {
+            var offerId;
+            $(".acceptOfferBtn").click(function () {
 
                 var buttonId = $(this).attr('id');
                 var buttonIDD = buttonId.split(':');
                 reqId = buttonIDD[1];
-                var dueDate = $("#dueDate\\:"+reqId).val();
-                var price = $("#bidPrice\\:"+reqId).val();
-                var message = $("#bidNote\\:"+reqId).val();
-
-                // min i startni datum ------
-                var d = new Date();
-                var month = d.getMonth()+1;
-                var day = d.getDate();
-                var dayplus = d.getDate()+1;
-                var tomorrow = d.getFullYear() + '-' +
-                        (month<10 ? '0' : '') + month + '-' +
-                        (day<10 ? '0' : '') + dayplus;
-                $("#dueDate\\:" + reqId).attr("min", tomorrow);
-
-                var minDate = new Date(tomorrow);
-                var maxDate = new Date("2020/1/16");
-                var odabran = new Date(dueDate);
-
-                if(odabran > maxDate ||  odabran < minDate )
-                {
-                    $("#EditOfferMessage"+reqId).html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Please choose a valid date! :) </div>");
-                    $("#EditOfferMessage"+reqId).show();
-                }
-                else if ( price == ""){
-                    $("#EditOfferMessage"+reqId).html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> You must fill the price field! :) </div>");
-                    $("#EditOfferMessage"+reqId).show();
-                }
-                else if (isNaN(price)){
-                    $("#EditOfferMessage"+reqId).html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Unfortunately, price is supposed to be a number :) </div>");
-                    $("#EditOfferMessage"+reqId).show();
-                }
-                else {
-
-                    var offer = {
-                        'reqId': reqId, 'price': price,  'dueDate': dueDate,
-                        'message': message
-                    };
-
-
-                    myJsRoutes.controllers.Bids.editOffer().ajax({
-                        data: JSON.stringify(offer),
+                offerId = buttonIDD[2];
+                var request = { 'reqId' : reqId , 'acceptedOfferId': offerId};
+                    myJsRoutes.controllers.Bids.acceptOffer().ajax({
+                        data: JSON.stringify(request),
                         dataType: 'json',
                         contentType: 'application/json',
                         success: function () {
-                            $("#EditOfferMessage"+reqId).html("<div class='alert alert-success'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Your offer has been edited! </div>");
-                            $("#EditOfferMessage"+reqId).show();
+                            $("#AcceptOfferMessage"+reqId).html("<div class='alert alert-success'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Offer accepted! </div>");
+                            $("#AcceptOfferMessage"+reqId).show();
+                            $("#acceptOfferBtn\\:" + reqId + "\\:" + offerId).hide();
+
                         },
                         error: function () {
-                            $("#EditOfferMessage"+reqId).html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> We have some problems.. </div>");
-                            $("#EditOfferMessage"+reqId).show();
+                            $("#AcceptOfferMessage"+reqId).html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> We have some problems.. </div>");
+                            $("#AcceptOfferMessage"+reqId).show();
 
                         }
                     });
-                }
-            });
-
-
-
-            $("#trazi").click(function() {
-
-                $('.offerDiv').each(function() {
-                    alert( $(this).attr("id"));
-                    $(this).show();
-                });
-
-                var filter = $("#toSearch").val();
-
-                $('.reqByRes').each(function() {
-
-                    var this_id = $(this).attr("id");
-
-                    if($(this).text().indexOf(filter) == -1){
-                        $("div[name=\"reqBy"+this_id+"\"]").hide(300);
-
-
-                    }
-                });
 
             });
+
+
 
 
     </script>
