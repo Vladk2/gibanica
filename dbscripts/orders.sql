@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS baklava.orderVictualDrink (
   isReady BOOLEAN DEFAULT 0,
   cookId INT(5) NOT NULL,
   bartenderId INT(5) NOT NULL,
+  quantity INT(5) NOT NULL,
   CONSTRAINT `order_ordUsrVDconstraint`
     FOREIGN KEY (orderId) REFERENCES baklava.orders (orderId),
   CONSTRAINT `victualDrink_ordUsrVDconstraint`
