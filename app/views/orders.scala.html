@@ -60,7 +60,8 @@
                                                     @if(session.get("userType") != "waiter"){
                                                         @if(element.get("orderAccepted") == "0"){
                                                             <td id="kol4:@element.get("orderId")" class="acceptColumn">
-                                                                <input type="checkbox" >
+                                                                <input type="checkbox" class="orderAccepted"
+                                                                id="@element.get("orderId"):check">
                                                             </td>
                                                         } else {
                                                             <td id="kol4:@element.get("orderId")" class="orderColumn">
@@ -268,6 +269,31 @@
             $('.orderReady').on('click', function(){
                 /* ajax call -> porudzbina je spremna */
                 console.log($(this).attr('id'));
+            });
+
+            $('.orderAccepted').on('click', function(){
+                var for_request = $(this).attr('id').split(':');
+                var request = {
+                    'orderId': for_request[0],
+                    'employee': '@session.get("userId")'
+                };
+                console.log(request);
+
+                $(this).parent().append("<p>accepted</p>");
+                $(this).remove();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/acceptOrder',
+                    data: JSON.stringify(request),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    error: function (error){
+                        alert(error.responseText);
+                    }
+                });
             });
 
             $('.editColumn').on('click', function(){

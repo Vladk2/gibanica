@@ -81,7 +81,6 @@ public class Orders extends Controller {
                 if(!session("userType").equals("waiter"))
                     obj.put("orderAccepted", resultSet.getString(6));
                 _orders.add(obj);
-                System.out.println(obj.toString());
             }
 
             return ok(orders.render(_orders));
@@ -339,7 +338,7 @@ public class Orders extends Controller {
         if(session("userType") == null)
             return redirect("/");
         else {
-            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+            if (!session("userType").equals("chef")
                     && !session("userType").equals("bartender")) {
                 System.out.println(session("userType"));
                 return forbidden();
@@ -402,6 +401,69 @@ public class Orders extends Controller {
         return internalServerError("Something strange happened");
     }
 
+    @SuppressWarnings("Duplicates")
+    public static Result acceptOrderAJAX(){
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
+
+        Connection connection = null;
+
+        try {
+            connection = DB.getConnection();
+
+            connection.setAutoCommit(false);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            HashMap<String, String> request = objectMapper.convertValue(ajax_json, HashMap.class);
+
+            System.out.println(request.toString());
+
+            String stmt_update = "Update orderVictualDrink set accepted = 1 where orderId = ? and workerId = ?;";
+
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(stmt_update, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            preparedStatement.setString(1, request.get("orderId"));
+            preparedStatement.setString(2, request.get("employee"));
+
+            if(preparedStatement.executeUpdate() > 0) {
+                connection.commit();
+                preparedStatement.close();
+
+                return ok("Order has been accepted");
+            }
+            else
+                return internalServerError("Something strange happened");
+
+        } catch (SQLException e) {
+            if(connection != null){
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return internalServerError("Something strange happened");
+    }
+
     private static ConcurrentHashMap<String, ActorRef> clients = new ConcurrentHashMap<String, ActorRef>();
 
     public static WebSocket<String> proceed() {
@@ -415,6 +477,7 @@ public class Orders extends Controller {
         }
 
         private final ActorRef out;
+        private String user;
 
         public OrdersPostman(ActorRef out) {
             this.out = out;
@@ -424,11 +487,18 @@ public class Orders extends Controller {
             if (message instanceof String) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 HashMap<String, String> request_message = objectMapper.readValue(message.toString(), HashMap.class);
-                if(request_message.get("type").equals("connection"))
+                if(request_message.get("type").equals("connection")) {
                     clients.put(request_message.get("user"), out);
-                clients.get("konobar@konobar.com").tell("Pozdraviii", self());
+                    this.user = request_message.get("user");
+                }
+                //clients.get("konobar@konobar.com").tell("Pozdraviii", self());
                 //clients.get(message.toString()).tell("I received your message: " + message, self());
             }
+        }
+
+        public void postStop() throws Exception {
+            System.out.println("Websocket closing for: " + this.user);
+            clients.remove(this.user);
         }
     }
 }
