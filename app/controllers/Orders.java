@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by stefan on 6/17/17.
@@ -45,16 +46,16 @@ public class Orders extends Controller {
                     "  WHERE uw.userId = (Select userId from users where email = ?);";
 
             String cook_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.orderReady," +
-                    "  u.email from baklava.orders as o " +
+                    "  u.email, ouvd.accepted from baklava.orders as o " +
                     "  LEFT JOIN users AS u ON o.guestId = u.userId" +
                     "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
-                    "  WHERE ouvd.cookId = (Select userId from users where email = ?);";
+                    "  WHERE ouvd.workerId = (Select userId from users where email = ?);";
 
             String bartender_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.orderReady," +
-                    "  u.email from baklava.orders as o " +
+                    "  u.email, ouvd.accepted from baklava.orders as o " +
                     "  LEFT JOIN users AS u ON o.guestId = u.userId" +
                     "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
-                    "  WHERE ouvd.bartenderId = (Select userId from users where email = ?);";
+                    "  WHERE ouvd.workerId = (Select userId from users where email = ?);";
 
             PreparedStatement preparedStatement = null;
 
@@ -77,7 +78,10 @@ public class Orders extends Controller {
                 obj.put("orderTime", resultSet.getString(3));
                 obj.put("orderReady", resultSet.getString(4));
                 obj.put("guestEmail", resultSet.getString(5));
+                if(!session("userType").equals("waiter"))
+                    obj.put("orderAccepted", resultSet.getString(6));
                 _orders.add(obj);
+                System.out.println(obj.toString());
             }
 
             return ok(orders.render(_orders));
@@ -257,7 +261,7 @@ public class Orders extends Controller {
             String cook_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady, o.orderId from victualsanddrinks as v " +
                     "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
                     "left join orders as o on ovd.orderId = o.orderId " +
-                    "left join users as uc on ovd.cookId = uc.userId " +
+                    "left join users as uc on ovd.workerId = uc.userId " +
                     "where uc.userId = (Select userId from users where email=?) and v.type=\"victual\" " +
                     "and o.orderId=?;";
 
@@ -270,7 +274,7 @@ public class Orders extends Controller {
             String bartender_query = "select distinct v.name, v.price, ovd.quantity, ovd.isReady, o.orderId from victualsanddrinks as v " +
                     "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
                     "left join orders as o on ovd.orderId = o.orderId " +
-                    "left join users as ub on ovd.bartenderId = ub.userId " +
+                    "left join users as ub on ovd.workerId = ub.userId " +
                     "where ub.userId = (select userId from users where email=?) and v.type=\"drink\" " +
                     "and o.orderId=?;";
 
@@ -303,6 +307,7 @@ public class Orders extends Controller {
                 element.put("isReady", resultSet.getString(4));
                 element.put("orderId", resultSet.getString(5));
                 items.add(element);
+                System.out.println(element.toString());
             }
 
             response.put("items", items);
@@ -331,8 +336,11 @@ public class Orders extends Controller {
             }
         }
 
-        try (Connection connection = DB.getConnection()) {
+        Connection connection = null;
+
+        try {
             /* radice se transakcija sa zakljucavanjem reda koji se updejtuje */
+            connection = DB.getConnection();
 
             connection.setAutoCommit(false);
 
@@ -342,29 +350,48 @@ public class Orders extends Controller {
 
             System.out.println(request.toString());
 
-            String statement = "Update orderVictualDrink set isReady = 1 where orderId = ? and " +
-                    "victualDrinkId = (Select victualsAndDrinksId from victualsanddrinks where name = ?);";
+            String stmt_update = "Select orderId, victualDrinkId, isReady from orderVictualDrink where orderId = ? and " +
+                    "victualDrinkId = (Select victualsAndDrinksId from victualsanddrinks where name = ?) " +
+                    "and isReady = ? for update;";
 
-            PreparedStatement preparedStatement = connection.prepareStatement(statement);
+            PreparedStatement preparedStatement =
+                    connection.prepareStatement(stmt_update, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             preparedStatement.setString(1, request.get("orderId"));
             preparedStatement.setString(2, request.get("name"));
+            preparedStatement.setString(3, "0");
 
-            if(preparedStatement.executeUpdate() > 0) {
-                connection.commit();
-                return ok("Successfully updated");
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+                resultSet.updateString(3, "1");
+                resultSet.updateRow();
             }
-            else
-                return internalServerError();
+
+            connection.commit();
+            return ok("Successfully updated");
         } catch (SQLException sqle){
+            if(connection != null)
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             sqle.printStackTrace();
         } catch (Exception exc){
             exc.printStackTrace();
+        } finally {
+            if(connection != null)
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
 
         return internalServerError("Something strange happened");
     }
 
-    private static HashMap<String, ActorRef> clients = new HashMap<String, ActorRef>();
+    private static ConcurrentHashMap<String, ActorRef> clients = new ConcurrentHashMap<String, ActorRef>();
 
     public static WebSocket<String> proceed() {
         return WebSocket.withActor(OrdersPostman::props);

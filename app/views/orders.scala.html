@@ -35,6 +35,9 @@
                                                 @if(session.get("userType") == "waiter") {
                                                     <th>Edit Order</th>
                                                 }
+                                                @if(session.get("userType") != "waiter"){
+                                                    <th>Accepted</th>
+                                                }
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -53,6 +56,17 @@
                                                         <td id="kol4:@element.get("orderId")" class="editColumn">
                                                             <em class="fa fa-gear"></em>
                                                         </td>
+                                                    }
+                                                    @if(session.get("userType") != "waiter"){
+                                                        @if(element.get("orderAccepted") == "0"){
+                                                            <td id="kol4:@element.get("orderId")" class="acceptColumn">
+                                                                <input type="checkbox" >
+                                                            </td>
+                                                        } else {
+                                                            <td id="kol4:@element.get("orderId")" class="orderColumn">
+                                                                Ready
+                                                            </td>
+                                                        }
                                                     }
                                                 </tr>
                                             }
@@ -137,6 +151,12 @@
                     $("#kol2\\:" + orderId).css("background", "#FFF");
                     $("#kol3\\:" + orderId).css("background", "#FFF");
                 });
+            });
+            $('.acceptColumn').hover(function(){
+                $(this).css("background", "#dde500");
+            },
+            function(){
+                $(this).css("background", "#FFF");
             });
 
             $('.editColumn').hover(function(){

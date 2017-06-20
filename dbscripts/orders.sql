@@ -22,28 +22,27 @@ CREATE TABLE IF NOT EXISTS baklava.orderVictualDrink (
   orderId INT(5) NOT NULL,
   victualDrinkId INT(5) NOT NULL,
   isReady BOOLEAN DEFAULT 0,
-  cookId INT(5) NOT NULL,
-  bartenderId INT(5) NOT NULL,
-  quantity INT(5) NOT NULL,
+  accepted BOOLEAN DEFAULT 0,
+  workerId INT(5) DEFAULT NULL,
+  quantity INT(5) DEFAULT 1,
   CONSTRAINT `order_ordUsrVDconstraint`
     FOREIGN KEY (orderId) REFERENCES baklava.orders (orderId),
   CONSTRAINT `victualDrink_ordUsrVDconstraint`
     FOREIGN KEY (victualDrinkId) REFERENCES baklava.victualsanddrinks (victualsAndDrinksId),
   CONSTRAINT `cook_orderVDconstraint`
-    FOREIGN KEY (cookId) REFERENCES baklava.users (userId),
-  CONSTRAINT `bartender_orderVDconstraint`
-    FOREIGN KEY (bartenderId) REFERENCES baklava.users (userId)
+    FOREIGN KEY (workerId) REFERENCES baklava.workers (userId),
+  PRIMARY KEY (orderId, victualDrinkId)
 );
 
 INSERT INTO baklava.orders (orderId, orderDate, orderTime, guestId, waiterId, restaurantId, price) VALUES
   (1, "2017-06-19", "19:24:22", 1, 6, 1, 1200.99);
 
-INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
-  (1, 1, 7, 8);
-INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
-  (1, 2, 7, 8);
-INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, cookId, bartenderId) VALUES
-  (1, 3, 7, 8);
+INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, workerId) VALUES
+  (1, 1, 7);
+INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, workerId) VALUES
+  (1, 2, 8);
+INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, workerId) VALUES
+  (1, 3, 7);
 
 
 SELECT DISTINCT o.guestId, u.email, uw.email, o.orderDate, o.orderTime, o.waiterId, vd.name, vd.description, vd.price
