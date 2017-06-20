@@ -190,6 +190,7 @@
                                 color: #f47441" id="reqButton"> Requests </b></a></li>
                             <li id="myOffers"> <a href="/myOffers" ><b style="font-size: 130%;
                                 color: #f47441" id="myOffersButton"> My offers </b></a></li>
+
                         }
                         @if(session.get("userType").equals("waiter")){
                             <li id="orders"> <a href="/newOrder" ><b style="font-size: 130%;
@@ -212,7 +213,24 @@
                             color: #f47441"> Log out </b></a></li>
 
                     </ul>
+
+                    @if(session.get("userType").equals("bidder")) {
+                    <div class="col-sm-3 col-md-3 pull-right" style="margin-right:70px;visibility: hidden" id="searchDiv">
+
+
+                        <div class="input-group" style="margin-top:10px">
+                            <input type="text" class="form-control" id="toSearch" placeholder="Search by restaurant's name..." name="srch-term"  style="min-width:150px; width:250px">
+                            <div class="input-group-btn">
+                                <button class="btn btn-warning" id="trazi" style="height:34px;"><i class="glyphicon glyphicon-search"></i></button>
+                            </div>
+
+                        </div>
+                    </div>
+                    }
+
                 </div>
+
+
 
             </div>
 

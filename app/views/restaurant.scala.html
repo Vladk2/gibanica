@@ -748,11 +748,11 @@
                             var odabranDo = new Date(doDate);
                             if(odabranOd > odabranDo || odabranOd > maxDate || odabranDo > maxDate || odabranOd < minDateOd || odabranDo < minDateDo)
                             {
-                                $("#AddRequestMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Please choose a valid date! :) </div>");
+                                $("#AddRequestMessage").html("<div class='alert alert-danger'   > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Please choose a valid date! :) </div>");
                                 $("#AddRequestMessage").show();
                             }
                             else if(groceries.length == 0) {
-                                $("#AddRequestMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> You must write in some groceries. </div>");
+                                $("#AddRequestMessage").html("<div class='alert alert-danger'   > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> You must write in some groceries. </div>");
                                 $("#AddRequestMessage").show();
                             }
                             else {

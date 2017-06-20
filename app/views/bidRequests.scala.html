@@ -4,13 +4,13 @@
   <center>
 
 
-  @for(request <- requests) {
-    <div style="width:30%;border-style: dotted; border-color: #333333">
+      @for(request <- requests) {
+    <div title="reqBy@request.restName" class="requestDiv " id="" style="width:30%;border-style: dotted; border-color: #333333">
       <div style="width: 100%; height:100px">
 
         <div style="float:left;margin-left: 5%"> <br>
           <p><b>Request</b>  #@request.reqId</p>
-          <p><b>Restaurant: </b> @request.restName</p>
+          <p><b>Restaurant: </b><span class="reqByRes" id="@request.restName">@request.restName</span></p>
         </div>
 
         <div style="float:right;margin-right: 5%"> <br>
@@ -43,37 +43,178 @@
         </table> <br>
 
       </div>
-      <button class="btn btn-warning btn-block " class="makeOfferBtn" id="makeOffer:@request.reqId" style="width: 130px;color:black"><b>
+      <button class="btn btn-warning btn-block addOfferBtn" id="addOffer:@request.reqId" data-toggle="modal"
+              data-target="#addOfferModal" style="width: 130px;color:black"><b>
                             MAKE AN OFFER</b></button> <br>
 
     </div> <br> <br>
 
-    }
+  }
+
+          <!--- MODAL ZA POTRAZNJU  -->
+      <div class="modal fade" id="addOfferModal" >
+          <div class="modal-dialog" >
+              <div class="modal-content" >
+                      <!--  modal header -->
+                  <div class="modal-header">
+                      <h3 class="modal-title" id="modalTitle" style="color: black;
+                          font-family: Verdana;
+                          font-size: 24pt"> MAKE A NEW OFFER </h3>
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  </div>
+                      <!--  modal body -->
+                  <br> <br>
+                  <label for="fromTime">Delivery date:</label> <br>
+                  <input class="form-control" style="margin-bottom: 15px;
+                      width: 250px;" type="date" min="" max="2018-12-31" id="bidDate" name="dueDate" required>
+                  <label for="toTime">Price (RSD):</label> <br>
+                  <input class="form-control" style="margin-bottom: 15px;
+                      width: 250px;" type="text" id="bidPrice" name="bidPrice" required>
+                  <label for="toTime">Message (optional):</label> <br>
+                  <textarea rows="6"   style="border-radius: 8px;
+                      width: 250px;text-align: left;"  id="bidNote" ></textarea>
+                  <br>
+
+
+                  <br> <br> <br>
+
+                  <div style="height:50px;display:none" id="OfferMessage"> </div> <br>
+
+
+
+                  <button class="btn btn-warning btn-block makeOfferBtn"  id="makeOffer"  style="width: 125px; float:left; margin-top:4px; margin-left:185px;
+                            "> MAKE OFFER </button>
+                  <button class="btn btn-warning btn-block" id="closeOfferModal"  style="width: 80px;float:left; margin-left:20px;
+                             "> DISCARD </button> <br> <br>
+                  <div> <p style="margin:50px;"></p> </div>
+
+
+
+
+                      <!--  modal footer -->
+                  <div class="modal-footer">
+                  </div>
+              </div>
+          </div>
+      </div>
 
 
   </center>
 
 
   <script>
+          // change color of the 'requests' option in the navbar
           $("#reqButton").css("color", "#ffb79b");
+          $("#searchDiv").css("visibility","visible");
 
-          /*
+
+
+          var reqId;
+
+          // min i startni datum ------
+          var d = new Date();
+          var month = d.getMonth()+1;
+          var day = d.getDate();
+          var dayplus = d.getDate()+1;
+          var bidDate = d.getFullYear() + '-' +
+                  (month<10 ? '0' : '') + month + '-' +
+                  (day<10 ? '0' : '') + dayplus;
+          $("#bidDate").attr("min", bidDate);
+          $("#bidDate").val(bidDate);
+
+
+          $(".addOfferBtn").click(function () {
+
+              var buttonId = $(this).attr('id');
+              var buttonIDD = buttonId.split(':');
+              reqId = buttonIDD[1];
+              $("#modalTitle").text("");
+              $("#modalTitle").append("MAKE A NEW OFFER FOR REQUEST #" + reqId);
+
+          });
+
            $(".makeOfferBtn").click(function () {
-           var buttonId = $(this).attr('id');
-           var buttonIDD = this_id.split(':');
-           var reqId = buttonIDD[1];
+
+           var dueDate = $("#bidDate").val();
+           var price = $("#bidPrice").val();
+           var message = $("#bidNote").val();
+               var minDate = new Date(bidDate);
+               var maxDate = new Date("2020/1/16");
+               var odabran = new Date(dueDate);
+
+               if(odabran > maxDate ||  odabran < minDate )
+               {
+                   $("#OfferMessage").html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Please choose a valid date! :) </div>");
+                   $("#OfferMessage").show();
+               }
+               else if ( price == ""){
+                   $("#OfferMessage").html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> You must fill the price field! :) </div>");
+                   $("#OfferMessage").show();
+               }
+              else if (isNaN(price)){
+                   $("#OfferMessage").html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Unfortunately, price is supposed to be a number :) </div>");
+                   $("#OfferMessage").show();
+               }
+               else {
+
+                   var offer = {
+                       'reqId': reqId, 'price': price,  'dueDate': dueDate,
+                       'message': message
+                   };
 
 
+                   myJsRoutes.controllers.Bids.makeOffer().ajax({
+                       data: JSON.stringify(offer),
+                       dataType: 'json',
+                       contentType: 'application/json',
+                       success: function () {
+                           $("#OfferMessage").html("<div class='alert alert-success'> <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Offer sent! :)</div>");
+                           $("#OfferMessage").show();
 
-           myJsRoutes.controllers.Restaurants.makeOffer().ajax({
-           data: JSON.stringify(),
-           dataType: 'json',
-           contentType: 'application/json',
-           success: function () {
+                           $("#bidPrice").val('');
+                           $("#bidNote").val('');
+                           $("#bidDate").val(bidDate);
+                       },
+                       error: function () {
+                           $("#OfferMessage").html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> We have some problems.. </div>");
+                           $("#OfferMessage").show();
 
-           }
+                       }
+                   });
+               }
            });
-           });  */
+
+
+          $("#closeOfferModal").click(function() {
+              $("#addOfferModal").modal('toggle');
+              $("#bidDate").val(bidDate);
+              $("#bidPrice").val('');
+              $("#bidNote").val('');
+              $("#OfferMessage").hide();
+          });
+
+
+          $("#trazi").click(function() {
+
+              $('.requestDiv').each(function(i, obj) {
+                  $(this).show();
+              });
+
+              var filter = $("#toSearch").val();
+
+              $('.reqByRes').each(function(i, obj) {
+
+                  var this_id = $(this).attr("id");
+
+                  if($(this).text().indexOf(filter) == -1){
+                      $("div[title=\"reqBy"+this_id+"\"]").hide(300);
+                    //  $("#reqBy"+this_id).hide(300);
+
+                  }
+              });
+
+          });
+
 
   </script>
 }

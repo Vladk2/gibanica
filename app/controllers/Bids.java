@@ -9,7 +9,6 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 import models.*;
 import play.*;
 
-
 import play.data.DynamicForm;
 import play.data.Form;
 import play.db.DB;
@@ -29,6 +28,7 @@ public class Bids extends Controller {
 
     public static String loggedUser = session("connected");
     public static String tip = session("userType");
+    public static String userId = session("userId");
     public static String verified = session("verified");
     public static List<RequestFood> groceries = new ArrayList<>();
     public static List<Request> requests = new ArrayList<>();
@@ -39,9 +39,9 @@ public class Bids extends Controller {
         groceries.clear();
         requests.clear();
         // ---- prikazi ovu stranicu samo ako je korisnik ulogovani i verifikovani bidder.
-        if(loggedUser == null || verified.equals("0"))
+        if (loggedUser == null || verified.equals("0"))
             return redirect("/");
-        else if(!tip.equals("bidder"))
+        else if (!tip.equals("bidder"))
             return redirect("/");
         // ----------------------------
 
@@ -61,11 +61,17 @@ public class Bids extends Controller {
             stmt = connection.prepareStatement("Select requestId, fromDate, dueDate, restaurantId from requests where isActive = 1;");
             result = stmt.executeQuery();
             while (result.next()) {
+
                 stmt2 = connection.prepareStatement("Select name from restaurants where restaurantId = ?;");
                 stmt2.setString(1, result.getString(4));
                 ResultSet result2 = stmt2.executeQuery();
                 result2.next();
                 String restName = result2.getString(1);
+                Date d = new Date();
+                /*Date d2 = new Date(result.getString(2));
+                if(d2 > d){
+                    System.out.print("VECI OD DANASNJEG JE " + result.getString(2));
+                } */
                 Request rq = new Request(result.getInt(1), result.getString(2),
                         result.getString(3), restName);
                 requests.add(rq);
@@ -80,9 +86,46 @@ public class Bids extends Controller {
         return ok(bidRequests.render(requests, groceries));
 
     }
+
+    @SuppressWarnings("Duplicates")
+    public static Result makeOffer() {
+
+
+        JsonNode json = request().body().asJson();
+        Offer offer = Json.fromJson(json, Offer.class);
+
+        try (Connection connection = DB.getConnection()) {
+
+            PreparedStatement stmt = null;
+
+            stmt = connection.prepareStatement("insert into offers (requestId, price, dueDate, message, userId) values (?,?,?,?,?) ;");
+            stmt.setInt(1, offer.reqId);
+            stmt.setDouble(2, offer.price);
+            stmt.setString(3, offer.dueDate);
+            stmt.setString(4, offer.message);
+            stmt.setString(5, userId);
+            stmt.executeUpdate();
+
+
+            stmt.close();
+
+            return ok(Json.toJson(offer));
+
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+        }
+
+        return badRequest("Something strange happened");
+
+    }
+
+    @SuppressWarnings("Duplicates")
+    public static Result myOffers() {
+
+        return ok(myOffers.render());
+    }
+
 }
-
-
 
 
 
