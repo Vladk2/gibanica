@@ -45,13 +45,13 @@ public class Orders extends Controller {
                     "  LEFT JOIN users AS uw ON o.waiterId = uw.userId" +
                     "  WHERE uw.userId = (Select userId from users where email = ?);";
 
-            String cook_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.orderReady," +
+            String cook_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.foodReady," +
                     "  u.email, ouvd.accepted from baklava.orders as o " +
                     "  LEFT JOIN users AS u ON o.guestId = u.userId" +
                     "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
                     "  WHERE ouvd.workerId = (Select userId from users where email = ?);";
 
-            String bartender_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.orderReady," +
+            String bartender_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.drinkReady," +
                     "  u.email, ouvd.accepted from baklava.orders as o " +
                     "  LEFT JOIN users AS u ON o.guestId = u.userId" +
                     "  LEFT JOIN orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId" +
@@ -460,6 +460,94 @@ public class Orders extends Controller {
                 }
             }
         }
+
+        return internalServerError("Something strange happened");
+    }
+
+    @SuppressWarnings("Duplicates")
+    public static Result readyOrderAJAX(){
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter") && !session("userType").equals("chef")
+                    && !session("userType").equals("bartender")) {
+                System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            /* radice se transakcija sa zakljucavanjem reda koji se updejtuje */
+            connection = DB.getConnection();
+
+            connection.setAutoCommit(false);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            HashMap<String, String> request = objectMapper.convertValue(ajax_json, HashMap.class);
+
+            String waiter_statement = "Select orderId, orderReady from orders where orderId = ? " +
+                    "and waiterId = ? for update";
+
+            String cook_statement = "Select o.orderId, o.foodReady from orders as o left join orderVictualDrink as ovd " +
+                    "on o.orderId = ovd.orderId left join users as u on ovd.workerId = u.userId " +
+                    "where o.orderId = ? and ovd.workerId = ? for update";
+
+            String bartender_statement = "Select o.orderId, o.drinkReady from orders as o left join orderVictualDrink as ovd " +
+                    "on o.orderId = ovd.orderId left join users as u on ovd.workerId = u.userId " +
+                    "where o.orderId = ? and ovd.workerId = ? for update";
+
+            if(session("userType").equals("waiter"))
+                preparedStatement = connection.prepareStatement(waiter_statement,
+                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            else if(session("userType").equals("chef"))
+                preparedStatement = connection.prepareStatement(cook_statement,
+                         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            else if(session("userType").equals("bartender"))
+                preparedStatement = connection.prepareStatement(bartender_statement,
+                         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            else
+                return forbidden();
+
+            preparedStatement.setString(1, request.get("orderId"));
+            preparedStatement.setString(2, session("userId"));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+                resultSet.updateString(2, "1");
+                resultSet.updateRow();
+            }
+
+            connection.commit();
+            preparedStatement.close();
+
+            return ok(request.toString());
+
+        } catch (SQLException sql){
+            sql.printStackTrace();
+            if(connection != null){
+                try {
+                    connection.rollback();
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
 
         return internalServerError("Something strange happened");
     }

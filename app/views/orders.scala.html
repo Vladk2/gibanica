@@ -47,7 +47,8 @@
                                                     <td id="kol2:@element.get("orderId")" class="orderColumn">@element.get("orderTime")</td>
                                                     @if(element.get("orderReady").equals("0")) {
                                                         <td class="readyColumn">
-                                                            <input type="checkbox" class="orderReady" id="@element.get("orderId"):check">
+                                                            <input type="checkbox" class="orderReady"
+                                                            id="@element.get("orderId"):check:@session.get("userType")">
                                                         </td>
                                                     } else {
                                                         <td id="kol3:@element.get("orderId")" class="orderColumn">Ready</td>
@@ -65,7 +66,7 @@
                                                             </td>
                                                         } else {
                                                             <td id="kol4:@element.get("orderId")" class="orderColumn">
-                                                                Ready
+                                                                Accepted
                                                             </td>
                                                         }
                                                     }
@@ -152,7 +153,6 @@
                 };
                 webSocket.send(JSON.stringify(connection_string));
             };
-
 
             $("#ordersButton").css("color", "#ffb79b");
             $(function () {
@@ -268,7 +268,26 @@
 
             $('.orderReady').on('click', function(){
                 /* ajax call -> porudzbina je spremna */
-                console.log($(this).attr('id'));
+                var for_request = $(this).attr('id').split(':');
+                var request = {
+                    "orderId": for_request[0]
+                };
+
+                $(this).parent().append("<p>Ready</p>");
+                $(this).remove();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/readyOrder',
+                    data: JSON.stringify(request),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    error: function (error){
+                        alert(error.responseText);
+                    }
+                });
             });
 
             $('.orderAccepted').on('click', function(){
@@ -297,7 +316,6 @@
             });
 
             $('.editColumn').on('click', function(){
-
                var form_id = $(this).attr('id').split(':');
                console.log(form_id[1]);
             });
