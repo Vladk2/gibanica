@@ -1,0 +1,24 @@
+@(notifications: List[Notification])
+
+
+@home("Notifications") {
+
+
+    <center>
+        <h3><b> Notification history </b> </h3> <br>
+<div style="border-radius: 10px">
+        @for(notification <- notifications) {
+
+            <div style="width: 30%;
+                overflow: hidden;
+                padding: 5px;
+
+                color: #ea5e38">
+                <p><b> @notification.message </b></p>
+                <hr style="border-color:black">
+            </div>
+        }
+</div>
+    </center>
+
+}

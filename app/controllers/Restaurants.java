@@ -455,8 +455,8 @@ public class Restaurants extends Controller {
                 }
 
             }
-           updateSeat.executeBatch();
-          //  System.out.println("REZ JE " + rez);
+            updateSeat.executeBatch();
+            //  System.out.println("REZ JE " + rez);
             connection.commit();
             long end = System.currentTimeMillis();
             System.out.println("Batch time was " + (end - start));
