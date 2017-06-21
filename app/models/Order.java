@@ -10,8 +10,17 @@ import java.util.List;
 public class Order {
 
     private String orderId;
+    private String type;
     private BigDecimal price;
     private List<HashMap<String, String>> victualsDrinks;
+
+    public String getType(){
+        return type;
+    }
+
+    public void setType(String type){
+        this.type = type;
+    }
 
     public String getOrderId() {
         return orderId;

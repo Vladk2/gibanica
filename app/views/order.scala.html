@@ -150,7 +150,7 @@
                             </button>
                         }
                         @if(edit_or_create == "edit"){
-                            <button class="btn btn-warning btn-block " id="addOrder" style="width: 150px">
+                            <button class="btn btn-warning btn-block " id="editOrder" style="width: 150px">
                                 <b>EDIT ORDER</b>
                             </button>
                         }
@@ -180,6 +180,10 @@
                 var check = false;
                 var name_to_display = $(this).attr('content');
 
+                console.log(name);
+                console.log(name_to_display);
+                console.log(check);
+
                 $("#orderList").each(function(){
                     $(this).find('td').each(function(){
                         if($(this).text() === name_to_display) {
@@ -190,22 +194,21 @@
                     });
                 });
 
-                if(!check){
-                    $("#orderList").append("<tr class=\"removeFood\" style=\"cursor:pointer\" " +
-                            "content=\"" + name_to_display + "\" + about=\"" + @order.getOrderId() + "\"> " +
+                var row = "<tr class=\"removeFood\" style=\"cursor:pointer\" " +
+                            "content=\"" + name_to_display + "\"> " +
                             "<td>" + name_to_display + "</td>"
                             + "<td>" + price + "</td>"
-                            + "<td id=\"" + name + "amount\">" + "1</td></tr>");
+                            + "<td id=\"" + name + "amount\">" + "1</td></tr>";
+
+                if(!check){
+                    $("#orderList").append(row);
                 }
 
                 e.preventDefault();
             });
             $(document).on('click', '.removeFood', function() {
-                //console.log($(this).attr('content'));
-                //console.log($(this).attr('about'));
-
                 var request = {
-                    'orderId': $(this).attr('about'),
+                    'orderId': '-1',
                     'name': $(this).attr('content')
                 };
 
@@ -239,13 +242,22 @@
                            return false;
                        } else {
                            // uklanjaj slobodno stavke sa porudzbine
+                           var item_dup = $('#' + request['name'].replace(/\s/g, '') + 'amount');
+                           if(parseInt(item_dup.text()) > 1){
+                               item_dup.html(parseInt(item_dup.text()) - 1);
+                           } else {
+                               item_dup.parent().remove();
+                           }
                        }
                 });
             });
 
             $("#addOrder").on('click', function(e){
                 // order Id ce biti broj rezervacije gde se kreira porudzbina
-                var order = {"orderId": "0", "victualsDrinks": []};
+                var type = 'new';
+                if($(this).attr('id') === 'editOrder')
+                    type = 'edit';
+                var order = {"type": type, "orderId": "0", "victualsDrinks": []};
 
                 var global_price = 0.0;
                 var prices = [];
