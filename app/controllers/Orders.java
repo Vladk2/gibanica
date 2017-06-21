@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import play.data.DynamicForm;
@@ -577,6 +578,50 @@ public class Orders extends Controller {
         }
 
 
+
+        return internalServerError("Something strange happened");
+    }
+
+    @SuppressWarnings("Duplicates")
+    public static Result checkOrderItemStatusAJAX(){
+        if(session("userType") == null)
+            return redirect("/");
+        else {
+            if (!session("userType").equals("waiter")) {
+                //System.out.println(session("userType"));
+                return forbidden();
+            }
+        }
+        try (Connection connection = DB.getConnection()){
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            HashMap<String, String> request = objectMapper.convertValue(ajax_json, HashMap.class);
+
+            String query = "Select accepted from orderVictualDrink where orderId = ? and victualDrinkId = " +
+                    "(Select victualsAndDrinksId from victualsanddrinks where name = ?);";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, request.get("orderId"));
+            preparedStatement.setString(2, request.get("name"));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            String isAccepted = "";
+
+            while(resultSet.next()){
+                isAccepted = resultSet.getString(1).equals("1") ? "true" : "false";
+            }
+
+            HashMap<String, String> for_response = new HashMap<>();
+            for_response.put("isAccepted", isAccepted);
+
+            return ok(objectMapper.writeValueAsString(for_response));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         return internalServerError("Something strange happened");
     }

@@ -129,7 +129,8 @@
                             <tbody id="orderList">
                                 @if(edit_or_create == "edit"){
                                     @for(element <- order.getVictualsDrinks()){
-                                        <tr>
+                                        <tr class="removeFood" style="cursor:pointer"
+                                        about="@order.getOrderId()" content="@element.get("name")">
                                             <td>@element.get("name")</td>
                                             <td>@element.get("price")</td>
                                             <td id="@element.get("name").replaceAll("\\s+", "")amount">
@@ -190,14 +191,56 @@
                 });
 
                 if(!check){
-                    $("#orderList").append("<tr> <td>" + name_to_display + "</td>"
+                    $("#orderList").append("<tr class=\"removeFood\" style=\"cursor:pointer\"> " +
+                            "<td>" + name_to_display + "</td>"
                             + "<td>" + price + "</td>"
                             + "<td id=\"" + name + "amount\">" + "1</td></tr>");
                 }
 
                 e.preventDefault();
             });
+            $(document).on('click', '.removeFood', function() {
+                //console.log($(this).attr('content'));
+                //console.log($(this).attr('about'));
 
+                var request = {
+                    'orderId': $(this).attr('about'),
+                    'name': $(this).attr('content')
+                };
+
+                $('#orderList').each(function() {
+                    var row = $(this);
+                    @if(edit_or_create == "edit"){
+                           // ajax poziv koji ce proveriti da li je stavka
+                           // sa porudzbine prihvacena
+                           $.ajax({
+                                type: "POST",
+                                url: "/checkOrderItem",
+                                data: JSON.stringify(request),
+                                contentType: 'application/json',
+                                success: function (response) {
+                                    var json_response = JSON.parse(response);
+                                    if(json_response['isAccepted'] === 'true'){
+                                        alert('This order is accepted and cannot be changed');
+                                    } else if(json_response['isAccepted'] === 'false'){
+                                        var item = $('#' + request['name'].replace(/\s/g,'') + 'amount');
+                                        if(parseInt(item.text()) > 1){
+                                            item.html(parseInt(item.text()) - 1);
+                                        } else {
+                                            item.parent().remove();
+                                        }
+                                    }
+                                },
+                                error: function (error) {
+                                    alert(error.responseText);
+                                }
+                           });
+                           return false;
+                       } else {
+                           // uklanjaj slobodno stavke sa porudzbine
+                       }
+                });
+            });
 
             $("#addOrder").on('click', function(e){
                 // order Id ce biti broj rezervacije gde se kreira porudzbina
