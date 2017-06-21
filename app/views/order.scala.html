@@ -191,7 +191,8 @@
                 });
 
                 if(!check){
-                    $("#orderList").append("<tr class=\"removeFood\" style=\"cursor:pointer\"> " +
+                    $("#orderList").append("<tr class=\"removeFood\" style=\"cursor:pointer\" " +
+                            "content=\"" + name_to_display + "\" + about=\"" + @order.getOrderId() + "\"> " +
                             "<td>" + name_to_display + "</td>"
                             + "<td>" + price + "</td>"
                             + "<td id=\"" + name + "amount\">" + "1</td></tr>");
