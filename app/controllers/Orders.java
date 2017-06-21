@@ -2,6 +2,8 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import play.data.DynamicForm;
+import play.data.Form;
 import play.mvc.Controller;
 import akka.actor.*;
 import play.libs.F.*;
@@ -10,6 +12,7 @@ import play.mvc.WebSocket;
 import views.html.order;
 import models.*;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.*;
 import play.db.DB;
@@ -112,6 +115,9 @@ public class Orders extends Controller {
 
         try (Connection connection = DB.getConnection()){
 
+            DynamicForm requestData = Form.form().bindFromRequest();
+            String orderId = requestData.get("orderId");
+
             PreparedStatement stmt = null;
 
             stmt = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
@@ -126,12 +132,42 @@ public class Orders extends Controller {
                 menu.add(vd);
             }
 
+            result.close();
             stmt.close();
 
+            PreparedStatement order_items = null;
+
+            String items = "select v.name, v.price, ovd.quantity, o.price from victualsanddrinks as v " +
+                    "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
+                    "left join orders as o on o.orderId = ovd.orderId " +
+                    "where o.orderId = ?;";
+
+            order_items = connection.prepareStatement(items);
+            order_items.setString(1, orderId);
+
+            ResultSet resultSet = order_items.executeQuery();
+
+            Order _order = new Order();
+            _order.setOrderId(orderId);
+            List<HashMap<String, String>> for_order = new ArrayList<HashMap<String, String>>();
+
+            while(resultSet.next()){
+                HashMap<String, String> item = new HashMap<>();
+                item.put("name", resultSet.getString(1));
+                item.put("price", resultSet.getString(2));
+                item.put("quantity", resultSet.getString(3));
+                _order.setPrice(new BigDecimal(resultSet.getString(4)));
+                for_order.add(item);
+            }
+
+            _order.setVictualsDrinks(for_order);
+
+            resultSet.close();
+            order_items.close();
 
             //return redirect("/editOrder");
             return ok(order.render(menu,
-                    "edit", new Order()));
+                    "edit", _order));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -170,7 +206,8 @@ public class Orders extends Controller {
             ResultSet result = preparedStatement.executeQuery();
 
             while (result.next()) {
-                VictualAndDrink vd = new VictualAndDrink(result.getString(1), result.getString(2),
+                VictualAndDrink vd = new VictualAndDrink(result.getString(1),
+                        result.getString(2),
                         result.getDouble(3), result.getString(4));
                 menu.add(vd);
             }
@@ -200,19 +237,6 @@ public class Orders extends Controller {
         }
 
         return internalServerError("Something strange happened");
-    }
-
-    @SuppressWarnings("Duplicates")
-    public static Result editOrderAJAX(){
-        if(session("userType") == null)
-            return redirect("/");
-        else {
-            if (!session("userType").equals("waiter")) {
-                System.out.println(session("userType"));
-                return forbidden();
-            }
-        }
-        return ok();
     }
 
     @SuppressWarnings("Duplicates")
@@ -359,15 +383,20 @@ public class Orders extends Controller {
 
             System.out.println(request.toString());
 
-            String stmt_update = "Select orderId, victualDrinkId, isReady from orderVictualDrink where orderId = ? and " +
-                    "victualDrinkId = (Select victualsAndDrinksId from victualsanddrinks where name = ?) " +
-                    "and isReady = ? for update;";
+            String stmt_update = "select ovd.orderId, ovd.victualDrinkId, ovd.isReady from orderVictualDrink as ovd " +
+                    "left join orders as o on ovd.orderId = o.orderId " +
+                    "left join restaurants as r on r.restaurantId = o.restaurantId " +
+                    "where o.orderId = ? and " +
+                    "ovd.victualDrinkId = (Select victualsAndDrinksId from victualsanddrinks where name = ?) for update;";
+
+            //String stmt_update = "Select orderId, victualDrinkId, isReady from orderVictualDrink where orderId = ? and " +
+            //        "victualDrinkId = (Select victualsAndDrinksId from victualsanddrinks where name = ?) " +
+            //        "and isReady = ? and for update;";
 
             PreparedStatement preparedStatement =
                     connection.prepareStatement(stmt_update, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             preparedStatement.setString(1, request.get("orderId"));
             preparedStatement.setString(2, request.get("name"));
-            preparedStatement.setString(3, "0");
 
             ResultSet resultSet = preparedStatement.executeQuery();
 

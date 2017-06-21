@@ -21,7 +21,7 @@
                     <div class="col-sm-3 col-md-4 col-lg-2" >
                         <div class="form-group">
                             @if(edit_or_create == "edit"){
-                                <label>@order.getOrderId()</label>
+                                <label>Order ID: @order.getOrderId()</label>
                             } else {
                                 <select class="input-large form-control" style="width: 150px">
                                         <!-- for petljom dodaj sve musteriji koje imaju rezervaciju trenutno -->
@@ -53,7 +53,7 @@
                     </div>
 
                     <div class="col-sm-3 col-md-4 col-lg-2" >
-                        <p>Govedji restoran</p>
+                        <p>Ako je kreairanje nove porudzbine, onda lista gostiju sa trenutnom rezervacijom</p>
                     </div>
 
                     <br><br><br>
@@ -74,7 +74,8 @@
                             <tbody id="vicList">
                             @for(victual <- menu) {
                                 @if(victual.tip == "victual") {
-                                    <tr style="cursor:pointer" about="@victual.price" class="orderFood" id="@victual.name">
+                                    <tr style="cursor:pointer" about="@victual.price" class="orderFood"
+                                    id="@victual.name.replaceAll("\\s+", "")" content="@victual.name">
                                         <td>@victual.name</td>
                                         <td>@victual.description</td>
                                         <td>@victual.price</td>
@@ -100,7 +101,8 @@
                         <tbody id="drinkList">
                         @for(drink <- menu) {
                             @if(drink.tip == "drink") {
-                                <tr style="cursor:pointer" about="@drink.price" class="orderFood" id="@drink.name">
+                                <tr style="cursor:pointer" about="@drink.price" class="orderFood"
+                                id="@drink.name.replaceAll("\\s+", "")" content="@drink.name">
                                     <td>@drink.name</td>
                                     <td>@drink.description</td>
                                     <td>@drink.price</td>
@@ -126,11 +128,12 @@
                             </thead>
                             <tbody id="orderList">
                                 @if(edit_or_create == "edit"){
-                                    @for(element <- order.getVictualsDrinks){
+                                    @for(element <- order.getVictualsDrinks()){
                                         <tr>
                                             <td>@element.get("name")</td>
-                                            <td id="@element.get("name")price">@element.get("price")</td>
-                                            <td>@element.get("quantity")</td>
+                                            <td>@element.get("price")</td>
+                                            <td id="@element.get("name").replaceAll("\\s+", "")amount">
+                                            @element.get("quantity")</td>
                                         </tr>
                                     }
                                 }
@@ -169,25 +172,27 @@
             $('.orderFood').on('click', function(e) {
                 //name to add
                 var name = $(this).attr('id');
+                //console.log(name);
                 //price to add
                 var price = $(this).attr('about');
                 //check if food is already in order list
                 var check = false;
+                var name_to_display = $(this).attr('content');
 
                 $("#orderList").each(function(){
                     $(this).find('td').each(function(){
-                        if($(this).text() === name) {
-                            var current_price = $("#" + name + "price").text();
-                            $("#" + name + "price").html(parseInt(current_price) + 1);
+                        if($(this).text() === name_to_display) {
+                            var current_amount = $("#" + name + "amount").text();
+                            $("#" + name + "amount").html(parseInt(current_amount) + 1);
                             check = true;
                         }
                     });
                 });
 
                 if(!check){
-                    $("#orderList").append("<tr> <td>" + name + "</td>"
+                    $("#orderList").append("<tr> <td>" + name_to_display + "</td>"
                             + "<td>" + price + "</td>"
-                            + "<td id=\"" + name + "price\">" + "1</td></tr>");
+                            + "<td id=\"" + name + "amount\">" + "1</td></tr>");
                 }
 
                 e.preventDefault();

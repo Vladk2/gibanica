@@ -38,7 +38,7 @@ INSERT INTO baklava.orders (orderId, orderDate, orderTime, guestId, waiterId, re
   (1, "2017-06-19", "19:24:22", 1, 6, 1, 1200.99);
 
 INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, workerId) VALUES
-  (1, 1, 7);
+  (2, 4, 7);
 INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, workerId) VALUES
   (1, 2, 8);
 INSERT INTO baklava.orderVictualDrink (orderId, victualDrinkId, workerId) VALUES
