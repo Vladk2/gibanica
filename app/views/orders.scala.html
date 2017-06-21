@@ -55,7 +55,9 @@
                                                     }
                                                     @if(session.get("userType") == "waiter") {
                                                         <td id="kol4:@element.get("orderId")" class="editColumn">
+                                                            <form method="post" id="@element.get("orderId"):form" action="/editOrder">
                                                             <em class="fa fa-gear"></em>
+                                                            </form>
                                                         </td>
                                                     }
                                                     @if(session.get("userType") != "waiter"){
@@ -318,6 +320,7 @@
             $('.editColumn').on('click', function(){
                var form_id = $(this).attr('id').split(':');
                console.log(form_id[1]);
+               console.log($('#' + form_id[1] + ':form').attr('id'));
             });
         });
 
