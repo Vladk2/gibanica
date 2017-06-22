@@ -1,5 +1,6 @@
 @(userEmail: String)
 @home("Friends") {
+    <script src="assets/javascripts/sorttable.js"></script>
     <i style="float: right;
         margin-right: 40px;">logged in: <b>@userEmail</b> </i> <br> <br>
 
@@ -27,7 +28,12 @@
                         </div>
                     </div>
                     <div class="panel-body" id="searchDiv" style="display: none">
-                        <table class="table table-striped table-bordered table-list">
+                        <table class="table table-striped table-bordered table-list sortable">
+                            <thead>
+                                <td>Name</td>
+                                <td>Surname</td>
+                                <td class="sorttable_nosort">Actions</td>
+                            </thead>
                             <tbody id="searchResultsTableBody">
                             </tbody>
                         </table>
@@ -54,7 +60,12 @@
                         </div>
                     </div>
                     <div class="panel-body" id="pendingDiv" style="display: none">
-                        <table class="table table-striped table-bordered table-list">
+                        <table class="table table-striped table-bordered table-list sortable">
+                            <thead>
+                                <td>Name</td>
+                                <td>Surname</td>
+                                <td class="sorttable_nosort">Actions</td>
+                            </thead>
                             <tbody id="pendingTableBody">
                             </tbody>
                         </table>
@@ -81,7 +92,12 @@
                         </div>
                     </div>
                     <div class="panel-body" id="friendsDiv" style="display: none">
-                        <table class="table table-striped table-bordered table-list">
+                        <table class="table table-striped table-bordered table-list sortable">
+                            <thead>
+                                <td>Name</td>
+                                <td>Surname</td>
+                                <td class="sorttable_nosort">Actions</td>
+                            </thead>
                             <tbody id="friendsTableBody">
                             </tbody>
                         </table>

@@ -251,7 +251,6 @@
                 </script>
 
                 @if(session.get("userType").equals("guest")) {
-                    <script src="assets/javascripts/restaurantsGuest.js"></script>
                     <form id="searchRestaurantsForm">
                         <input type="text" id="searchRestaurantsText">
                         <button type="button" id="searchRestaurantsButton"
@@ -316,6 +315,7 @@
                                 </div>
 
                             </div></div></div>
+                    <script src="assets/javascripts/restaurantsGuest.js"></script>
                 } <!-- neki div nije zatvoren, ne mogu provalim koji -- >
 
       </center>

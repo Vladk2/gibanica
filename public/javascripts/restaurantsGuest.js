@@ -4,6 +4,7 @@
 
 function getRestaurantSearchResults(getAll) {
     console.log('getRestaurantSearchResults: ', getAll);
+    document.getElementById('restaurantsTableBody').innerHTML = '<i>Please wait...</i>';
     var searchText;
     if (getAll === true) {
         searchText = '';

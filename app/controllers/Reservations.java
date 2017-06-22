@@ -73,4 +73,14 @@ public class Reservations extends Controller {
         return ok(Json.toJson(resultArray));
     }
 
+    public static Result reserve(int id) {
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+
+        return badRequest(Integer.toString(id));
+    }
+
 }
