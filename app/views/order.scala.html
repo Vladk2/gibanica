@@ -1,4 +1,5 @@
-@(menu: List[VictualAndDrink], edit_or_create: String, order: Order, cookId: String, bartenderId: String)
+@(menu: List[VictualAndDrink], edit_or_create: String, order: Order, cookId: String, bartenderId: String,
+    guests: List[User])
 
 @home("Order"){
     <div>
@@ -25,7 +26,10 @@
                             } else {
                                 <select class="input-large form-control" style="width: 150px">
                                         <!-- for petljom dodaj sve musteriji koje imaju rezervaciju trenutno -->
-                                    <option name="brRez+imeIPrezime">2: Miljan Maljkovic</option>
+                                    @for(el <- guests) {
+                                        <option value="@el.userId">@el.name
+                                            @el.surname</option>
+                                    }
                                 </select>
                             }
                         </div>

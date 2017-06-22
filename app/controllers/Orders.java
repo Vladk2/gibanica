@@ -174,8 +174,9 @@ public class Orders extends Controller {
             order_items.close();
 
             //return redirect("/editOrder");
+            List<User> guests = new ArrayList<>();
             return ok(order.render(menu,
-                    "edit", _order, cookId, bartenderId));
+                    "edit", _order, cookId, bartenderId, guests));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -224,7 +225,25 @@ public class Orders extends Controller {
 
             // izlistaj imena gostiju koji trenutno imaju rezervisan sto
 
-            String get_guests = "";
+            String get_guests = "Select * from users where type = \"guest\";";
+
+            List<User> guests = new ArrayList<>();
+
+            PreparedStatement preparedStatement1 = connection.prepareStatement(get_guests);
+
+            ResultSet resultSet = preparedStatement1.executeQuery();
+
+            while(resultSet.next()){
+                User guest = new User();
+                guest.userId = resultSet.getString(1);
+                guest.name = resultSet.getString(2);
+                guest.surname = resultSet.getString(3);
+                guest.email = resultSet.getString(4);
+                guests.add(guest);
+            }
+
+            resultSet.close();
+            preparedStatement1.close();
 
             // izlistaj kuvare i sankere kojima ce se dodeliti porudzbina
 
@@ -237,8 +256,11 @@ public class Orders extends Controller {
 
             preparedStatement.close();
 
+
+
+
             return ok(order.render(menu,
-                    "new", new Order(), "", ""));
+                    "new", new Order(), "", "", guests));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();

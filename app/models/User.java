@@ -9,6 +9,7 @@ public class User {
     public String email;
     public String password;
     public String tip;
+    public String userId;
     public int verified;
 
     public User() {}
