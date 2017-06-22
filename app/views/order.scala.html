@@ -1,4 +1,4 @@
-@(menu: List[VictualAndDrink], edit_or_create: String, order: Order)
+@(menu: List[VictualAndDrink], edit_or_create: String, order: Order, cookId: String, bartenderId: String)
 
 @home("Order"){
     <div>
@@ -75,7 +75,7 @@
                             @for(victual <- menu) {
                                 @if(victual.tip == "victual") {
                                     <tr style="cursor:pointer" about="@victual.price" class="orderFood"
-                                    id="@victual.name.replaceAll("\\s+", "")" content="@victual.name">
+                                    id="@victual.name.replaceAll("\\s+", "")" content="@victual.name" resource="victual">
                                         <td>@victual.name</td>
                                         <td>@victual.description</td>
                                         <td>@victual.price</td>
@@ -102,7 +102,7 @@
                         @for(drink <- menu) {
                             @if(drink.tip == "drink") {
                                 <tr style="cursor:pointer" about="@drink.price" class="orderFood"
-                                id="@drink.name.replaceAll("\\s+", "")" content="@drink.name">
+                                id="@drink.name.replaceAll("\\s+", "")" content="@drink.name" resource="drink">
                                     <td>@drink.name</td>
                                     <td>@drink.description</td>
                                     <td>@drink.price</td>
@@ -130,7 +130,8 @@
                                 @if(edit_or_create == "edit"){
                                     @for(element <- order.getVictualsDrinks()){
                                         <tr class="removeFood" style="cursor:pointer"
-                                        about="@order.getOrderId()" content="@element.get("name")">
+                                        about="@order.getOrderId()" content="@element.get("name")"
+                                        resource="@element.get("type")">
                                             <td>@element.get("name")</td>
                                             <td>@element.get("price")</td>
                                             <td id="@element.get("name").replaceAll("\\s+", "")amount">
@@ -180,9 +181,11 @@
                 var check = false;
                 var name_to_display = $(this).attr('content');
 
-                console.log(name);
-                console.log(name_to_display);
-                console.log(check);
+                console.log($(this).attr('resource'));
+
+                var item_type = 'victual';
+                if($(this).attr('resource') === 'drink')
+                    item_type = 'drink';
 
                 $("#orderList").each(function(){
                     $(this).find('td').each(function(){
@@ -198,7 +201,9 @@
                             "content=\"" + name_to_display + "\"> " +
                             "<td>" + name_to_display + "</td>"
                             + "<td>" + price + "</td>"
-                            + "<td id=\"" + name + "amount\">" + "1</td></tr>";
+                            + "<td id=\"" + name + "amount\">1</td>"
+                            + "<td style=\"display:none\">" + item_type
+                            + "</td></tr>";
 
                 if(!check){
                     $("#orderList").append(row);
@@ -207,6 +212,8 @@
                 e.preventDefault();
             });
             $(document).on('click', '.removeFood', function() {
+
+                console.log($(this).attr('resource'));
                 var request = {
                     'orderId': '@order.getOrderId()',
                     'name': $(this).attr('content')
@@ -258,11 +265,29 @@
                 var type = 'new';
                 if($(this).attr('id') === 'editOrder')
                     type = 'edit';
+
                 var order = {"type": type,
-                    "orderId": "@order.getOrderId()",
-                    "victualsDrinks": [],
-                    "workerId": "@order.getWorkerId()"
+                    "victualsDrinks": []
                 };
+
+                var orderId = '@order.getOrderId()';
+
+                var bartenderId = '8';
+                var cookId = '7';
+
+                if('@edit_or_create' === 'new'){
+
+                    /* Iz comboboxa za kuvara/sankera uzmi vrednost i stavi za
+                     * svaku stavku u porudzbini */
+
+                    bartenderId = '8';
+                    cookId = '7';
+
+                    order['guestId'] = '1';
+                    orderId = '';
+                }
+                else
+                    order['orderId'] = orderId;
                 //workerId se prikuplja sa forme
 
                 var global_price = 0.0;
@@ -281,6 +306,11 @@
                             } else if(i === 2){
                                 item["quantity"] = $(this).text();
                                 item_price = parseFloat(item["price"]) * parseInt(item["quantity"]);
+                            } else if(i === 3){
+                                if($(this).text() === 'victual')
+                                    item['workerId'] = cookId;
+                                else if($(this).text() === 'drink')
+                                    item['workerId'] = bartenderId;
                             }
                             prices.push(item_price);
                             i++;

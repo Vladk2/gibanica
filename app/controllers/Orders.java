@@ -14,6 +14,8 @@ import views.html.order;
 import models.*;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.*;
 import play.db.DB;
@@ -114,6 +116,8 @@ public class Orders extends Controller {
 
         /* bice poslate informacije o porudzbine preko forme */
         /* svaki element u listi porudzbina ce biti forma za sebe */
+        String cookId = "";
+        String bartenderId = "";
 
         try (Connection connection = DB.getConnection()){
 
@@ -139,7 +143,7 @@ public class Orders extends Controller {
 
             PreparedStatement order_items = null;
 
-            String items = "select v.name, v.price, ovd.quantity, o.price, ovd.workerId from victualsanddrinks as v " +
+            String items = "select v.name, v.price, ovd.quantity, o.price, o.guestId, v.type from victualsanddrinks as v " +
                     "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
                     "left join orders as o on o.orderId = ovd.orderId " +
                     "where o.orderId = ?;";
@@ -158,8 +162,9 @@ public class Orders extends Controller {
                 item.put("name", resultSet.getString(1));
                 item.put("price", resultSet.getString(2));
                 item.put("quantity", resultSet.getString(3));
+                item.put("type", resultSet.getString(6));
                 _order.setPrice(new BigDecimal(resultSet.getString(4)));
-                _order.setWorkerId(resultSet.getString(5));
+                _order.setGuestId(resultSet.getString(5));
                 for_order.add(item);
             }
 
@@ -170,7 +175,7 @@ public class Orders extends Controller {
 
             //return redirect("/editOrder");
             return ok(order.render(menu,
-                    "edit", _order));
+                    "edit", _order, cookId, bartenderId));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -233,7 +238,7 @@ public class Orders extends Controller {
             preparedStatement.close();
 
             return ok(order.render(menu,
-                    "new", new Order()));
+                    "new", new Order(), "", ""));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -301,12 +306,12 @@ public class Orders extends Controller {
 
                 String get_new_worker = "Select w.userId from workers as w left join v";
 
-                for(int i = 0; i < order_items.size(); i++) {
+                for(int i = 0; i < request.getVictualsDrinks().size(); i++) {
                     PreparedStatement preparedStatement1 = connection.prepareStatement(new_query);
                     preparedStatement1.setString(1, request.getOrderId());
-                    preparedStatement1.setString(2, order_items.get(i));
-                    preparedStatement1.setString(3, request.getWorkerId());
-                    preparedStatement1.setString(4, ord_items.get(order_items.get(i)).trim());
+                    preparedStatement1.setString(2, request.getVictualsDrinks().get(i).get("name"));
+                    preparedStatement1.setString(3, request.getVictualsDrinks().get(i).get("workerId"));
+                    preparedStatement1.setString(4, request.getVictualsDrinks().get(i).get("quantity").trim());
 
                     preparedStatement1.execute();
                     preparedStatement1.close();
@@ -318,21 +323,64 @@ public class Orders extends Controller {
 
                 connection.commit();
             } else if(request.getType().equals("new")){
+
+                // vreme kreiranja porudzbine
+                Date current_datetime = new Date();
+                DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                String sqlDate = formatter.format(current_datetime);
+                String sqlTime = new SimpleDateFormat("HH:MM:s").format(current_datetime);
+
+                String new_order = "Insert into orders (orderDate, orderTime, guestId, waiterId, restaurantId," +
+                        " price) values (?, ?, ?, ?, (Select restaurantId from workers where userId = ? ), ?);";
+
+                PreparedStatement pstmt = connection.prepareStatement(new_order);
+                pstmt.setString(1, sqlDate);
+                pstmt.setString(2, sqlTime);
+                pstmt.setString(3, request.getGuestId());
+                pstmt.setString(4, session("userId"));
+                pstmt.setString(5, session("userId"));
+                pstmt.setBigDecimal(6, request.getPrice());
+
+
+                pstmt.execute();
+
+                // uzmi id porudzbine koja je tek povezana
+
+                String get_orderId = "Select orderId from orders where waiterId = ? and orderDate = ? and orderTime = ?";
+                PreparedStatement getId = connection.prepareCall(get_orderId);
+                getId.setString(1, session("userId"));
+                getId.setString(2, sqlDate);
+                getId.setString(3, sqlTime);
+
+                String orderId = "";
+
+                ResultSet resultSet = getId.executeQuery();
+
+                while(resultSet.next()){
+                    orderId = resultSet.getString(1);
+                }
+
+                resultSet.close();
+                getId.close();
+
                 String new_query = "Insert into orderVictualDrink (orderId, victualDrinkId, isReady, accepted, workerId," +
                         "quantity) values (?, (Select victualsAndDrinksId from victualsanddrinks where name = ?), " +
                         "0, 0, ?, ?);";
 
-                for(int i = 0; i < order_items.size(); i++) {
+                for(int i = 0; i < request.getVictualsDrinks().size(); i++) {
                     PreparedStatement preparedStatement1 = connection.prepareStatement(new_query);
-                    preparedStatement1.setString(1, request.getOrderId());
-                    preparedStatement1.setString(2, order_items.get(i));
-                    preparedStatement1.setString(3, request.getWorkerId());
-                    preparedStatement1.setString(4, ord_items.get(order_items.get(i)).trim());
+                    preparedStatement1.setString(1, orderId);
+                    preparedStatement1.setString(2, request.getVictualsDrinks().get(i).get("name"));
+                    preparedStatement1.setString(3, request.getVictualsDrinks().get(i).get("workerId"));
+                    preparedStatement1.setString(4, request.getVictualsDrinks().get(i).get("quantity"));
 
                     preparedStatement1.execute();
                     preparedStatement1.close();
 
                 }
+
+
+                connection.commit();
             }
 
             //nakon snimanja u bazu, salje se notifikacija konobarima i

@@ -12,7 +12,7 @@ public class Order {
     private String orderId;
     private String type;
     private BigDecimal price;
-    private String workerId;
+    private String guestId;
     private List<HashMap<String, String>> victualsDrinks;
 
     public String getType(){
@@ -23,12 +23,12 @@ public class Order {
         this.type = type;
     }
 
-    public String getWorkerId(){
-        return workerId;
+    public String getGuestId(){
+        return guestId;
     }
 
-    public void setWorkerId(String workerId){
-        this.workerId = workerId;
+    public void setGuestId(String guestId){
+        this.guestId = guestId;
     }
 
     public String getOrderId() {
