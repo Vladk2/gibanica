@@ -69,7 +69,7 @@
                                 i = sizeSqrt
                             }
                         }
-                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor" class="divTableCell" style="cursor:pointer;background-color:
+                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor|@seat.status" class="divTableCell" style="cursor:pointer;background-color:
                     @seat.sectionColor;"></div>
                     @if(i == 1) {
                             <!-- DivTableRow end --> </div>
@@ -282,10 +282,6 @@
     });
 
 
-
-
-
-
     // seat config
     var josjedan = true;
     $(document).on("click", "#addSection", function () {
@@ -363,13 +359,20 @@
     $(".divTableCell").click(function () {
         var this_id = $(this).attr('id');
         var new_id = this_id.split('|');
-        if (new_id[1] == pickedColor) {
-            $(this).css("background-color", "#fff1cc");
-            $(this).attr("id", new_id[0] + "|none");
+        if(new_id[2] == "free") {
+            if (new_id[1] == pickedColor) {
+                $(this).css("background-color", "#fff1cc");
+                $(this).attr("id", new_id[0] + "|none|" + new_id[2]);
+
+            }
+            else {
+                $(this).css("background-color", pickedColor);
+                $(this).attr("id", new_id[0] + "|" + pickedColor + "|" + new_id[2]);
+            }
+            $("#sectionsErrMessage").html("");
         }
         else {
-            $(this).css("background-color", pickedColor);
-            $(this).attr("id", new_id[0] + "|" + pickedColor);
+            $("#sectionsErrMessage").html("You cannot edit reserved table");
         }
 
     });

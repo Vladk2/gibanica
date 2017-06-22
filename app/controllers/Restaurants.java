@@ -660,7 +660,7 @@ public class Restaurants extends Controller {
                     posX = set3.getString(1);
                     posY = set3.getString(2);
                     sectorColor = set3.getString(3);
-                    RestSection seat = new RestSection(sectorColor, posX, posY);
+                    RestSection seat = new RestSection(sectorColor, posX, posY, "free");
                     seats.add(seat);
 
                 }

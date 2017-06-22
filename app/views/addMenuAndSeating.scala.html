@@ -120,7 +120,7 @@
                     @for(x <- 0 until restSize) {
                         <div class="divTableRow">
                             @for(y <- 0 until restSize) {
-                                <div id="seat:@x:@y:|none" class="divTableCell" style="cursor: pointer"></div>
+                                <div id="seat:@x:@y:|none|free" class="divTableCell" style="cursor: pointer"></div>
                             }
                             <!-- DivTableRow end --> </div>
                     }
@@ -254,11 +254,11 @@
             var new_id = this_id.split('|');
             if (new_id[1] == pickedColor) {
                 $(this).css("background-color", "#fff1cc");
-                $(this).attr("id", new_id[0] + "|none");
+                $(this).attr("id", new_id[0] + "|none|free");
             }
             else {
                 $(this).css("background-color", pickedColor);
-                $(this).attr("id", new_id[0] + "|" + pickedColor);
+                $(this).attr("id", new_id[0] + "|" + pickedColor + "|free");
             }
 
         });

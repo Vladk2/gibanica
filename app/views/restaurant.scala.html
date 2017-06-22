@@ -494,7 +494,8 @@
 
                                     <label for="selectWorker">Select employee:</label> <br>
                                     <select class="form-control" style=" margin-bottom: 15px;
-                                        width: 250px;" type="text" id="selectWorker" name="selectWorker">
+                                        width: 250px;" type="text" id="selectWorker" value="none()" name="selectWorker">
+
                                         @for(worker <- workers) {
                                             <option id="@worker.email">@worker.name @worker.surname (@worker.tip)</option>
                                         }
@@ -549,6 +550,7 @@
                     // ------
 
                     $(document).ready(function () {
+
                         var selektovan = $("#selectWorker").val().split("(");
 
                         if(selektovan[1] == "waiter)") {
@@ -559,20 +561,23 @@
                             $("#selectSector").hide();
                             $("#selectSectorLabel").hide();
                         }
+
                     });
                     $('#selectWorker').on('change', function() {
-                        var selektovan = $("#selectWorker").val().split("(");
-                        $("#WorkTimeMessage").hide();
-                        if(selektovan[1] == "waiter)") {
-                            $("#selectSector").show();
-                            $("#selectSectorLabel").show();
 
-                        }
-                        else {
-                            $("#selectSector").hide();
-                            $("#selectSectorLabel").hide();
-                            $("#selectSector").val("nula bajo");
-                        }
+                            var selektovan = $("#selectWorker").val().split("(");
+                            $("#WorkTimeMessage").hide();
+                            if (selektovan[1] == "waiter)") {
+                                $("#selectSector").show();
+                                $("#selectSectorLabel").show();
+
+                            }
+                            else {
+                                $("#selectSector").hide();
+                                $("#selectSectorLabel").hide();
+                                $("#selectSector").val("nula bajo");
+                            }
+
                     });
 
                     $("#addWorkingHours").click(function() {
