@@ -152,7 +152,10 @@ public class Bids extends Controller {
 
     public static Result bidderNotifications() {
 
-
+        tip = session("userType");
+        verified = session("verified");
+        userId = session("userId");
+        loggedUser = session("connected");
         // ---- prikazi ovu stranicu samo ako je korisnik ulogovani i verifikovani bidder.
         if (loggedUser == null || verified.equals("0"))
             return redirect("/");
@@ -161,7 +164,7 @@ public class Bids extends Controller {
         // ----------------------------
 
         List<Notification> notifikacije = new ArrayList<>();
-        userId = session("userId");
+
         try (Connection connection = DB.getConnection()) {
 
             PreparedStatement stmt = null;
