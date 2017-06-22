@@ -259,24 +259,25 @@ public class Orders extends Controller {
             JsonNode ajax_json = request().body().asJson();
             Order request = objectMapper.convertValue(ajax_json, Order.class);
 
+
+            HashMap<String, String> ord_items = new HashMap<>();
+
+            List<String> order_items = new ArrayList<>();
+
+            for(HashMap<String, String> element: request.getVictualsDrinks()){
+                ord_items.put(element.get("name"), element.get("quantity"));
+                order_items.add(element.get("name"));
+            }
             //upisivanje porudzbine u bazu
             //id porudzbine ce biti isti kao id rezervacije
             //sto jos nije zavrseno !!!!
 
             if(request.getType().equals("edit")){
 
-                HashMap<String, String> ord_items = new HashMap<>();
-
-                List<String> order_items = new ArrayList<>();
-
-                for(HashMap<String, String> element: request.getVictualsDrinks()){
-                    ord_items.put(element.get("name"), element.get("quantity"));
-                    order_items.add(element.get("name"));
-                }
+                if(request.getVictualsDrinks().size() == 0)
+                    return badRequest("Order needs to have at least one item");
 
                 // brisanje stavki sa porudzbine
-
-                List<String> to_be_deleted = new ArrayList<>();
 
                 String delete_all = "delete from orderVictualDrink where orderId = ?;";
 
@@ -296,9 +297,11 @@ public class Orders extends Controller {
                         "0, 0, ?, ?);";
 
                 // if workerId null, onda uradi select i nadji bilo kog radnika za taj tip stavke (hrana/pice)
+                String workerId = null;
+
+                String get_new_worker = "Select w.userId from workers as w left join v";
 
                 for(int i = 0; i < order_items.size(); i++) {
-                    System.out.println("Za upis: " + order_items.get(i));
                     PreparedStatement preparedStatement1 = connection.prepareStatement(new_query);
                     preparedStatement1.setString(1, request.getOrderId());
                     preparedStatement1.setString(2, order_items.get(i));
@@ -314,6 +317,22 @@ public class Orders extends Controller {
 
 
                 connection.commit();
+            } else if(request.getType().equals("new")){
+                String new_query = "Insert into orderVictualDrink (orderId, victualDrinkId, isReady, accepted, workerId," +
+                        "quantity) values (?, (Select victualsAndDrinksId from victualsanddrinks where name = ?), " +
+                        "0, 0, ?, ?);";
+
+                for(int i = 0; i < order_items.size(); i++) {
+                    PreparedStatement preparedStatement1 = connection.prepareStatement(new_query);
+                    preparedStatement1.setString(1, request.getOrderId());
+                    preparedStatement1.setString(2, order_items.get(i));
+                    preparedStatement1.setString(3, request.getWorkerId());
+                    preparedStatement1.setString(4, ord_items.get(order_items.get(i)).trim());
+
+                    preparedStatement1.execute();
+                    preparedStatement1.close();
+
+                }
             }
 
             //nakon snimanja u bazu, salje se notifikacija konobarima i
@@ -340,7 +359,6 @@ public class Orders extends Controller {
                 return forbidden();
             }
         }
-
 
         try (Connection connection = DB.getConnection()) {
             ObjectMapper objectMapper = new ObjectMapper();
