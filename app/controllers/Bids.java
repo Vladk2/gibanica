@@ -152,6 +152,14 @@ public class Bids extends Controller {
 
     public static Result bidderNotifications() {
 
+
+        // ---- prikazi ovu stranicu samo ako je korisnik ulogovani i verifikovani bidder.
+        if (loggedUser == null || verified.equals("0"))
+            return redirect("/");
+        else if (!tip.equals("bidder"))
+            return redirect("/");
+        // ----------------------------
+
         List<Notification> notifikacije = new ArrayList<>();
         userId = session("userId");
         try (Connection connection = DB.getConnection()) {
@@ -164,7 +172,7 @@ public class Bids extends Controller {
             ResultSet result = stmt.executeQuery();
 
             while (result.next()) {
-                Notification nf = new Notification(result.getInt(2),Integer.parseInt(userId),result.getString(1));
+                Notification nf = new Notification(result.getInt(2),Integer.parseInt(userId),result.getString(1), 0);
                 notifikacije.add(nf);
             }
         } catch (SQLException sqle) {
@@ -181,6 +189,7 @@ public class Bids extends Controller {
 
         JsonNode json = request().body().asJson();
         Offer offer = Json.fromJson(json, Offer.class);
+        userId = session("userId");
 
         try (Connection connection = DB.getConnection()) {
 
@@ -194,6 +203,11 @@ public class Bids extends Controller {
             stmt.setString(5, userId);
             stmt.executeUpdate();
 
+            int offerId = offer.offerId;
+
+            for(ActorRef klijent : connectedManagers.values()){
+                klijent.tell(Integer.toString(offerId),  ActorRef.noSender());
+            }
 
             stmt.close();
 
@@ -261,7 +275,7 @@ public class Bids extends Controller {
                         result = stmt.executeQuery();
                         result.next();
                         int notifyId = result.getInt(1);
-                        Notification notif = new Notification(notifyId, acceptedUserId, acceptedMessage);
+                        Notification notif = new Notification(notifyId, acceptedUserId, acceptedMessage, req.reqId);
 
                         ObjectMapper mapper = new ObjectMapper();
                         String notifString = mapper.writeValueAsString(notif);
@@ -289,7 +303,7 @@ public class Bids extends Controller {
                     result = stmt2.executeQuery();
                     result.next();
                     int notifyId = result.getInt(1);
-                    Notification notif = new Notification(notifyId, rejectedUserId, rejecteddMessage);
+                    Notification notif = new Notification(notifyId, rejectedUserId, rejecteddMessage, req.reqId);
 
                     ObjectMapper mapper = new ObjectMapper();
                     String notifString = mapper.writeValueAsString(notif);
@@ -298,6 +312,13 @@ public class Bids extends Controller {
                     }
                     stmt.executeUpdate();
 
+            }
+                Notification notification = new Notification(0,0,null,req.reqId,"hideReq");
+                ObjectMapper mapper = new ObjectMapper();
+                String notifString = mapper.writeValueAsString(notification);
+            for(ActorRef klijent : clients.values()){
+
+                klijent.tell(notifString,  ActorRef.noSender());
             }
 
             connection.commit();
@@ -505,7 +526,7 @@ public class Bids extends Controller {
 
 
     private static ConcurrentHashMap<String, ActorRef> clients = new ConcurrentHashMap<String, ActorRef>();
-    private static ConcurrentHashMap<String, String> notifications = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, ActorRef> connectedManagers = new ConcurrentHashMap<>();
 
     public static WebSocket<String> notifyManager() {
         return WebSocket.withActor(Bids.OffersPostman::props);
@@ -529,10 +550,14 @@ public class Bids extends Controller {
                 ObjectMapper objectMapper = new ObjectMapper();
                 HashMap<String, String> request_message = objectMapper.readValue(message.toString(), HashMap.class);
                 List<Notification> userNotifications = new ArrayList<>();
-                if(request_message.get("type").equals("connection")) {
+                if(request_message.get("type").equals("restmanConnection")){
+                    connectedManagers.put(request_message.get("userId"), out);
+                    this.user = request_message.get("userMail");
+                    System.out.print("konektovao se " + request_message.get("userId"));
+                }
+                if(request_message.get("type").equals("bidderConnection")) {
                     clients.put(request_message.get("userId"), out);
                     this.user = request_message.get("userMail");
-                    System.out.print("Konektovan je: " + request_message.get("userId"));
 
                     try (Connection connection = DB.getConnection()) {
 
@@ -559,7 +584,7 @@ public class Bids extends Controller {
 
                             notifyId = result.getInt(1);
                             notifyMessage = result.getString(2);
-                            Notification notif = new Notification(notifyId, realUserId, notifyMessage);
+                            Notification notif = new Notification(notifyId, realUserId, notifyMessage, 0);
                             userNotifications.add(notif);
                             notifyNo++;
 

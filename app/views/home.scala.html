@@ -273,7 +273,6 @@
                     @if(session.get("userType").equals("bidder")) {
                     <div class="col-sm-3 col-md-3 pull-right" style="margin-right:70px;visibility: hidden" id="searchDiv">
 
-
                         <div class="input-group" style="margin-top:10px">
                             <input type="text" class="form-control searchInput" id="toSearch" placeholder="Search by restaurant's name..." name="srch-term"  style="background-color:black;color:white;border-color:orange;min-width:120px; width:220px">
                             <div class="input-group-btn">
@@ -294,7 +293,7 @@
 
         @if(session.get("userType").equals("bidder")) {
 
-            <script>
+                   <script>
 
                     var ws;
                     var root;
@@ -304,26 +303,34 @@
                     $(function() {
 
 
-                        // change color of the 'requests' option in the navbar
-
-
                         root = "ws:" + '//' + location.host + "/notifyManager";
-
                         ws = new WebSocket(root, "protocolTwo");
 
                         ws.onmessage = function (event) {
 
-                            var notification = JSON.parse(event.data);
-                            $("#dropdown_notify").append('<b>' + notification.message + '</b> <hr style="border-color:dimgrey">')
-                            $("#notifyNo").text(notifyNo);
 
-                            notifyNo++;
+                                var notification = JSON.parse(event.data);
+                            if(notification.signal != "hideReq") {
+                                $("#dropdown_notify").append('<b>' + notification.message + '</b> <hr style="border-color:dimgrey">')
+                                $("#notifyNo").text(notifyNo);
+
+
+                                notifyNo++;
+                            }
+                            else {
+                                if ($(".requestDiv")[0]) {  // if div exists (if requests page is opened)
+                                    $("#divId\\:" + notification.aboutReq).hide(300);
+                                }
+                                if($(".myOfferDiv")[0]){   // if div exists (if myoffers page is opened)
+                                    $(".offerFor\\:" + notification.aboutReq).hide(300);
+                                }
+                            }
 
                         };
 
                         ws.onopen = function (event) {
                             var connection_string = {
-                                "type": "connection",
+                                "type": "bidderConnection",
                                 "userId" : "@session.get("userId")",
                                 "userMail": "@session.get("connected")"
                             };
@@ -354,9 +361,9 @@
 
                     });
 
-            </script>
-
+        </script>
         }
+
         @if(session.get("userType").equals("waiter") || session.get("userType").equals("chef")
                     || session.get("userType").equals("bartender")) {
             <script>
@@ -462,6 +469,47 @@
 
             </script>
         }
+
+            @if(session.get("userType").equals("rest-manager")) {
+             <script>
+                    var ws;
+                    var root;
+                    $(function() {
+
+                        root = "ws:" + '//' + location.host + "/notifyManager";
+                        ws = new WebSocket(root, "protocolTwo");
+
+                        ws.onmessage = function (event) {
+
+
+                                var offerId = event.data;
+                                if($("#offerDiv\\:" + offerId).length != 0) // if id exists
+                                {
+                                    $(".btn\\:" + offerId).hide(100);
+                                    $("#AcceptOfferMessage"+offerId).html("<div class='alert alert-warning'  >" +
+                                            " <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Bidder has changed his offer! </b> You must refresh your page in order to accept this offer. </div>");
+                                    $("#AcceptOfferMessage"+offerId).show();
+                                }
+
+
+                        };
+
+
+                        ws.onopen = function (event) {
+                            var connection_string = {
+                                "type": "restmanConnection",
+                                "userId" : "@session.get("userId")",
+                                "userMail": "@session.get("connected")"
+                            };
+
+                            ws.send(JSON.stringify(connection_string));
+                        };
+
+                    });
+         </script>
+            }
+
+
 
         @content
 

@@ -18,7 +18,7 @@
                 @if(request.restName == session.get("myRestName")) {
 
                     <div class=" offerDiv activeOffer tab-pane fade in active ">
-            <div name="reqBy@request.restName" class=" " id="" style="width:30%;border-style: dotted; border-color: #333333">
+            <div name="reqBy@request.restName" class="" id="offerDiv:@offer.offerId" style="width:45em;border-style: dotted; border-color: #333333">
                 <div style="width: 100%; height:100px">
 
                     <div style="float:left;margin-left: 5%"> <br>
@@ -78,7 +78,7 @@
                 <br>
                 <div style="height:50px;display:none" id="AcceptOfferMessage@offer.offerId"> </div> <br>
 
-                <button class="btn btn-block btn-success acceptOfferBtn acceptOfferBtn:@request.reqId" id="acceptOfferBtn:@request.reqId:@offer.offerId"
+                <button class="btn btn-block btn-success acceptOfferBtn acceptOfferBtn:@request.reqId btn:@offer.offerId" id="acceptOfferBtn:@request.reqId:@offer.offerId"
                  style="width: 130px;color:black" ><b>
                     ACCEPT OFFER</b></button> <br>
 

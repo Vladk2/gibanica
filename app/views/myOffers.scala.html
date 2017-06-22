@@ -17,7 +17,7 @@
                 @if(offer.userId == session.get("userId")) {
                 @if(request.reqId == offer.reqId) {
                     <div class=" offerDiv activeOffer tab-pane fade in active ">
-            <div name="reqBy@request.restName" class=" " id="" style="width:30%;border-style: dotted; border-color: #333333">
+            <div name="reqBy@request.restName" class="myOfferDiv offerFor:@request.reqId" id="" style="width:41em;border-style: dotted; border-color: #333333">
                 <div style="width: 100%; height:100px">
 
                     <div style="float:left;margin-left: 5%"> <br>
@@ -60,17 +60,17 @@
                 <div style="float:left">
                 <label for="fromTime">Delivery date:</label> <br>
                 <input class="form-control editInput" style="margin-bottom: 15px; margin-left: 10px;
-                    width: 150px;" type="date" value="@offer.dueDate" min="" max="2018-12-31" id="dueDate:@offer.offerId" required>
+                    width: 150px;" type="date" value="@offer.dueDate" min="" max="2018-12-31" id="dueDate:@request.reqId:@offer.offerId" required>
                 </div>
                 <div style="float:left">
                 <label for="toTime">Price (RSD):</label> <br>
                 <input  class="form-control editInput" value="@offer.price" style="margin-bottom: 15px; margin-left: 10px;
-                    width: 95px;" type="text" id="bidPrice:@offer.offerId" name="bidPrice" required>
+                    width: 95px;" type="text" id="bidPrice:@request.reqId:@offer.offerId" name="bidPrice" required>
                 </div>
 
                 <label for="toTime">Message (optional):</label> <br>
                 <textarea class="editInput" rows="5" style="border-radius: 8px;
-                    width: 270px;text-align: left;"  id="bidNote:@offer.offerId" >@offer.message</textarea>
+                    width: 270px;text-align: left;"  id="bidNote:@request.reqId:@offer.offerId" >@offer.message</textarea>
                 </div>
                 <br>
                 <div style="height:50px;display:none" id="EditOfferMessage@offer.offerId"> </div> <br>
@@ -170,7 +170,8 @@
                     var this_id = $(this).attr('id');
                     var reqid = this_id.split(':');
                     var req = reqid[1];
-                    $("#editOfferBtn\\:" + req).removeAttr('disabled');
+                    var off = reqid[2];
+                    $("#editOfferBtn\\:" + req + "\\:" + off).removeAttr('disabled');
                 });
 
 
@@ -184,9 +185,9 @@
                 var buttonIDD = buttonId.split(':');
                 reqId = buttonIDD[1];
                 offerId = buttonIDD[2];
-                var dueDate = $("#dueDate\\:"+reqId).val();
-                var price = $("#bidPrice\\:"+reqId).val();
-                var message = $("#bidNote\\:"+reqId).val();
+                var dueDate = $("#dueDate\\:"+reqId+"\\:"+offerId).val();
+                var price = $("#bidPrice\\:"+reqId+"\\:"+offerId).val();
+                var message = $("#bidNote\\:"+reqId+"\\:"+offerId).val();
 
                 // min i startni datum ------
                 var d = new Date();
@@ -219,7 +220,7 @@
 
                     var offer = {
                         'reqId': reqId, 'price': price,  'dueDate': dueDate,
-                        'message': message
+                        'message': message, 'offerId' : offerId
                     };
 
 
