@@ -81,6 +81,10 @@ public class Application extends Controller {
             return ok(firstLog.render(loggedUser));
         else if((tip.equals("guest") && verified.equals("0")))
             return ok(firstLogGuest.render(name, loggedUser));
+        else if (tip.equals("bidder") && verified.equals("1"))
+            return redirect("/requests");
+        else if (tip.equals("rest-manager") && verified.equals("1"))
+            return redirect("/restaurants");
         else return ok(render("Welcome",new play.twirl.api.Html("<center><h2>Welcome, " + loggedUser + "!</h2></center>") ));
     }
 

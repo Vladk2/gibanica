@@ -143,6 +143,18 @@
             background-color: #e56e42;
         }
 
+        #seatConfTitle:hover {
+            color: #e56e42;
+        }
+
+        #menuTitle:hover {
+            color: #e56e42;
+        }
+        #managementTitle:hover {
+            color: #e56e42;
+        }
+
+
 
         .nav-tabs > li > a{
             border: medium none;
@@ -487,7 +499,7 @@
                                 {
                                     $(".btn\\:" + offerId).hide(100);
                                     $("#AcceptOfferMessage"+offerId).html("<div class='alert alert-warning'  >" +
-                                            " <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Bidder has changed his offer! </b> You must refresh your page in order to accept this offer. </div>");
+                                            " <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Bidder has changed his offer! </b> You must <a href='/offers'>refresh </a> your page in order to accept this offer. </div>");
                                     $("#AcceptOfferMessage"+offerId).show();
                                 }
 

@@ -50,6 +50,8 @@
                         </div>
                     }
                     <div style="width: 800px" >
+
+                        <div id="restInfoDiv">
                         <h3><span style="color: #e85c00">Your Restaurant:</span> <b>@myRestaurant.name</b>
                             <span style="margin-left:15px;font-size: 20px;cursor:pointer;color: #e85c00" class="glyphicon glyphicon-edit" data-toggle="modal" data-target="#editRestaurant" aria-hidden="true">
                             </span>
@@ -62,8 +64,20 @@
                         <div class = "hidemap" id = "mapa" style="width: 100%;
                             height: 220px;
                             background-color: white;"></div> <br>
-
+                        </div>
                         <br>
+
+                        <hr style="width: 100%;
+                            color: black;
+                            height: 1px;
+                            background-color: #d8d8d8;" />
+                        <h3 ><b id="managementTitle" style="cursor: pointer"> Management </b>
+                        </h3>
+                        <hr style="width: 100%;
+                            color: black;
+                            height: 1px;
+                            background-color: #d8d8d8;" />
+                        <div  id="managementDiv">
                         <a class="btn btn-warning btn-block" data-toggle="modal" data-target="#addWorkingTime" style="width: 240px;
                             float: left;
                             color: black;
@@ -87,12 +101,12 @@
                             color: black;
                             margin: 10px;
                             "><b>ADD A BIDDER</b></button> <br>
-
+                        </div>
                         <hr style="width: 100%;
                             color: black;
                             height: 1px;
                             background-color: #d8d8d8;" />
-                        <h3><b> Seat Configuration </b>
+                        <h3 ><b id="seatConfTitle" style="cursor: pointer"> Seat Configuration </b>
                             <a href="/editMenuAndSeating"><span  style="color:#e85c00;margin-left:10px;font-size: 20px;cursor:pointer" class="glyphicon glyphicon-edit"  aria-hidden="true">
                             </span> </a>
                         </h3>
@@ -151,13 +165,14 @@
                             color: black;
                             height: 1px;
                             background-color: #d8d8d8;" />
-                        <h3><b> Food and Beverage Menu </b> <a href="/editMenuAndSeating">
+                        <h3><b id="menuTitle" style="cursor: pointer"> Food and Beverage Menu </b> <a href="/editMenuAndSeating">
                             <span style="color:#e85c00;margin-left:10px;font-size: 20px;cursor:pointer" class="glyphicon glyphicon-edit" aria-hidden="true"></span> </a> </h3>
                         <hr style="width: 100%;
                             color: black;
                             height: 1px;
                             background-color: #d8d8d8;" />
-                        <div style="height: 130px;
+                        <div id="menuDiv">
+                        <div  style="height: 130px;
                             overflow: auto">
                             <table class="table-bordered table-striped" style="width: 630px;">
                                 <thead>
@@ -211,8 +226,29 @@
                             height: 1px;
                             background-color: #d8d8d8;" />
                     </div>
-
+                    </div>
                 }
+
+                <script>
+
+                        $(function() {
+                            $("#seatConfig").hide();
+                            $("#menuDiv").hide();
+                            $("#managementDiv").hide();
+                        });
+
+                        $("#managementTitle").click(function() {
+                            $("#managementDiv").toggle();
+                        });
+
+                        $("#seatConfTitle").click(function() {
+                            $("#seatConfig").toggle(200);
+                        });
+                        $("#menuTitle").click(function() {
+                            $("#menuDiv").toggle(200);
+                        });
+
+                </script>
 
                 @if(session.get("userType").equals("guest")) {
                     <script src="assets/javascripts/restaurantsGuest.js"></script>
