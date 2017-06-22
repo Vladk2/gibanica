@@ -111,6 +111,9 @@ public class Orders extends Controller {
             }
         }
 
+        /* PROVERI DA LI KONOBARU JOS TRAJE SMENA
+        * ukoliko ne traje return forbidden() */
+
         String myRestName = session("myRestName");
         String loggedUser = session("connected");
         List<VictualAndDrink> menu = new ArrayList<>();
@@ -1093,6 +1096,32 @@ public class Orders extends Controller {
         return false;
     }
 
+    private static List<String> loadNotifications(String userId){
+        List<String> notifications = new ArrayList<>();
+
+        try (Connection connection = DB.getConnection()) {
+
+            String query = "Select message from notificationOrders where userId = ? and seen = 0;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, userId);
+
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while(resultSet.next()){
+                notifications.add(resultSet.getString(1));
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+        return notifications;
+    }
+
     private static ConcurrentHashMap<String, ActorRef> clients_mail = new ConcurrentHashMap<String, ActorRef>();
     private static ConcurrentHashMap<String, String> clients_id = new ConcurrentHashMap<String, String>();
 
@@ -1123,6 +1152,10 @@ public class Orders extends Controller {
                     clients_id.put(request_message.get("userMail"), request_message.get("userId"));
                     this.userId = request_message.get("userId");
                     this.userMail = request_message.get("userMail");
+
+                    for(String notification : loadNotifications(this.userId)){
+                        this.out.tell(notification, self());
+                    }
                 }
                 System.out.println(request_message.toString());
                 //clients.get(message.toString()).tell("I received your message: " + message, self());

@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
@@ -14,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,6 +26,15 @@ public class Ratings extends Controller {
 
     public static Result visits() {
         if(session("userType").equals("guest")) {
+            Calendar currentTime = Calendar.getInstance();
+            System.out.println(currentTime.getTime());
+
+            Calendar startTime = Calendar.getInstance();
+
+            Calendar endTime = Calendar.getInstance();
+
+
+
             try (Connection connection = DB.getConnection()) {
                 /* PORED PODATAKA O RESTARANU, TREBA DA SE IZLISTAJU I PODACI O POSETI (to jos nije uradjeno) */
                 PreparedStatement preparedStatement = connection.prepareStatement(
@@ -48,14 +59,46 @@ public class Ratings extends Controller {
                     ));
                 }
 
+                resultSet.close();
+                preparedStatement.close();
 
-                return ok(visits.render(session("connected"), restaurants));
+                /* uzimanje ocena  */
+
+                String query_ratings = "Select * from restaurantsRating where userId = ?";
+
+                PreparedStatement preparedStatement1 = connection.prepareStatement(query_ratings);
+                preparedStatement1.setString(1, session("userId"));
+
+                ResultSet resultSet1 = preparedStatement1.executeQuery();
+
+                List<HashMap<String, String>> ratings = new ArrayList<>();
+
+                while(resultSet1.next()){
+                    HashMap<String, String> rating = new HashMap<>();
+                    rating.put("userId", resultSet1.getString(1));
+                    rating.put("restaurantId", resultSet1.getString(2));
+                    rating.put("visitId", resultSet1.getString(3));
+                    rating.put("rating", resultSet1.getString(4));
+                    rating.put("serviceRating", resultSet1.getString(5));
+                    rating.put("mealRating", resultSet1.getString(6));
+                    ratings.add(rating);
+                }
+
+                resultSet1.close();
+                preparedStatement1.close();
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                String for_js_ratings = objectMapper.writeValueAsString(ratings);
+
+                return ok(visits.render(session("connected"), restaurants, ratings, for_js_ratings));
             } catch (SQLException e) {
                 e.printStackTrace();
-                return badRequest("Nesto se cudno desilo");
+                return badRequest("Something strange happened");
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
             }
         }
-        return badRequest("Vi niste gost");
+        return forbidden();
     }
 
     @SuppressWarnings("Duplicates")
@@ -88,7 +131,7 @@ public class Ratings extends Controller {
             return ok(ajax_json.toString());
         } catch (SQLException e) {
             e.printStackTrace();
-            return badRequest("Nesto se cudno desilo");
+            return badRequest("Something strange happened");
         }
     }
 
@@ -121,7 +164,7 @@ public class Ratings extends Controller {
             return ok(ajax_json.toString());
         } catch (SQLException e) {
             e.printStackTrace();
-            return badRequest("Nesto se cudno desilo");
+            return badRequest("Something strange happened");
         }
     }
 
@@ -161,10 +204,10 @@ public class Ratings extends Controller {
 
         } catch(MySQLIntegrityConstraintViolationException duplicate_key){
             duplicate_key.printStackTrace();
-            return badRequest("Vec ste ocenili ovaj restoran.");
+            return badRequest("Already rated");
         } catch (Exception e){
             e.printStackTrace();
-            return badRequest("Desilo se nesto cudno.");
+            return badRequest("Something strange happened");
         }
     }
 }

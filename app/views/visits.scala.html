@@ -1,4 +1,6 @@
-@(userEmail: String, restaurants: List[Restaurant])
+@import java.util
+@(userEmail: String, restaurants: List[Restaurant], ratings: List[util.HashMap[String, String]],
+                for_js_ratings: String)
 
 @home("Visits"){
     <div>
@@ -39,23 +41,31 @@
                                     @for(restaurant <- restaurants) {
                                         <tr>
                                             <td>
-                                                <form class="rating" id="@(restaurant.id + "rst")">
-                                                    <fieldset class="fsets" id="@(restaurant.id + "fset")">
-                                                    <div class="rate">
-                                                        <input type="radio" class="stars" id="@(restaurant.id + "s5")" name="rate"/>
-                                                        <label for="@(restaurant.id + "s5")" title="text">5 stars</label>
-                                                        <input type="radio" class="stars" id="@(restaurant.id + "s4")" name="rate"/>
-                                                        <label for="@(restaurant.id + "s4")" title="text">4 stars</label>
-                                                        <input type="radio" class="stars" id="@(restaurant.id + "s3")" name="rate"/>
-                                                        <label for="@(restaurant.id + "s3")" title="text">3 stars</label>
-                                                        <input type="radio" class="stars" id="@(restaurant.id + "s2")" name="rate"/>
-                                                        <label for="@(restaurant.id + "s2")" title="text">2 stars</label>
-                                                        <input type="radio" class="stars" id="@(restaurant.id + "s1")" name="rate"/>
-                                                        <label for="@(restaurant.id + "s1")" title="text">1 star</label>
-                                                    </div>
-                                                    </fieldset>
-                                                        <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
-                                                </form>
+                                                @for(rating <- ratings){
+                                                    @if(rating.get("restaurantId").trim().equals(restaurant.id)){
+                                                        @if(rating.get("rating").equals("0")){
+                                                            <form class="rating" id="@(restaurant.id + "rst")">
+                                                                <fieldset class="fsets" id="@(restaurant.id + "fset")">
+                                                                <div class="rate">
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s5")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s5")" title="text">5 stars</label>
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s4")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s4")" title="text">4 stars</label>
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s3")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s3")" title="text">3 stars</label>
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s2")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s2")" title="text">2 stars</label>
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s1")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s1")" title="text">1 star</label>
+                                                                </div>
+                                                                </fieldset>
+                                                                    <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
+                                                            </form>
+                                                        } else {
+                                                            <p>You rated us with @rating.get("rating") stars. Thank you.</p>
+                                                        }
+                                                    }
+                                                }
                                             </td>
                                             <td class="restNameVisits" style="cursor:pointer;" id="@(restaurant.id + "name")"><b>@restaurant.name</b> </td>
                                             <td>@restaurant.description</td>
@@ -73,17 +83,7 @@
                                     <div class="col col-xs-4">
                                     </div>
                                     <div class="col col-xs-8">
-                                        <ul class="pagination hidden-xs pull-right">
-                                            <li><a href="#">1</a></li>
-                                            <li><a href="#">2</a></li>
-                                            <li><a href="#">3</a></li>
-                                            <li><a href="#">4</a></li>
-                                            <li><a href="#">5</a></li>
-                                        </ul>
-                                        <ul class="pagination visible-xs pull-right">
-                                            <li><a href="#">«</a></li>
-                                            <li><a href="#">»</a></li>
-                                        </ul>
+
                                     </div>
                                 </div>
                             </div>
@@ -108,7 +108,7 @@
                             <div class="floating-box"
                             style="width: 400px; display: inline-block;  height: 250px; margin: 20px;">
                                 <div>
-                                    <div align="center">
+                                    <div align="center" id="mealRating">
                                         <p>Rate your food for this visit</p>
                                         <form class="rating_food" id="rate_food">
                                             <fieldset class="food_fsets" id="rate_food_fset">
@@ -128,7 +128,7 @@
                                         </form>
                                     </div>
 
-                                    <div>
+                                    <div id="serviceRating">
                                         <p>Rate restaurant`s service for this visit</p>
                                         <form class="rating_service" id="rate_service">
                                             <fieldset class="service_fsets" id="rate_service_fset">
@@ -204,8 +204,10 @@
                                 data: JSON.stringify(form_),
                                 contentType: 'application/json',
                                 success: function (response) {
-                                    //$(".food_fsets").prop("disabled", true);
-                                    $("#modal-id").append(response);
+                                    $('#mealRating').hide();
+                                    $('#modal-id').append('<p><br>Thank you for rating your meal.</p>');
+                                    //$("#rate_food_fset").prop("disabled", true);
+                                    //$("#modal-id").append(response);
                                 },
                                 error: function (error) {
                                     alert(error.responseText);
@@ -245,8 +247,10 @@
                                 data: JSON.stringify(form_),
                                 contentType: 'application/json',
                                 success: function (response) {
-                                    //$(".food_fsets").prop("disabled", true);
-                                    $("#modal-id").append(response);
+                                    //$("#rate_service_fset").prop("disabled", true);
+                                    $('#serviceRating').hide();
+                                    $('#modal-id').append('<p><br>Thank you for rating our service.</p>');
+                                    //$("#modal-id").append(response);
                                 },
                                 error: function (error) {
                                     alert(error.responseText);
@@ -295,42 +299,51 @@
 
                     });
 
-                    var root = "ws:" + '//' + location.host + "/proceed_with_order";
-
-                    var webSocket = new WebSocket(root, "protocolOne");
-
-                    webSocket.onmessage = function (event) {
-                        console.log(event.data);
-                    };
-
                     $(".restNameVisits").on('click', function(event){
 
                         //ocisti modal pre svakog novog prikaza
                         $("#modal-id").empty();
-                        $("#cow")[0].play();
-
-                        //webSocket.onopen = function (event) {
-                            webSocket.send("@userEmail");
-                        //};
+                        //$("#cow")[0].play();
 
                         var restaurant = $(this).attr('id');
                         var id = restaurant.substring(0, restaurant.length - 4);
 
-                        $(".rating_food").attr('id', id + 'rate_food');
-                        $(".rating_service").attr('id', id + "rate_service");
+                        if($('#' + id + 'rst').length)
+                            alert('You have to rate our restaurant first.');
+                        else{
+                            console.log('forma ne postoji');
 
-                        console.log($(".rating_food").attr('id'));
-                        console.log($(".rating_service").attr('id'));
+                            $(".rating_food").attr('id', id + 'rate_food');
+                            $(".rating_service").attr('id', id + "rate_service");
 
-                        var request = {
-                            "restaurant": id,
-                            "userEmail": "@userEmail"
-                        };
+                            console.log($(".rating_food").attr('id'));
+                            console.log($(".rating_service").attr('id'));
 
-                        $("#modal-id").append("<p>" + request["userEmail"] + "</p>");
-                        $("#rateMealAndService").modal('toggle');
+                            var request = {
+                                "restaurant": id,
+                                "userEmail": "@userEmail"
+                            };
 
+                            @for(obj <- ratings){
+                                if(request['restaurant'] === "@obj.get("restaurantId")"){
+                                    @if(!obj.get("serviceRating").equals("0")){
+                                        $('#serviceRating').hide();
+                                        $('#modal-id').append('<p>You gave us '
+                                                + @obj.get("serviceRating") + ' stars for our service.' +
+                                                ' Thank you.</p><br><br>');
+                                    }
+                                    @if(!obj.get("mealRating").equals("0")){
+                                        $('#mealRating').hide();
+                                        $('#modal-id').append('<p>You rated your meal for this visit with '
+                                                + @obj.get("mealRating") + ' stars. Thank you.</p><br><br>');
+                                    }
+                                }
 
+                            }
+
+                            $("#rateMealAndService").modal('toggle');
+
+                        }
                         event.preventDefault();
 
                     });

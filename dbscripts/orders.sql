@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS baklava.notificationOrders (
   userId	  INT(5)	NOT NULL,
   message	  VARCHAR(100)   NOT NULL,
   seen		  BOOLEAN	NOT NULL,
-  CONSTRAINT `userId_in_notifications`
+  CONSTRAINT `userId_in_notificationOrders`
   FOREIGN KEY (userId) REFERENCES baklava.users (userId)
 );
 
