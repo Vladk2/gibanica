@@ -273,7 +273,12 @@
                                 <div id="dropdown_notify">
 
                                 </div>
-                                <a href="/bidderNotifications" style="color:white"><i>See all notifications</i></a>
+                            @if(session.get("userType").equals("bidder"))  {
+                             <a href="/bidderNotifications" style="color:white"><i>See all notifications</i></a>
+                                }else {
+                                <a href="/ordersNotifications" style="color:white"><i>See all notifications</i></a>
+                            }
+
                             </div>
 
                         </li>
