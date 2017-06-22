@@ -1,5 +1,5 @@
 @(menu: List[VictualAndDrink], edit_or_create: String, order: Order, cookId: String, bartenderId: String,
-    guests: List[User])
+    guests: List[User], cooks: List[User], bartenders: List[User])
 
 @home("Order"){
     <div>
@@ -24,7 +24,7 @@
                             @if(edit_or_create == "edit"){
                                 <label>Order ID: @order.getOrderId()</label>
                             } else {
-                                <select class="input-large form-control" style="width: 150px">
+                                <select class="input-large form-control" style="width: 150px" id="guests">
                                         <!-- for petljom dodaj sve musteriji koje imaju rezervaciju trenutno -->
                                     @for(el <- guests) {
                                         <option value="@el.userId">@el.name
@@ -32,6 +32,20 @@
                                     }
                                 </select>
                             }
+                            <select class="input-large form-control" style="width: 150px" id="cooks">
+                                <!-- for petljom dodaj sve musteriji koje imaju rezervaciju trenutno -->
+                                @for(el <- cooks) {
+                                    <option value="@el.userId">@el.name
+                                        @el.surname</option>
+                                }
+                            </select>
+                            <select class="input-large form-control" style="width: 150px" id="bartenders">
+                                <!-- for petljom dodaj sve musteriji koje imaju rezervaciju trenutno -->
+                                @for(el <- bartenders) {
+                                    <option value="@el.userId">@el.name
+                                        @el.surname</option>
+                                }
+                            </select>
                         </div>
                     </div>
                     <div class="col-sm-6 col-md-4 col-lg-8" >
@@ -185,7 +199,7 @@
                 var check = false;
                 var name_to_display = $(this).attr('content');
 
-                console.log($(this).attr('resource'));
+                //console.log($(this).attr('resource'));
 
                 var item_type = 'victual';
                 if($(this).attr('resource') === 'drink')
@@ -202,7 +216,7 @@
                 });
 
                 var row = "<tr class=\"removeFood\" style=\"cursor:pointer\" " +
-                            "content=\"" + name_to_display + "\"> " +
+                            "content=\"" + name_to_display + "\" + resource=\"" + item_type + "\"> " +
                             "<td>" + name_to_display + "</td>"
                             + "<td>" + price + "</td>"
                             + "<td id=\"" + name + "amount\">1</td>"
@@ -276,18 +290,17 @@
 
                 var orderId = '@order.getOrderId()';
 
-                var bartenderId = '8';
-                var cookId = '7';
+                var bartenderId = $('#bartenders').val();
+                var cookId = $('#cooks').val();
+                var guestId = $('#guests').val();
+
 
                 if('@edit_or_create' === 'new'){
 
                     /* Iz comboboxa za kuvara/sankera uzmi vrednost i stavi za
                      * svaku stavku u porudzbini */
 
-                    bartenderId = '8';
-                    cookId = '7';
-
-                    order['guestId'] = '1';
+                    order['guestId'] = guestId;
                     orderId = '';
                 }
                 else
@@ -301,8 +314,12 @@
                     $(this).find('tr').each(function(){
                         var i = 0;
                         var item = {};
+                        var workerId = cookId;
+                        if($(this).attr('resource') == 'drink')
+                            workerId = bartenderId;
                         $(this).find('td').each(function(){
                             var item_price = 0.0;
+
                             if(i === 0){
                                 item["name"] = $(this).text();
                             } else if(i === 1){
@@ -310,12 +327,8 @@
                             } else if(i === 2){
                                 item["quantity"] = $(this).text();
                                 item_price = parseFloat(item["price"]) * parseInt(item["quantity"]);
-                            } else if(i === 3){
-                                if($(this).text() === 'victual')
-                                    item['workerId'] = cookId;
-                                else if($(this).text() === 'drink')
-                                    item['workerId'] = bartenderId;
                             }
+                            item['workerId'] = workerId;
                             prices.push(item_price);
                             i++;
                         });
@@ -329,7 +342,7 @@
 
                 order["price"] = global_price.toString();
 
-                //console.log(order);
+                console.log(order);
 
                 /*Object.keys(order).forEach(function() {
                     var value = order["victualsDrinks"];

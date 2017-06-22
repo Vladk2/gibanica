@@ -173,10 +173,62 @@ public class Orders extends Controller {
             resultSet.close();
             order_items.close();
 
-            //return redirect("/editOrder");
+            //prazne lista gostiju koja ne treba za edit
             List<User> guests = new ArrayList<>();
+
+            List<User> cooks = new ArrayList<>();
+
+            String get_cooks = "select u.userId, u.name, u.surname from users as u " +
+                    "left join workers as w on u.userId = w.userId " +
+                    "left join restaurants as r on w.restaurantId = r.restaurantId " +
+                    "where u.type = \"chef\" and r.restaurantId = " +
+                    "(Select restaurantId from workers " +
+                    "where userId = (Select userId from users where email = ?));";
+
+
+            PreparedStatement preparedStatement2 = connection.prepareStatement(get_cooks);
+            preparedStatement2.setString(1, session("connected"));
+
+
+            ResultSet resultSet1 = preparedStatement2.executeQuery();
+
+            while(resultSet1.next()){
+                User cook = new User();
+                cook.userId = resultSet1.getString(1);
+                cook.name = resultSet1.getString(2);
+                cook.surname = resultSet1.getString(3);
+                cooks.add(cook);
+            }
+
+            resultSet1.close();
+            preparedStatement2.close();
+
+            List<User> bartenders = new ArrayList<>();
+
+            String get_bartenders = "select u.userId, u.name, u.surname from users as u " +
+                    "left join workers as w on u.userId = w.userId " +
+                    "left join restaurants as r on w.restaurantId = r.restaurantId " +
+                    "where u.type = \"bartender\" and r.restaurantId = " +
+                    "(Select restaurantId from workers " +
+                    "where userId = (Select userId from users where email = ?));";
+
+            PreparedStatement preparedStatement3 = connection.prepareStatement(get_bartenders);
+            preparedStatement3.setString(1, session("connected"));
+
+            ResultSet resultSet2 = preparedStatement3.executeQuery();
+
+            while(resultSet2.next()){
+                User bartender = new User();
+                bartender.userId = resultSet2.getString(1);
+                bartender.name = resultSet2.getString(2);
+                bartender.surname = resultSet2.getString(3);
+                bartenders.add(bartender);
+            }
+
+            resultSet2.close();
+            preparedStatement3.close();
             return ok(order.render(menu,
-                    "edit", _order, cookId, bartenderId, guests));
+                    "edit", _order, cookId, bartenderId, guests, cooks, bartenders));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -222,6 +274,7 @@ public class Orders extends Controller {
             }
 
             result.close();
+            preparedStatement.close();
 
             // izlistaj imena gostiju koji trenutno imaju rezervisan sto
 
@@ -247,20 +300,66 @@ public class Orders extends Controller {
 
             // izlistaj kuvare i sankere kojima ce se dodeliti porudzbina
 
-            String get_workers = "select u.name, u.surname from users as u " +
+            List<User> cooks = new ArrayList<>();
+
+            String get_cooks = "select u.userId, u.name, u.surname from users as u " +
                     "left join workers as w on u.userId = w.userId " +
-                    "left join restaurants as r on r.restaurantId = w.restaurantId " +
-                    "where u.email = ?;";
+                    "left join restaurants as r on w.restaurantId = r.restaurantId " +
+                    "where u.type = \"chef\" and r.restaurantId = " +
+                    "(Select restaurantId from workers " +
+                    "where userId = (Select userId from users where email = ?));";
 
 
+            PreparedStatement preparedStatement2 = connection.prepareStatement(get_cooks);
+            preparedStatement2.setString(1, session("connected"));
 
-            preparedStatement.close();
 
+            ResultSet resultSet1 = preparedStatement2.executeQuery();
 
+            while(resultSet1.next()){
+                User cook = new User();
+                cook.userId = resultSet1.getString(1);
+                cook.name = resultSet1.getString(2);
+                cook.surname = resultSet1.getString(3);
+                System.out.println(resultSet1.getString(2));
+                cooks.add(cook);
+            }
+
+            System.out.println(cooks.size());
+
+            resultSet1.close();
+            preparedStatement2.close();
+
+            List<User> bartenders = new ArrayList<>();
+
+            String get_bartenders = "select u.userId, u.name, u.surname from users as u " +
+                    "left join workers as w on u.userId = w.userId " +
+                    "left join restaurants as r on w.restaurantId = r.restaurantId " +
+                    "where u.type = \"bartender\" and r.restaurantId = " +
+                    "(Select restaurantId from workers " +
+                    "where userId = (Select userId from users where email = ?));";
+
+            PreparedStatement preparedStatement3 = connection.prepareStatement(get_bartenders);
+            preparedStatement3.setString(1, session("connected"));
+
+            ResultSet resultSet3 = preparedStatement3.executeQuery();
+
+            while(resultSet3.next()){
+                User bartender = new User();
+                bartender.userId = resultSet3.getString(1);
+                bartender.name = resultSet3.getString(2);
+                bartender.surname = resultSet3.getString(3);
+                bartenders.add(bartender);
+            }
+
+            System.out.println(bartenders.size());
+
+            resultSet3.close();
+            preparedStatement3.close();
 
 
             return ok(order.render(menu,
-                    "new", new Order(), "", "", guests));
+                    "new", new Order(), "", "", guests, cooks, bartenders));
 
         } catch (SQLException sqle){
             sqle.printStackTrace();
@@ -299,10 +398,10 @@ public class Orders extends Controller {
             //id porudzbine ce biti isti kao id rezervacije
             //sto jos nije zavrseno !!!!
 
-            if(request.getType().equals("edit")){
+            if(request.getVictualsDrinks().size() == 0)
+                return badRequest("Order needs to have at least one item");
 
-                if(request.getVictualsDrinks().size() == 0)
-                    return badRequest("Order needs to have at least one item");
+            if(request.getType().equals("edit")){
 
                 // brisanje stavki sa porudzbine
 
