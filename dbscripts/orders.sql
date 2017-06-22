@@ -34,6 +34,15 @@ CREATE TABLE IF NOT EXISTS baklava.orderVictualDrink (
   PRIMARY KEY (orderId, victualDrinkId)
 );
 
+CREATE TABLE IF NOT EXISTS baklava.notificationOrders (
+  notificationId  INT(5)	NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  userId	  INT(5)	NOT NULL,
+  message	  VARCHAR(100)   NOT NULL,
+  seen		  BOOLEAN	NOT NULL,
+  CONSTRAINT `userId_in_notifications`
+  FOREIGN KEY (userId) REFERENCES baklava.users (userId)
+);
+
 INSERT INTO baklava.orders (orderId, orderDate, orderTime, guestId, waiterId, restaurantId, price) VALUES
   (1, "2017-06-19", "19:24:22", 1, 6, 1, 1200.99);
 

@@ -357,9 +357,113 @@
             </script>
 
         }
+        @if(session.get("userType").equals("waiter") || session.get("userType").equals("chef")
+                    || session.get("userType").equals("bartender")) {
+            <script>
+
+                    /*var ws;
+                    var root;
+                    var notifyNo = 1;
 
 
+                    $(function () {
+
+
+                        // change color of the 'requests' option in the navbar
+
+
+                        root = "ws:" + '//' + location.host + "/proceed_with_order";
+
+                        ws = new WebSocket(root, "protocolOne");
+
+                        ws.onmessage = function (event) {
+
+                            //var notification = JSON.parse(event.data);
+                            //$("#dropdown_notify").append('<b>' + notification.message + '</b> <hr style="border-color:dimgrey">');
+                            //$("#notifyNo").text(notifyNo);
+                            console.log(event);
+                            notifyNo++;
+
+                        };
+
+                        ws.onopen = function (event) {
+                            var connection_string = {
+                                "type": "connection",
+                                "userId": "@session.get("userId")",
+                                "userMail": "@session.get("connected")"
+                            };
+                            ws.send(JSON.stringify(connection_string));
+                        };
+
+                    });
+
+                    $("#notificationIcon").click(function () {
+                        var this_user = {
+                            "userId": "@session.get("userId")"
+                        };
+                        $.ajax({
+                            type: "POST",
+                            url: "/seenOrderNotification",
+                            data: JSON.stringify(this_user),
+                            contentType: 'application/json',
+                            success: function () {
+                                $("#notifyNo").text("");
+                            },
+                            error: function () {
+
+                            }
+                        });
+                    });*/
+                var notifyNo = 1;
+
+                $(function (){
+
+                    var root = "ws:" + '//' + location.host + "/proceed_with_order";
+
+                    var webSocket = new WebSocket(root, "protocolOne");
+
+                    webSocket.onmessage = function (event) {
+                        console.log(event.data);
+                        //var notification = JSON.parse(event.data);
+                        $("#dropdown_notify").append('<b>' + event.data + '</b> <hr style="border-color:dimgrey">');
+                        $("#notifyNo").text(notifyNo);
+
+                        notifyNo++;
+                    };
+
+                    webSocket.onopen = function (event) {
+                        var connection_string = {
+                            "type": "connection",
+                            "userId": "@session.get("userId")",
+                            "userMail": "@session.get("connected")"
+                        };
+                        webSocket.send(JSON.stringify(connection_string));
+                    };
+
+                    $("#notificationIcon").click(function () {
+                        var this_user = {
+                            "userId": "@session.get("userId")"
+                        };
+                        $.ajax({
+                            type: "POST",
+                            url: "/seenOrderNotification",
+                            data: JSON.stringify(this_user),
+                            contentType: 'application/json',
+                            success: function () {
+                                $("#notifyNo").text("");
+                            },
+                            error: function () {
+
+                            }
+                        });
+                    });
+
+                });
+
+            </script>
+        }
 
         @content
+
     </body>
 </html>

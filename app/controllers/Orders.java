@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import play.data.DynamicForm;
 import play.data.Form;
+import play.libs.Json;
 import play.mvc.Controller;
 import akka.actor.*;
 import play.libs.F.*;
@@ -441,6 +442,20 @@ public class Orders extends Controller {
 
                 /* insert novih zavrsen */
 
+                String notification_message = String.format("Order ID: %s\nPrevious orders that you worked " +
+                        "on has been updated.", request.getOrderId());
+                for(int i = 0; i < request.getVictualsDrinks().size(); i++) {
+                    saveNotification(request.getVictualsDrinks().get(i).get("workerId"), notification_message);
+                    try {
+                        for(Map.Entry<String, ActorRef> websocket : clients_mail.entrySet()){
+                            websocket.getValue().tell(notification_message, ActorRef.noSender());
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
 
                 connection.commit();
             } else if(request.getType().equals("new")){
@@ -502,6 +517,20 @@ public class Orders extends Controller {
 
 
                 connection.commit();
+
+                String notification_message = String.format("Order ID: %s\nThere are new orders waiting " +
+                        "for your confirmation.", request.getOrderId());
+                for(int i = 0; i < request.getVictualsDrinks().size(); i++) {
+                    saveNotification(request.getVictualsDrinks().get(i).get("workerId"), notification_message);
+                    try {
+                        for(Map.Entry<String, ActorRef> websocket : clients_mail.entrySet()){
+                            websocket.getValue().tell(notification_message, ActorRef.noSender());
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
             //nakon snimanja u bazu, salje se notifikacija konobarima i
@@ -650,8 +679,38 @@ public class Orders extends Controller {
 
             resultSet.close();
 
-            connection.commit();
+
             preparedStatement.close();
+
+            String notification_message = String.format("%s on Order(ID: %s) is now ready.", request.get("name"),
+                    request.get("orderId"));
+
+            String getWaiter = "Select o.waiterId, u.email from orders as o left join users as u " +
+                    "on u.userId = o.waiterId where orderId = ?";
+            PreparedStatement pstmt = connection.prepareStatement(getWaiter);
+            pstmt.setString(1, request.get("orderId"));
+
+            ResultSet rs = pstmt.executeQuery();
+            String waiter_id = "";
+            String waiter_mail = "";
+
+            while(rs.next()){
+                waiter_id = rs.getString(1);
+                waiter_mail = rs.getString(2);
+            }
+
+            rs.close();
+            pstmt.close();
+
+            saveNotification(waiter_id, notification_message);
+            try {
+                clients_mail.get(waiter_mail).tell(notification_message, ActorRef.noSender());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            connection.commit();
+
             return ok("Successfully updated");
         } catch (SQLException sqle){
             if(connection != null)
@@ -708,6 +767,38 @@ public class Orders extends Controller {
             preparedStatement.setString(2, request.get("employee"));
 
             if(preparedStatement.executeUpdate() > 0) {
+                String notification_message = "";
+                if (session("userType").equals("chef"))
+                    notification_message = String.format("Food for order(ID: %s) is now accepted.", request.get("orderId"));
+                else if (session("userType").equals("bartender"))
+                    notification_message = String.format("Drink for order(ID: %s) is now accepted.", request.get("orderId"));
+
+                String getWaiter = "Select o.waiterId, u.email from orders as o left join users as u " +
+                            "on u.userId = o.waiterId where orderId = ?";
+
+                PreparedStatement pstmt = connection.prepareStatement(getWaiter);
+                pstmt.setString(1, request.get("orderId"));
+
+                ResultSet rs = pstmt.executeQuery();
+                String waiter_id = "";
+                String waiter_mail = "";
+
+                while (rs.next()) {
+                    waiter_id = rs.getString(1);
+                    waiter_mail = rs.getString(2);
+                }
+
+                rs.close();
+                pstmt.close();
+
+                saveNotification(waiter_id, notification_message);
+                try {
+                    clients_mail.get(waiter_mail).tell(notification_message, ActorRef.noSender());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
                 connection.commit();
                 preparedStatement.close();
 
@@ -796,6 +887,39 @@ public class Orders extends Controller {
                 resultSet.updateRow();
             }
 
+            if(session("userType").equals("chef") || session("userType").equals("bartender")) {
+                String notification_message = "";
+                if (session("userType").equals("chef"))
+                    notification_message = String.format("Food for order(ID: %s) is now ready.", request.get("orderId"));
+                else if (session("userType").equals("bartender"))
+                    notification_message = String.format("Drink for order(ID: %s) is now ready.", request.get("orderId"));
+
+                String getWaiter = "Select o.waiterId, u.email from orders as o left join users as u " +
+                            "on u.userId = o.waiterId where orderId = ?";
+
+                PreparedStatement pstmt = connection.prepareStatement(getWaiter);
+                pstmt.setString(1, request.get("orderId"));
+
+                ResultSet rs = pstmt.executeQuery();
+                String waiter_id = "";
+                String waiter_mail = "";
+
+                while (rs.next()) {
+                    waiter_id = rs.getString(1);
+                    waiter_mail = rs.getString(2);
+                }
+
+                rs.close();
+                pstmt.close();
+
+                saveNotification(waiter_id, notification_message);
+                try {
+                    clients_mail.get(waiter_mail).tell(notification_message, ActorRef.noSender());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
             connection.commit();
             preparedStatement.close();
 
@@ -873,7 +997,104 @@ public class Orders extends Controller {
         return internalServerError("Something strange happened");
     }
 
-    private static ConcurrentHashMap<String, ActorRef> clients = new ConcurrentHashMap<String, ActorRef>();
+    @SuppressWarnings("Duplicates")
+    public static Result seenNotificationsAJAX() throws SQLException {
+
+        JsonNode j =  request().body().asJson();
+        HashMap<String, String> request = Json.fromJson(j, HashMap.class);
+
+        Connection connection = null;
+        PreparedStatement stmt = null;
+
+        String query = "update notificationOrders set seen = 1 where userId = ?;";
+
+        try {
+
+            connection = DB.getConnection();
+            connection.setAutoCommit(false);
+            stmt = connection.prepareStatement(query);
+            stmt.setString(1, request.get("userId"));
+            stmt.executeUpdate();
+
+            connection.commit();
+
+            return ok();
+        }
+        catch (SQLException sqle){
+
+            try {
+                if (connection != null && !connection.getAutoCommit()) {
+                    System.err.print("Transaction is being rolled back\n");
+                    connection.rollback();
+
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+
+            } catch(SQLException excep) {
+                excep.printStackTrace();
+            }
+            sqle.printStackTrace();
+        }
+        finally {
+
+            if(connection != null) {
+                connection.close();
+            }
+
+        }
+        return internalServerError("Something strange happened");
+
+    }
+
+    private static boolean saveNotification(String userId, String message){
+
+        Connection connection = null;
+
+        try {
+            connection = DB.getConnection();
+
+            connection.setAutoCommit(false);
+
+            String statement = "Insert into notificationOrders (userId, message, seen) " +
+                    "values (?, ?, 0);";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, userId);
+            preparedStatement.setString(2, message);
+
+            preparedStatement.execute();
+            preparedStatement.close();
+
+            connection.commit();
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            if(connection != null){
+                try {
+                    connection.close();
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        } finally {
+            if(connection != null){
+                try{
+                    connection.close();
+                } catch (SQLException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static ConcurrentHashMap<String, ActorRef> clients_mail = new ConcurrentHashMap<String, ActorRef>();
+    private static ConcurrentHashMap<String, String> clients_id = new ConcurrentHashMap<String, String>();
 
     public static WebSocket<String> proceed() {
         return WebSocket.withActor(OrdersPostman::props);
@@ -886,7 +1107,8 @@ public class Orders extends Controller {
         }
 
         private final ActorRef out;
-        private String user;
+        private String userId;
+        private String userMail;
 
         public OrdersPostman(ActorRef out) {
             this.out = out;
@@ -897,17 +1119,24 @@ public class Orders extends Controller {
                 ObjectMapper objectMapper = new ObjectMapper();
                 HashMap<String, String> request_message = objectMapper.readValue(message.toString(), HashMap.class);
                 if(request_message.get("type").equals("connection")) {
-                    clients.put(request_message.get("user"), out);
-                    this.user = request_message.get("user");
+                    clients_mail.put(request_message.get("userMail"), out);
+                    clients_id.put(request_message.get("userMail"), request_message.get("userId"));
+                    this.userId = request_message.get("userId");
+                    this.userMail = request_message.get("userMail");
                 }
-                //clients.get("konobar@konobar.com").tell("Pozdraviii", self());
+                System.out.println(request_message.toString());
                 //clients.get(message.toString()).tell("I received your message: " + message, self());
             }
         }
 
         public void postStop() throws Exception {
-            System.out.println("Websocket closing for: " + this.user);
-            clients.remove(this.user);
+            System.out.println("Websocket closing for: " + this.userMail);
+            try {
+                clients_id.remove(this.userMail);
+                clients_mail.remove(this.userMail);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 }

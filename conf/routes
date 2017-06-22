@@ -28,6 +28,7 @@ POST        /updateOrderItem             controllers.Orders.updateOrderItemAJAX(
 POST        /acceptOrder                 controllers.Orders.acceptOrderAJAX()
 POST        /readyOrder                  controllers.Orders.readyOrderAJAX()
 POST        /checkOrderItem              controllers.Orders.checkOrderItemStatusAJAX()
+POST        /seenOrderNotification       controllers.Orders.seenNotificationsAJAX()
 GET         /requests                    controllers.Bids.requests()
 GET         /myOffers                    controllers.Bids.myOffers()
 GET         /offers                      controllers.Bids.offers()
