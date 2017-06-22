@@ -61,6 +61,12 @@ public class Bids extends Controller {
     @SuppressWarnings("Duplicates")
     public static Result myOffers() throws ParseException {
 
+        tip = session("userType");
+        verified = session("verified");
+        userId = session("userId");
+        loggedUser = session("connected");
+
+
         // ---- prikazi ovu stranicu samo ako je korisnik ulogovani i verifikovani bidder.
         if (loggedUser == null || verified.equals("0"))
             return redirect("/");
@@ -117,7 +123,7 @@ public class Bids extends Controller {
 
         JsonNode json = request().body().asJson();
         Offer offer = Json.fromJson(json, Offer.class);
-
+        userId = session("userId");
         try (Connection connection = DB.getConnection()) {
 
             PreparedStatement stmt = null;
@@ -210,6 +216,7 @@ public class Bids extends Controller {
 
         Connection connection = null;
         PreparedStatement stmt = null;
+        PreparedStatement stmt2 = null;
 
         try {
 
@@ -240,45 +247,58 @@ public class Bids extends Controller {
             ResultSet result = stmt.executeQuery();
 
             int acceptedUserId = 0;
-            if(result.next()) {
-                acceptedUserId = result.getInt(1);
-                String acceptedMessage = "Congratulations, " + req.restName + " accepted your offer for request #" + req.reqId + "!";
-                stmt = connection.prepareStatement("insert into notifications (userId, message, seen) values (?,?,0) ;");
-                stmt.setInt(1, acceptedUserId);
-                stmt.setString(2, acceptedMessage);
-                stmt.executeUpdate();
 
-                stmt = connection.prepareStatement("select last_insert_id();");
-                result = stmt.executeQuery();
-                result.next();
-                int notifyId = result.getInt(1);
-                Notification notif = new Notification(notifyId, acceptedUserId, acceptedMessage);
-                for(ActorRef klijent : clients.values())
-                {
+                if (result.next()) {
+
+                        acceptedUserId = result.getInt(1);
+                        String acceptedMessage = "Congratulations, " + req.restName + " accepted your offer for request #" + req.reqId + "!";
+                        stmt = connection.prepareStatement("insert into notifications (userId, message, seen) values (?,?,0) ;");
+                        stmt.setInt(1, acceptedUserId);
+                        stmt.setString(2, acceptedMessage);
+                        stmt.executeUpdate();
+
+                        stmt = connection.prepareStatement("select last_insert_id();");
+                        result = stmt.executeQuery();
+                        result.next();
+                        int notifyId = result.getInt(1);
+                        Notification notif = new Notification(notifyId, acceptedUserId, acceptedMessage);
+
                         ObjectMapper mapper = new ObjectMapper();
                         String notifString = mapper.writeValueAsString(notif);
-                        klijent.tell(notifString, ActorRef.noSender());
+                        if(clients.get(Integer.toString(acceptedUserId)) != null) {
+                            clients.get(Integer.toString(acceptedUserId)).tell(notifString, ActorRef.noSender());
+                        }
+
+                }
+
+                stmt = connection.prepareStatement("select userId from offers where offerId != ? and requestId = ? ;");
+                stmt.setInt(1, req.acceptedOfferId);
+                stmt.setInt(2, req.reqId);
+                stmt.executeQuery();
+                result = stmt.executeQuery();
+                int rejectedUserId = 0;
+                while (result.next()) {
+
+                    rejectedUserId = result.getInt(1);
+                    String rejecteddMessage = "Sorry, " + req.restName + " refused your offer for request #" + req.reqId + "!";
+                    stmt = connection.prepareStatement("insert into notifications (userId, message, seen) values (?,?,0) ;");
+                    stmt.setInt(1, rejectedUserId);
+                    stmt.setString(2, rejecteddMessage);
+
+                    stmt2 = connection.prepareStatement("select last_insert_id();");
+                    result = stmt2.executeQuery();
+                    result.next();
+                    int notifyId = result.getInt(1);
+                    Notification notif = new Notification(notifyId, rejectedUserId, rejecteddMessage);
+
+                    ObjectMapper mapper = new ObjectMapper();
+                    String notifString = mapper.writeValueAsString(notif);
+                    if( clients.get(Integer.toString(rejectedUserId)) != null) {
+                        clients.get(Integer.toString(rejectedUserId)).tell(notifString, ActorRef.noSender());
                     }
-
+                    stmt.executeUpdate();
 
             }
-
-            stmt = connection.prepareStatement("select userId from offers where offerId != ? and requestId = ? ;");
-            stmt.setInt(1, req.acceptedOfferId);
-            stmt.setInt(2, req.reqId);
-            stmt.executeQuery();
-            result = stmt.executeQuery();
-            int rejectedUserId=0;
-            if(result.next()) {
-                rejectedUserId = result.getInt(1);
-                String rejecteddMessage = "Sorry, " + req.restName + " refused your offer  for request #" + req.reqId + "!";
-                stmt = connection.prepareStatement("insert into notifications (userId, message, seen) values (?,?,0) ;");
-                stmt.setInt(1, rejectedUserId);
-                stmt.setString(2, rejecteddMessage);
-
-                stmt.executeUpdate();
-            }
-
 
             connection.commit();
             stmt.close();
@@ -342,30 +362,20 @@ public class Bids extends Controller {
     public static Result seenNotifications() throws SQLException {
 
         JsonNode j =  request().body().asJson();
+        Notification n = Json.fromJson(j, Notification.class);
 
-        ObjectMapper mapper = new ObjectMapper();
-        Map<ArrayList, ArrayList> result = mapper.convertValue(j, Map.class);
         Connection connection = null;
         PreparedStatement stmt = null;
 
-        String query = "update notifications set seen = 1 where notificationId = ?;";
+        String query = "update notifications set seen = 1 where userId = ?;";
 
         try {
 
             connection = DB.getConnection();
             connection.setAutoCommit(false);
-            int i = 0;
             stmt = connection.prepareStatement(query);
-            for(ArrayList value : result.values()) {
-                for (Object s : value) {
-                    System.out.print("\nUPISUJE SE " + Integer.parseInt(s.toString()));
-                    stmt.setInt(1, Integer.parseInt(s.toString()));
-                    stmt.addBatch();
-
-                }
-
-            }
-            stmt.executeBatch();
+            stmt.setInt(1, n.userId);
+            stmt.executeUpdate();
 
             connection.commit();
 
@@ -520,9 +530,9 @@ public class Bids extends Controller {
                 HashMap<String, String> request_message = objectMapper.readValue(message.toString(), HashMap.class);
                 List<Notification> userNotifications = new ArrayList<>();
                 if(request_message.get("type").equals("connection")) {
-                    clients.put(request_message.get("userMail"), out);
+                    clients.put(request_message.get("userId"), out);
                     this.user = request_message.get("userMail");
-                    System.out.print("Konektovan je: " + user);
+                    System.out.print("Konektovan je: " + request_message.get("userId"));
 
                     try (Connection connection = DB.getConnection()) {
 

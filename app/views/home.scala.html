@@ -291,8 +291,74 @@
             </div>
 
         </nav>
-        @* And here's where we render the `Html` object containing
-        * the page content. *@
+
+        @if(session.get("userType").equals("bidder")) {
+
+            <script>
+
+                    var ws;
+                    var root;
+                    var notifyNo = 1;
+
+
+                    $(function() {
+
+
+                        // change color of the 'requests' option in the navbar
+
+
+                        root = "ws:" + '//' + location.host + "/notifyManager";
+
+                        ws = new WebSocket(root, "protocolTwo");
+
+                        ws.onmessage = function (event) {
+
+                            var notification = JSON.parse(event.data);
+                            $("#dropdown_notify").append('<b>' + notification.message + '</b> <hr style="border-color:dimgrey">')
+                            $("#notifyNo").text(notifyNo);
+
+                            notifyNo++;
+
+                        };
+
+                        ws.onopen = function (event) {
+                            var connection_string = {
+                                "type": "connection",
+                                "userId" : "@session.get("userId")",
+                                "userMail": "@session.get("connected")"
+                            };
+                            ws.send(JSON.stringify(connection_string));
+                        };
+
+                    });
+
+                    $("#notificationIcon").click(function () {
+
+
+                        var this_user = { "userId" :  "@session.get("userId")"
+                        };
+                        myJsRoutes.controllers.Bids.seenNotifications().ajax({
+                            data: JSON.stringify(this_user),
+                            contentType: 'application/json',
+                            success: function () {
+                                $("#notifyNo").text("");
+                            },
+                            error: function () {
+
+                            }
+
+
+
+                        });
+
+
+                    });
+
+            </script>
+
+        }
+
+
 
         @content
     </body>

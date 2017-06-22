@@ -128,64 +128,10 @@
 
   <script>
 
-          var ws;
-          var root;
-          var notifyNo = 1;
-          var noNotify = true;
-          var notifyIds = [];
 
           $(function() {
-
-              if($("#notifyNo").text() != "") {
-                  noNotify = false;
-              }
-          // change color of the 'requests' option in the navbar
-          $("#reqButton").css("color", "#ffb79b");
-          $("#searchDiv").css("visibility","visible");
-
-
-          root = "ws:" + '//' + location.host + "/notifyManager";
-
-          ws = new WebSocket(root, "protocolTwo");
-
-          ws.onmessage = function (event) {
-
-                    var notification = JSON.parse(event.data);
-                    $("#dropdown_notify").append('<b>' + notification.message + '</b> <hr style="border-color:dimgrey">')
-                    $("#notifyNo").text(notifyNo);
-                    notifyIds.push(notification.notificationId);
-                    notifyNo++;
-
-          };
-
-          ws.onopen = function (event) {
-              var connection_string = {
-                  "type": "connection",
-                  "userMail": "@session.get("connected")"
-              };
-              ws.send(JSON.stringify(connection_string));
-          };
-
-          });
-
-          $("#notificationIcon").click(function () {
-
-
-
-              myJsRoutes.controllers.Bids.seenNotifications().ajax({
-                  data: JSON.stringify({notifyIds : notifyIds}),
-                  contentType: 'application/json',
-                  success: function () {
-                      $("#notifyNo").text("");
-                  },
-                  error: function () {
-
-                  }
-
-
-
-              });
-
+              $("#reqButton").css("color", "#ffb79b");
+              $("#searchDiv").css("visibility", "visible");
 
           });
 

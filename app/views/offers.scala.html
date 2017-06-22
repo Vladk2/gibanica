@@ -78,7 +78,7 @@
                 <br>
                 <div style="height:50px;display:none" id="AcceptOfferMessage@offer.offerId"> </div> <br>
 
-                <button class="btn btn-block btn-success acceptOfferBtn" id="acceptOfferBtn:@request.reqId:@offer.offerId"
+                <button class="btn btn-block btn-success acceptOfferBtn acceptOfferBtn:@request.reqId" id="acceptOfferBtn:@request.reqId:@offer.offerId"
                  style="width: 130px;color:black" ><b>
                     ACCEPT OFFER</b></button> <br>
 
@@ -191,6 +191,8 @@
                             $("#AcceptOfferMessage"+offerId).html("<div class='alert alert-success'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Offer accepted! </div>");
                             $("#AcceptOfferMessage"+offerId).show();
                             $("#acceptOfferBtn\\:" + reqId + "\\:" + offerId).hide();
+                            $(".acceptOfferBtn\\:" + reqId).attr("disabled", "disabled");
+
 
                         },
                         error: function () {
