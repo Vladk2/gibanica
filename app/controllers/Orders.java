@@ -923,10 +923,56 @@ public class Orders extends Controller {
                 }
             }
 
-            connection.commit();
             preparedStatement.close();
 
-            return ok(request.toString());
+            /* vrati informacije za racun o porudzbini iz baze */
+
+            String orderInfo = "Select orderDate, orderTime, price from orders where orderId = ?";
+            String orderItems = "Select v.name, ovd.quantity, v.price from victualsanddrinks as v " +
+                    "left join orderVictualDrink as ovd on ovd.victualDrinkId = v.victualsAndDrinksId " +
+                    "where ovd.orderId = ?";
+
+            Order order = new Order();
+
+            PreparedStatement stmt1 = connection.prepareStatement(orderInfo);
+            stmt1.setString(1, request.get("orderId"));
+
+            ResultSet resultSetO = stmt1.executeQuery();
+
+            while(resultSetO.next()){
+                order.setOrderDate(resultSetO.getString(1));
+                order.setOrderTime(resultSetO.getString(2));
+                order.setPrice(new BigDecimal(resultSetO.getString(3)));
+            }
+
+            resultSetO.close();
+            stmt1.close();
+
+            List<HashMap<String, String>> victualsDrinks = new ArrayList<>();
+
+            PreparedStatement stmt2 = connection.prepareStatement(orderItems);
+            stmt2.setString(1, request.get("orderId"));
+
+            ResultSet resultSetOI = stmt2.executeQuery();
+
+            while(resultSetOI.next()){
+                HashMap<String, String> item = new HashMap<>();
+                item.put("name", resultSetOI.getString(1));
+                item.put("quantity", resultSetOI.getString(2));
+                item.put("price", resultSetOI.getString(3));
+                victualsDrinks.add(item);
+            }
+
+            resultSetOI.close();
+            stmt2.close();
+
+            order.setVictualsDrinks(victualsDrinks);
+
+            String jsonized = objectMapper.writeValueAsString(order);
+
+            connection.commit();
+
+            return ok(jsonized);
 
         } catch (SQLException sql){
             sql.printStackTrace();
@@ -938,6 +984,8 @@ public class Orders extends Controller {
                     e.printStackTrace();
                 }
             }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         } finally {
             if(connection != null){
                 try {

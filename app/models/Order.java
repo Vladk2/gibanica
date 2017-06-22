@@ -10,6 +10,25 @@ import java.util.List;
 public class Order {
 
     private String orderId;
+    private String orderDate;
+    private String orderTime;
+
+    public String getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(String orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public String getOrderTime() {
+        return orderTime;
+    }
+
+    public void setOrderTime(String orderTime) {
+        this.orderTime = orderTime;
+    }
+
     private String type;
     private BigDecimal price;
     private String guestId;
