@@ -264,11 +264,6 @@ public class Orders extends Controller {
             //sto jos nije zavrseno !!!!
 
             if(request.getType().equals("edit")){
-                // za edit ista funkcija kao za create order
-                // prolazim prvo kroz porudzbinu i uporedjujem da li
-                // se novo-submitovane stavke vec nalaze na spisku porudzbine
-                // ako se nalaze, updejtuju se ponovo i isReady i accepted se
-                // vracaju na 0
 
                 HashMap<String, String> ord_items = new HashMap<>();
 
@@ -279,101 +274,22 @@ public class Orders extends Controller {
                     order_items.add(element.get("name"));
                 }
 
-                StringBuilder stringBuilder = new StringBuilder();
+                // brisanje stavki sa porudzbine
 
-                stringBuilder.append("select v.name from victualsanddrinks as v " +
-                        "left join orderVictualDrink as ovd on ovd.victualDrinkId = v.victualsAndDrinksId " +
-                        "left join orders as o on o.orderId = ovd.OrderId " +
-                        "where v.name in (");
+                List<String> to_be_deleted = new ArrayList<>();
 
-                System.out.println("Broj stavki na porudzbini: " + order_items.size());
+                String delete_all = "delete from orderVictualDrink where orderId = ?;";
 
-                if(order_items.size() == 0)
-                    stringBuilder.append("\"hgadawdawdkbweowriacfzzcndg\"");
-                else
-                    stringBuilder.append("?");
+                PreparedStatement preparedStatement = connection.prepareStatement(delete_all);
+                preparedStatement.setString(1, request.getOrderId());
 
-                for(int i = 0; i < order_items.size() - 1; i++)
-                    stringBuilder.append(",?");
+                preparedStatement.execute();
 
-                stringBuilder.append(") and ovd.orderId = ?;");
-
-                System.out.println("Query: " + stringBuilder.toString());
-
-                PreparedStatement preparedStatement =
-                        connection.prepareStatement(stringBuilder.toString());
-
-                for(int i = 1; i <= order_items.size(); i++) {
-                    preparedStatement.setString(i, order_items.get(i - 1));
-                    System.out.println(order_items.get(i - 1));
-                }
-
-                if(order_items.size() > 0)
-                    preparedStatement.setString(order_items.size() + 1, request.getOrderId());
-                else
-                    preparedStatement.setString(1, request.getOrderId());
-
-                ResultSet resultSet = preparedStatement.executeQuery();
-
-                // lista u kojoj su imena stavki sa porudzbine
-                List<String> found_items = new ArrayList<>();
-
-                while(resultSet.next()){
-                    found_items.add(resultSet.getString(1));
-                }
-
-                for(int j = 0; j < found_items.size(); j++)
-                    System.out.println(found_items.get(j));
-
-                String update_item = "Select orderId, victualDrinkId, isReady, accepted, quantity " +
-                        "from orderVictualDrink where " +
-                        "orderId = ? and victualDrinkId = " +
-                        "(Select victualsAndDrinksId from victualsanddrinks where name = ?) " +
-                        "for update";
-
-                // petlja koja svasta radi sa updejtom
-                // BUG KOJI UPDEJTUJE STAVKU KOJU NE BI TREBALO
-
-                for(int i = 0; i < found_items.size(); i++){
-                    System.out.println("To be updated: " + found_items.get(i));
-                    PreparedStatement preparedStatement1 =
-                            connection.prepareStatement(update_item,
-                                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-                    preparedStatement1.setString(1, request.getOrderId());
-                    preparedStatement1.setString(2, found_items.get(i));
-
-                    ResultSet resultSet1 = preparedStatement1.executeQuery();
-
-
-                    while(resultSet1.next()){
-                        // radi update nad svakim redom
-                        resultSet1.updateString(3, "0");
-                        resultSet1.updateString(4, "0");
-                        resultSet1.updateString(5, ord_items.get(found_items.get(i)).trim());
-                        resultSet1.updateRow();
-                    }
-                    //connection.commit();
-
-                    resultSet1.close();
-                    preparedStatement1.close();
-
-                }
-
-                resultSet.close();
                 preparedStatement.close();
-
-                /* edit postojecih zavrsen */
 
                 /* upis novih */
                 // ord_item hashmapa gde je kljuc ime a vrednosti amout jela/pica
                 // found_items lista stavki koje se vec nalaze na porduzbini
-
-                for(int i = 0; i < order_items.size(); i++){
-                    for(String found_item : found_items){
-                        if(order_items.get(i).equals(found_item))
-                            order_items.remove(i);
-                    }
-                }
 
                 String new_query = "Insert into orderVictualDrink (orderId, victualDrinkId, isReady, accepted, workerId," +
                         "quantity) values (?, (Select victualsAndDrinksId from victualsanddrinks where name = ?), " +
@@ -382,7 +298,7 @@ public class Orders extends Controller {
                 // if workerId null, onda uradi select i nadji bilo kog radnika za taj tip stavke (hrana/pice)
 
                 for(int i = 0; i < order_items.size(); i++) {
-                    //System.out.println("Worker id: " + request.getWorkerId());
+                    System.out.println("Za upis: " + order_items.get(i));
                     PreparedStatement preparedStatement1 = connection.prepareStatement(new_query);
                     preparedStatement1.setString(1, request.getOrderId());
                     preparedStatement1.setString(2, order_items.get(i));
@@ -395,48 +311,6 @@ public class Orders extends Controller {
                 }
 
                 /* insert novih zavrsen */
-
-                // brisanje stavki sa porudzbine
-
-                List<String> to_be_deleted = new ArrayList<>();
-
-                String get_all = "select v.name from orderVictualDrink as ovd " +
-                        "left join victualsanddrinks as v on ovd.victualDrinkId = v.victualsAndDrinksId " +
-                        "where ovd.orderId = ?;";
-
-                PreparedStatement preparedStatement1 = connection.prepareStatement(get_all);
-                preparedStatement1.setString(1, request.getOrderId());
-
-                ResultSet resultSet1 = preparedStatement1.executeQuery();
-
-                while(resultSet1.next()){
-                    to_be_deleted.add(resultSet1.getString(1));
-                }
-
-                resultSet1.close();
-                preparedStatement1.close();
-
-                for(int i = 0; i < to_be_deleted.size(); i++){
-                    for(int j = 0; j < request.getVictualsDrinks().size(); j++){
-                        if(to_be_deleted.get(i).equals(request.getVictualsDrinks().get(j).get("name")))
-                            to_be_deleted.remove(i);
-                    }
-                }
-
-                for(int z = 0; z < to_be_deleted.size(); z++){
-                    // prodji petljom i obrisi sve sto treba
-
-                    String stmt_delete = "delete from orderVictualDrink " +
-                            "where victualDrinkId = (Select victualsAndDrinksId from victualsanddrinks " +
-                            "where name = ?)";
-
-                    PreparedStatement preparedStatement2 = connection.prepareStatement(stmt_delete);
-                    preparedStatement2.setString(1, to_be_deleted.get(z));
-
-                    preparedStatement2.execute();
-                    preparedStatement2.close();
-
-                }
 
 
                 connection.commit();

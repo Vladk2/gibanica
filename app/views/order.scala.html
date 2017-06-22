@@ -227,7 +227,7 @@
                                     console.log(json_response['isAccepted']);
                                     if(json_response['isAccepted'] === 'true'){
                                         alert('This order is accepted and cannot be changed');
-                                    } else if(json_response['isAccepted'] === 'false'){
+                                    } else {
                                         var item = $('#' + request['name'].replace(/\s/g,'') + 'amount');
                                         if(parseInt(item.text()) > 1){
                                             item.html(parseInt(item.text()) - 1);
