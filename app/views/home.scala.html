@@ -275,7 +275,9 @@
                                 </div>
                             @if(session.get("userType").equals("bidder"))  {
                              <a href="/bidderNotifications" style="color:white"><i>See all notifications</i></a>
-                                }else {
+                                }
+                             @if(session.get("userType").equals("waiter") || session.get("userType").equals("chef")
+                                        || session.get("userType").equals("bartender")) {
                                 <a href="/ordersNotifications" style="color:white"><i>See all notifications</i></a>
                             }
 

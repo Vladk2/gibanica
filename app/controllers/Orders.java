@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.*;
 import play.db.DB;
+import views.html.orderNotifications;
 import views.html.orders;
 
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
@@ -1391,6 +1392,32 @@ public class Orders extends Controller {
             e.printStackTrace();
         }
         return notifications;
+    }
+
+    public static Result ordersNotifications(){
+
+        try (Connection connection = DB.getConnection()) {
+
+            PreparedStatement stmt = null;
+            stmt = connection.prepareStatement("Select message from notificationOrders where userId = ?;");
+            stmt.setString(1, session("userId"));
+            ResultSet result = stmt.executeQuery();
+
+            List<String> messages = new ArrayList<>();
+
+            while (result.next()) {
+                messages.add(result.getString(1));
+            }
+
+            result.close();
+            stmt.close();
+
+            return ok(orderNotifications.render(messages));
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return internalServerError("Something strange happened");
     }
 
     private static ConcurrentHashMap<String, ActorRef> clients_mail = new ConcurrentHashMap<String, ActorRef>();
