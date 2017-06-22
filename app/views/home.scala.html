@@ -167,7 +167,7 @@
             height:30px;
             position: relative;
         }
-        .notifyNo{
+        .notifyNoBlock{
             background:white;
             color: orangered;
             font-size: medium;
@@ -245,9 +245,9 @@
                             <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
                                 color: #f47441" id="restButton"> My Restaurant </b></a></li>
                         }
-                        <li class="icon dropdown" style="margin-right: 15px;"> <a data-toggle="dropdown" href="#" style="color:#f47441;font-size:18pt;" class="dropdown-toggle glyphicon glyphicon-bell "></a>
-                            <div style="min-width: 55%;border-radius:5px;text-align: center" class="notifyNo"><b>2</b></div>
-
+                        <li class="icon dropdown" id="notificationIcon" style="margin-right: 15px;">
+                            <a data-toggle="dropdown" href="#" style="color:#f47441;font-size:18pt;" class="dropdown-toggle glyphicon glyphicon-bell "></a>
+                            <div style="min-width: 55%;border-radius:5px;text-align: center" class="notifyNoBlock"><b id="notifyNo"></b></div>
 
                             <div class="dropdown-menu" style="padding: 50%;
                                 opacity: 0.9;
@@ -256,10 +256,12 @@
                                 width: 200px;
                                 background-color: black;
                                 color: #f47441">
-                                <b>Bajo, ovo je prva notifikacija</b> <hr style="border-color:dimgrey">
-                                <b>Obavestavamo Vas da je ostalo svega 3 dana dok sve na ovom jebenom sajtu ne proradi. :) hehe</b> <hr style="border-color:dimgrey">
-                                <i style="color:white">See all notifications</i>
+                                <div id="dropdown_notify">
+
+                                </div>
+                                <a href="/bidderNotifications" style="color:white"><i>See all notifications</i></a>
                             </div>
+
                         </li>
 
                         <li class="divider" style="background-color: white"></li>
@@ -289,8 +291,74 @@
             </div>
 
         </nav>
-        @* And here's where we render the `Html` object containing
-        * the page content. *@
+
+        @if(session.get("userType").equals("bidder")) {
+
+            <script>
+
+                    var ws;
+                    var root;
+                    var notifyNo = 1;
+
+
+                    $(function() {
+
+
+                        // change color of the 'requests' option in the navbar
+
+
+                        root = "ws:" + '//' + location.host + "/notifyManager";
+
+                        ws = new WebSocket(root, "protocolTwo");
+
+                        ws.onmessage = function (event) {
+
+                            var notification = JSON.parse(event.data);
+                            $("#dropdown_notify").append('<b>' + notification.message + '</b> <hr style="border-color:dimgrey">')
+                            $("#notifyNo").text(notifyNo);
+
+                            notifyNo++;
+
+                        };
+
+                        ws.onopen = function (event) {
+                            var connection_string = {
+                                "type": "connection",
+                                "userId" : "@session.get("userId")",
+                                "userMail": "@session.get("connected")"
+                            };
+                            ws.send(JSON.stringify(connection_string));
+                        };
+
+                    });
+
+                    $("#notificationIcon").click(function () {
+
+
+                        var this_user = { "userId" :  "@session.get("userId")"
+                        };
+                        myJsRoutes.controllers.Bids.seenNotifications().ajax({
+                            data: JSON.stringify(this_user),
+                            contentType: 'application/json',
+                            success: function () {
+                                $("#notifyNo").text("");
+                            },
+                            error: function () {
+
+                            }
+
+
+
+                        });
+
+
+                    });
+
+            </script>
+
+        }
+
+
 
         @content
     </body>

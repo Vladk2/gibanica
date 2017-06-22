@@ -38,8 +38,8 @@ public class Application extends Controller {
                 routes.javascript.Restaurants.addGroceries(),
                 routes.javascript.Bids.makeOffer(),
                 routes.javascript.Bids.editOffer(),
-                routes.javascript.Bids.acceptOffer()
-
+                routes.javascript.Bids.acceptOffer(),
+                routes.javascript.Bids.seenNotifications()
                 )
         );
     }

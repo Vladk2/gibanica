@@ -19,6 +19,7 @@ import java.util.*;
 import play.db.DB;
 import views.html.orders;
 
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -138,7 +139,7 @@ public class Orders extends Controller {
 
             PreparedStatement order_items = null;
 
-            String items = "select v.name, v.price, ovd.quantity, o.price from victualsanddrinks as v " +
+            String items = "select v.name, v.price, ovd.quantity, o.price, ovd.workerId from victualsanddrinks as v " +
                     "left join orderVictualDrink as ovd on v.victualsAndDrinksId = ovd.victualDrinkId " +
                     "left join orders as o on o.orderId = ovd.orderId " +
                     "where o.orderId = ?;";
@@ -158,6 +159,7 @@ public class Orders extends Controller {
                 item.put("price", resultSet.getString(2));
                 item.put("quantity", resultSet.getString(3));
                 _order.setPrice(new BigDecimal(resultSet.getString(4)));
+                _order.setWorkerId(resultSet.getString(5));
                 for_order.add(item);
             }
 
@@ -250,7 +252,9 @@ public class Orders extends Controller {
             }
         }
 
-        try {
+        try (Connection connection = DB.getConnection()) {
+            connection.setAutoCommit(false);
+
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode ajax_json = request().body().asJson();
             Order request = objectMapper.convertValue(ajax_json, Order.class);
@@ -259,7 +263,184 @@ public class Orders extends Controller {
             //id porudzbine ce biti isti kao id rezervacije
             //sto jos nije zavrseno !!!!
 
-            System.out.println(request.toString());
+            if(request.getType().equals("edit")){
+                // za edit ista funkcija kao za create order
+                // prolazim prvo kroz porudzbinu i uporedjujem da li
+                // se novo-submitovane stavke vec nalaze na spisku porudzbine
+                // ako se nalaze, updejtuju se ponovo i isReady i accepted se
+                // vracaju na 0
+
+                HashMap<String, String> ord_items = new HashMap<>();
+
+                List<String> order_items = new ArrayList<>();
+
+                for(HashMap<String, String> element: request.getVictualsDrinks()){
+                    ord_items.put(element.get("name"), element.get("quantity"));
+                    order_items.add(element.get("name"));
+                }
+
+                StringBuilder stringBuilder = new StringBuilder();
+
+                stringBuilder.append("select v.name from victualsanddrinks as v " +
+                        "left join orderVictualDrink as ovd on ovd.victualDrinkId = v.victualsAndDrinksId " +
+                        "left join orders as o on o.orderId = ovd.OrderId " +
+                        "where v.name in (");
+
+                System.out.println("Broj stavki na porudzbini: " + order_items.size());
+
+                if(order_items.size() == 0)
+                    stringBuilder.append("\"hgadawdawdkbweowriacfzzcndg\"");
+                else
+                    stringBuilder.append("?");
+
+                for(int i = 0; i < order_items.size() - 1; i++)
+                    stringBuilder.append(",?");
+
+                stringBuilder.append(") and ovd.orderId = ?;");
+
+                System.out.println("Query: " + stringBuilder.toString());
+
+                PreparedStatement preparedStatement =
+                        connection.prepareStatement(stringBuilder.toString());
+
+                for(int i = 1; i <= order_items.size(); i++) {
+                    preparedStatement.setString(i, order_items.get(i - 1));
+                    System.out.println(order_items.get(i - 1));
+                }
+
+                if(order_items.size() > 0)
+                    preparedStatement.setString(order_items.size() + 1, request.getOrderId());
+                else
+                    preparedStatement.setString(1, request.getOrderId());
+
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                // lista u kojoj su imena stavki sa porudzbine
+                List<String> found_items = new ArrayList<>();
+
+                while(resultSet.next()){
+                    found_items.add(resultSet.getString(1));
+                }
+
+                for(int j = 0; j < found_items.size(); j++)
+                    System.out.println(found_items.get(j));
+
+                String update_item = "Select orderId, victualDrinkId, isReady, accepted, quantity " +
+                        "from orderVictualDrink where " +
+                        "orderId = ? and victualDrinkId = " +
+                        "(Select victualsAndDrinksId from victualsanddrinks where name = ?) " +
+                        "for update";
+
+                // petlja koja svasta radi sa updejtom
+                // BUG KOJI UPDEJTUJE STAVKU KOJU NE BI TREBALO
+
+                for(int i = 0; i < found_items.size(); i++){
+                    System.out.println("To be updated: " + found_items.get(i));
+                    PreparedStatement preparedStatement1 =
+                            connection.prepareStatement(update_item,
+                                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+                    preparedStatement1.setString(1, request.getOrderId());
+                    preparedStatement1.setString(2, found_items.get(i));
+
+                    ResultSet resultSet1 = preparedStatement1.executeQuery();
+
+
+                    while(resultSet1.next()){
+                        // radi update nad svakim redom
+                        resultSet1.updateString(3, "0");
+                        resultSet1.updateString(4, "0");
+                        resultSet1.updateString(5, ord_items.get(found_items.get(i)).trim());
+                        resultSet1.updateRow();
+                    }
+                    //connection.commit();
+
+                    resultSet1.close();
+                    preparedStatement1.close();
+
+                }
+
+                resultSet.close();
+                preparedStatement.close();
+
+                /* edit postojecih zavrsen */
+
+                /* upis novih */
+                // ord_item hashmapa gde je kljuc ime a vrednosti amout jela/pica
+                // found_items lista stavki koje se vec nalaze na porduzbini
+
+                for(int i = 0; i < order_items.size(); i++){
+                    for(String found_item : found_items){
+                        if(order_items.get(i).equals(found_item))
+                            order_items.remove(i);
+                    }
+                }
+
+                String new_query = "Insert into orderVictualDrink (orderId, victualDrinkId, isReady, accepted, workerId," +
+                        "quantity) values (?, (Select victualsAndDrinksId from victualsanddrinks where name = ?), " +
+                        "0, 0, ?, ?);";
+
+                // if workerId null, onda uradi select i nadji bilo kog radnika za taj tip stavke (hrana/pice)
+
+                for(int i = 0; i < order_items.size(); i++) {
+                    //System.out.println("Worker id: " + request.getWorkerId());
+                    PreparedStatement preparedStatement1 = connection.prepareStatement(new_query);
+                    preparedStatement1.setString(1, request.getOrderId());
+                    preparedStatement1.setString(2, order_items.get(i));
+                    preparedStatement1.setString(3, request.getWorkerId());
+                    preparedStatement1.setString(4, ord_items.get(order_items.get(i)).trim());
+
+                    preparedStatement1.execute();
+                    preparedStatement1.close();
+
+                }
+
+                /* insert novih zavrsen */
+
+                // brisanje stavki sa porudzbine
+
+                List<String> to_be_deleted = new ArrayList<>();
+
+                String get_all = "select v.name from orderVictualDrink as ovd " +
+                        "left join victualsanddrinks as v on ovd.victualDrinkId = v.victualsAndDrinksId " +
+                        "where ovd.orderId = ?;";
+
+                PreparedStatement preparedStatement1 = connection.prepareStatement(get_all);
+                preparedStatement1.setString(1, request.getOrderId());
+
+                ResultSet resultSet1 = preparedStatement1.executeQuery();
+
+                while(resultSet1.next()){
+                    to_be_deleted.add(resultSet1.getString(1));
+                }
+
+                resultSet1.close();
+                preparedStatement1.close();
+
+                for(int i = 0; i < to_be_deleted.size(); i++){
+                    for(int j = 0; j < request.getVictualsDrinks().size(); j++){
+                        if(to_be_deleted.get(i).equals(request.getVictualsDrinks().get(j).get("name")))
+                            to_be_deleted.remove(i);
+                    }
+                }
+
+                for(int z = 0; z < to_be_deleted.size(); z++){
+                    // prodji petljom i obrisi sve sto treba
+
+                    String stmt_delete = "delete from orderVictualDrink " +
+                            "where victualDrinkId = (Select victualsAndDrinksId from victualsanddrinks " +
+                            "where name = ?)";
+
+                    PreparedStatement preparedStatement2 = connection.prepareStatement(stmt_delete);
+                    preparedStatement2.setString(1, to_be_deleted.get(z));
+
+                    preparedStatement2.execute();
+                    preparedStatement2.close();
+
+                }
+
+
+                connection.commit();
+            }
 
             //nakon snimanja u bazu, salje se notifikacija konobarima i
             //barmenima za porudzbinu
@@ -405,6 +586,8 @@ public class Orders extends Controller {
                 resultSet.updateString(3, "1");
                 resultSet.updateRow();
             }
+
+            resultSet.close();
 
             connection.commit();
             preparedStatement.close();
@@ -611,6 +794,9 @@ public class Orders extends Controller {
             while(resultSet.next()){
                 isAccepted = resultSet.getString(1).equals("1") ? "true" : "false";
             }
+
+            resultSet.close();
+            preparedStatement.close();
 
             HashMap<String, String> for_response = new HashMap<>();
             for_response.put("isAccepted", isAccepted);

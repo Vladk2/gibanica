@@ -127,10 +127,13 @@
 
 
   <script>
-          // change color of the 'requests' option in the navbar
-          $("#reqButton").css("color", "#ffb79b");
-          $("#searchDiv").css("visibility","visible");
 
+
+          $(function() {
+              $("#reqButton").css("color", "#ffb79b");
+              $("#searchDiv").css("visibility", "visible");
+
+          });
 
 
           var reqId;
@@ -145,6 +148,9 @@
                   (day<10 ? '0' : '') + dayplus;
           $("#bidDate").attr("min", bidDate);
           $("#bidDate").val(bidDate);
+
+
+
 
 
           $(".addOfferBtn").click(function () {
@@ -203,6 +209,9 @@
                            $("#OfferMessage").show();
 
                        }
+
+
+
                    });
                }
            });

@@ -12,6 +12,7 @@ public class Order {
     private String orderId;
     private String type;
     private BigDecimal price;
+    private String workerId;
     private List<HashMap<String, String>> victualsDrinks;
 
     public String getType(){
@@ -20,6 +21,14 @@ public class Order {
 
     public void setType(String type){
         this.type = type;
+    }
+
+    public String getWorkerId(){
+        return workerId;
+    }
+
+    public void setWorkerId(String workerId){
+        this.workerId = workerId;
     }
 
     public String getOrderId() {
@@ -51,6 +60,7 @@ public class Order {
         return "Order{" +
                 "orderId='" + orderId + '\'' +
                 ", price=" + price +
+                ", type=" + type +
                 ", victualsDrinks=" + victualsDrinks +
                 '}';
     }

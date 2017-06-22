@@ -125,6 +125,7 @@ public class Login extends Controller {
         session().remove("userType");
         session().remove("userId");
         session().remove("verified");
+        session().remove("myRestName");
         return ok(index.render("bla"));
     }
 

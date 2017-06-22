@@ -208,7 +208,7 @@
             });
             $(document).on('click', '.removeFood', function() {
                 var request = {
-                    'orderId': '-1',
+                    'orderId': '@order.getOrderId()',
                     'name': $(this).attr('content')
                 };
 
@@ -224,6 +224,7 @@
                                 contentType: 'application/json',
                                 success: function (response) {
                                     var json_response = JSON.parse(response);
+                                    console.log(json_response['isAccepted']);
                                     if(json_response['isAccepted'] === 'true'){
                                         alert('This order is accepted and cannot be changed');
                                     } else if(json_response['isAccepted'] === 'false'){
@@ -252,12 +253,16 @@
                 });
             });
 
-            $("#addOrder").on('click', function(e){
+            $("#addOrder, #editOrder").on('click', function(e){
                 // order Id ce biti broj rezervacije gde se kreira porudzbina
                 var type = 'new';
                 if($(this).attr('id') === 'editOrder')
                     type = 'edit';
-                var order = {"type": type, "orderId": "0", "victualsDrinks": []};
+                var order = {"type": type,
+                    "orderId": "@order.getOrderId()",
+                    "victualsDrinks": [],
+                    "workerId": "@order.getWorkerId()"
+                };
 
                 var global_price = 0.0;
                 var prices = [];

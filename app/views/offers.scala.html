@@ -63,22 +63,22 @@
                 <div style="float:left">
                 <label for="fromTime">Delivery date:</label> <br>
                 <input class="form-control editInput" disabled style="margin-bottom: 15px; margin-left: 10px;
-                    width: 150px;" type="date" value="@offer.dueDate" min="" max="2018-12-31" id="dueDate:@request.reqId" required>
+                    width: 150px;" type="date" value="@offer.dueDate" min="" max="2018-12-31" id="dueDate:@offer.offerId" required>
                 </div>
                 <div style="float:left">
                 <label for="toTime">Price (RSD):</label> <br>
                 <input  class="form-control editInput" disabled value="@offer.price" style="margin-bottom: 15px; margin-left: 10px;
-                    width: 95px;" type="text" id="bidPrice:@request.reqId" name="bidPrice" required>
+                    width: 95px;" type="text" id="bidPrice:@offer.offerId" name="bidPrice" required>
                 </div>
 
                 <label for="toTime">Message (optional):</label> <br>
                 <textarea class="editInput" disabled rows="5" style="border-radius: 8px;
-                    width: 270px;text-align: left;"  id="bidNote:@request.reqId" >@offer.message</textarea>
+                    width: 270px;text-align: left;"  id="bidNote:@offer.offerId" >@offer.message</textarea>
                 </div>
                 <br>
-                <div style="height:50px;display:none" id="AcceptOfferMessage@request.reqId"> </div> <br>
+                <div style="height:50px;display:none" id="AcceptOfferMessage@offer.offerId"> </div> <br>
 
-                <button class="btn btn-block btn-success acceptOfferBtn" id="acceptOfferBtn:@request.reqId:@offer.offerId"
+                <button class="btn btn-block btn-success acceptOfferBtn acceptOfferBtn:@request.reqId" id="acceptOfferBtn:@request.reqId:@offer.offerId"
                  style="width: 130px;color:black" ><b>
                     ACCEPT OFFER</b></button> <br>
 
@@ -161,42 +161,48 @@
 
 
     <script>
+            var reqId;
+            var offerId;
 
             $(function() {
 
-            // change color of the 'requests' option in the navbar
-            $("#myOffersButton").css("color", "#ffb79b");
-         //   $("#searchDiv").css("visibility","visible");
 
+                // change color of the 'requests' option in the navbar
+                $("#myOffersButton").css("color", "#ffb79b");
+                //   $("#searchDiv").css("visibility","visible");
 
 
             });
 
-            var reqId;
-            var offerId;
+
             $(".acceptOfferBtn").click(function () {
 
                 var buttonId = $(this).attr('id');
                 var buttonIDD = buttonId.split(':');
                 reqId = buttonIDD[1];
                 offerId = buttonIDD[2];
-                var request = { 'reqId' : reqId , 'acceptedOfferId': offerId};
+                var request = { 'reqId' : reqId , 'acceptedOfferId': offerId, 'restName': '@session.get("myRestName")'
+                };
                     myJsRoutes.controllers.Bids.acceptOffer().ajax({
                         data: JSON.stringify(request),
                         dataType: 'json',
                         contentType: 'application/json',
                         success: function () {
-                            $("#AcceptOfferMessage"+reqId).html("<div class='alert alert-success'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Offer accepted! </div>");
-                            $("#AcceptOfferMessage"+reqId).show();
+                            $("#AcceptOfferMessage"+offerId).html("<div class='alert alert-success'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Offer accepted! </div>");
+                            $("#AcceptOfferMessage"+offerId).show();
                             $("#acceptOfferBtn\\:" + reqId + "\\:" + offerId).hide();
+                            $(".acceptOfferBtn\\:" + reqId).attr("disabled", "disabled");
+
 
                         },
                         error: function () {
-                            $("#AcceptOfferMessage"+reqId).html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> We have some problems.. </div>");
-                            $("#AcceptOfferMessage"+reqId).show();
+                            $("#AcceptOfferMessage"+offerId).html("<div class='alert alert-danger'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> We have some problems.. </div>");
+                            $("#AcceptOfferMessage"+offerId).show();
 
                         }
                     });
+
+
 
             });
 
