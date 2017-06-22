@@ -11,6 +11,7 @@ import akka.actor.*;
 import play.libs.F.*;
 import play.mvc.Result;
 import play.mvc.WebSocket;
+import scala.Int;
 import views.html.order;
 import models.*;
 
@@ -51,7 +52,8 @@ public class Orders extends Controller {
                     "  u.email from baklava.orders as o" +
                     "  LEFT JOIN users AS u ON o.guestId = u.userId" +
                     "  LEFT JOIN users AS uw ON o.waiterId = uw.userId" +
-                    "  WHERE uw.userId = (Select userId from users where email = ?);";
+                    "  WHERE uw.userId = (Select userId from users where email = ?) " +
+                    "  AND o.wdayFinished = 1;";
 
             String cook_query = "SELECT DISTINCT o.orderId, o.orderDate, o.orderTime, o.foodReady," +
                     "  u.email, ouvd.accepted from baklava.orders as o " +
@@ -127,6 +129,83 @@ public class Orders extends Controller {
 
             DynamicForm requestData = Form.form().bindFromRequest();
             String orderId = requestData.get("orderId");
+
+            /* PROVERI RADNO VREME KONOBARA */
+
+            Date date = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-dd");
+            String date_for_base = simpleDateFormat.format(date);
+
+            System.out.println("Datum " + date_for_base);
+
+            // trazi radno vreme ulogovanog konobara na osnovu trenutnog datuma
+
+            String get_daily_schedule = "Select startTime, endTime from workingday where date = ? and" +
+                    " userId = ?";
+
+            PreparedStatement preparedStatementShedule = connection.prepareStatement(get_daily_schedule);
+
+            preparedStatementShedule.setString(1, date_for_base);
+            preparedStatementShedule.setString(2, session("userId"));
+
+            String startTime = null;
+            String endTime = null;
+
+            ResultSet resultSetSchedule = preparedStatementShedule.executeQuery();
+
+            while(resultSetSchedule.next()){
+                startTime = resultSetSchedule.getString(1);
+                endTime = resultSetSchedule.getString(2);
+            }
+
+            if(startTime == null) {
+                // dozvoli drugim konobarima da zavrse porudzbinu
+                String allow = "Update orders set wdayFinished = 1 where orderId = ?;";
+                PreparedStatement ps = connection.prepareStatement(allow);
+                ps.setString(1, orderId);
+
+                ps.execute();
+
+                return forbidden("Your work time has expired.");
+
+            }
+
+            resultSetSchedule.close();
+            preparedStatementShedule.close();
+
+            String[] _startTime = startTime.split(":");
+            String[] _endTime = endTime.split(":");
+
+            System.out.println(endTime);
+            System.out.println(startTime);
+            Calendar presentDate = Calendar.getInstance();
+
+            Calendar startDate = Calendar.getInstance();
+
+
+            Calendar endDate = Calendar.getInstance();
+            endDate.set(Calendar.HOUR_OF_DAY, Integer.parseInt(_endTime[0]));
+            endDate.set(Calendar.MINUTE, Integer.parseInt(_endTime[1]));
+            endDate.set(Calendar.SECOND, Integer.parseInt(_endTime[2]));
+
+            startDate.set(Calendar.HOUR_OF_DAY, Integer.parseInt(_startTime[0]));
+            startDate.set(Calendar.MINUTE, Integer.parseInt(_startTime[1]));
+            startDate.set(Calendar.SECOND, Integer.parseInt(_startTime[2]));
+
+            if (presentDate.after(startDate) && presentDate.before(endDate)) {
+
+            } else {
+                // dozvoli drugim konobarima da zavrse porudzbinu
+                String allow = "Update orders set wdayFinished = 1 where orderId = ?;";
+                PreparedStatement ps = connection.prepareStatement(allow);
+                ps.setString(1, orderId);
+
+                ps.execute();
+
+                //connection.commit();
+
+                return forbidden("Your work time has expired.");
+            }
 
             PreparedStatement stmt = null;
 
@@ -261,6 +340,71 @@ public class Orders extends Controller {
             List<HashMap<String, String>> prazna_lista = new ArrayList<HashMap<String, String>>();
 
         try (Connection connection = DB.getConnection()){
+
+
+            /* PROVERI RADNO VREME KONOBARA */
+
+            Date date = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-dd");
+            String date_for_base = simpleDateFormat.format(date);
+
+            System.out.println("Datum " + date_for_base);
+
+            // trazi radno vreme ulogovanog konobara na osnovu trenutnog datuma
+
+            String get_daily_schedule = "Select startTime, endTime from workingday where date = ? and" +
+                    " userId = ?";
+
+            PreparedStatement preparedStatementShedule = connection.prepareStatement(get_daily_schedule);
+
+            preparedStatementShedule.setString(1, date_for_base);
+            preparedStatementShedule.setString(2, session("userId"));
+
+            String startTime = null;
+            String endTime = null;
+
+            ResultSet resultSetSchedule = preparedStatementShedule.executeQuery();
+
+            while(resultSetSchedule.next()){
+                startTime = resultSetSchedule.getString(1);
+                endTime = resultSetSchedule.getString(2);
+            }
+
+            if(startTime == null) {
+                return forbidden("Your work time has expired.");
+
+            }
+
+            resultSetSchedule.close();
+            preparedStatementShedule.close();
+
+            String[] _startTime = startTime.split(":");
+            String[] _endTime = endTime.split(":");
+
+            System.out.println(endTime);
+            System.out.println(startTime);
+            Calendar presentDate = Calendar.getInstance();
+
+            Calendar startDate = Calendar.getInstance();
+
+
+            Calendar endDate = Calendar.getInstance();
+            endDate.set(Calendar.HOUR_OF_DAY, Integer.parseInt(_endTime[0]));
+            endDate.set(Calendar.MINUTE, Integer.parseInt(_endTime[1]));
+            endDate.set(Calendar.SECOND, Integer.parseInt(_endTime[2]));
+
+            startDate.set(Calendar.HOUR_OF_DAY, Integer.parseInt(_startTime[0]));
+            startDate.set(Calendar.MINUTE, Integer.parseInt(_startTime[1]));
+            startDate.set(Calendar.SECOND, Integer.parseInt(_startTime[2]));
+
+            if (presentDate.after(startDate) && presentDate.before(endDate)) {
+
+            } else {
+
+
+                return forbidden("Your work time has expired.");
+            }
+
 
             PreparedStatement preparedStatement = null;
 
@@ -856,6 +1000,85 @@ public class Orders extends Controller {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode ajax_json = request().body().asJson();
             HashMap<String, String> request = objectMapper.convertValue(ajax_json, HashMap.class);
+
+            /* PROVERI RADNO VREME KONOBARA */
+
+            Date date = new Date();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-dd");
+            String date_for_base = simpleDateFormat.format(date);
+
+            System.out.println("Datum " + date_for_base);
+
+            // trazi radno vreme ulogovanog konobara na osnovu trenutnog datuma
+
+            String get_daily_schedule = "Select startTime, endTime from workingday where date = ? and" +
+                    " userId = ?";
+
+            PreparedStatement preparedStatementShedule = connection.prepareStatement(get_daily_schedule);
+
+            preparedStatementShedule.setString(1, date_for_base);
+            preparedStatementShedule.setString(2, session("userId"));
+
+            String startTime = null;
+            String endTime = null;
+
+            ResultSet resultSetSchedule = preparedStatementShedule.executeQuery();
+
+            while(resultSetSchedule.next()){
+                startTime = resultSetSchedule.getString(1);
+                endTime = resultSetSchedule.getString(2);
+            }
+
+            if(startTime == null) {
+                // dozvoli drugim konobarima da zavrse porudzbinu
+                String allow = "Update orders set wdayFinished = 1 where orderId = ?;";
+                PreparedStatement ps = connection.prepareStatement(allow);
+                ps.setString(1, request.get("orderId"));
+
+                ps.execute();
+
+                connection.commit();
+
+                return forbidden("Your work time has expired.");
+            }
+
+            resultSetSchedule.close();
+            preparedStatementShedule.close();
+
+            String[] _startTime = startTime.split(":");
+            String[] _endTime = endTime.split(":");
+
+            System.out.println(endTime);
+            System.out.println(startTime);
+            Calendar presentDate = Calendar.getInstance();
+
+            Calendar startDate = Calendar.getInstance();
+
+
+            Calendar endDate = Calendar.getInstance();
+            endDate.set(Calendar.HOUR_OF_DAY, Integer.parseInt(_endTime[0]));
+            endDate.set(Calendar.MINUTE, Integer.parseInt(_endTime[1]));
+            endDate.set(Calendar.SECOND, Integer.parseInt(_endTime[2]));
+
+            startDate.set(Calendar.HOUR_OF_DAY, Integer.parseInt(_startTime[0]));
+            startDate.set(Calendar.MINUTE, Integer.parseInt(_startTime[1]));
+            startDate.set(Calendar.SECOND, Integer.parseInt(_startTime[2]));
+
+            if (presentDate.after(startDate) && presentDate.before(endDate)) {
+
+            } else {
+                // dozvoli drugim konobarima da zavrse porudzbinu
+                String allow = "Update orders set wdayFinished = 1 where orderId = ?;";
+                PreparedStatement ps = connection.prepareStatement(allow);
+                ps.setString(1, request.get("orderId"));
+
+                ps.execute();
+
+                connection.commit();
+
+                return forbidden("Your work time has expired.");
+            }
+
 
             String waiter_statement = "Select orderId, orderReady from orders where orderId = ? " +
                     "and waiterId = ? for update";

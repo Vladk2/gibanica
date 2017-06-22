@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS baklava.orders (
   orderReady BOOLEAN DEFAULT 0,
   foodReady BOOLEAN DEFAULT 0,
   drinkReady BOOLEAN DEFAULT 0,
+  wdayFinished BOOLEAN DEFAULT 0,
   CONSTRAINT `guest_ordUsrVDconstraint`
     FOREIGN KEY (guestId) REFERENCES baklava.users (userId),
   CONSTRAINT `waiter_ordUsrVDconstraint`
