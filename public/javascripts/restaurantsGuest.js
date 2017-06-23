@@ -49,7 +49,7 @@ function fillRestaurantsTableBody(tableBodyId, responseText) {
 
 function reserve(id) {
     console.log('reserve: ', id);
-    window.location.href = 'reserve/' + id;
+    window.location.href = 'reserve1/' + id;
 }
 
 getRestaurantSearchResults(true);

@@ -18,7 +18,15 @@ POST         /addFriend                  controllers.Friends.addAFriendApi()
 POST         /acceptFriend               controllers.Friends.acceptFriend()
 GET         /restaurants                 controllers.Restaurants.restaurants()
 POST        /searchRestaurants           controllers.Reservations.searchRestaurants()
-GET         /reserve/:id                 controllers.Reservations.reserve(id: Integer)
+
+#reservations
+GET         /reserve1/:restaurantId      controllers.Reservations.reserve1(restaurantId: Integer)
+POST        /reserve2                    controllers.Reservations.reserve2()
+POST        /reserve3                    controllers.Reservations.reserve3()
+GET         /reserve4                    controllers.Reservations.reserve4(userIdStr, restaurantIdStr, reservationIdStr)
+POST        /inviteFriend                controllers.Reservations.inviteFriend()
+POST        /cancelInvite                controllers.Reservations.cancelInvite()
+
 GET         /visits                      controllers.Ratings.visits()
 GET         /orders                      controllers.Orders.orders()
 GET         /newOrder                    controllers.Orders.newOrder()

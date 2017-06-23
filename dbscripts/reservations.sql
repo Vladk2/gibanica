@@ -2,21 +2,20 @@ create table if not exists baklava.reservations (
     reservationId int(5) primary key auto_increment,
     userId int(5) not null,
     restaurantId int(5) not null,
-    date date not null,
-    startTime time not null,
-    endTime time not null,
-    constraint `userId_constraint`
+    startTimestamp timestamp,
+    endTimestamp timestamp,
+    constraint `userId_constraint_reservations`
         foreign key(userId) references baklava.users(userId),
-    constraint `restaurantId_constraint`
+    constraint `restaurantId_constraint_reservations`
         foreign key(restaurantId) references baklava.restaurants(restaurantId)
 );
 
-create table if not exists baklava.reservationTables (
+create table if not exists baklava.reservationSeats (
     reservationId int(5) not null,
     seatId int(12) not null,
-    constraint `reservationId_constraint`
+    constraint `reservationId_constraint_tables`
         foreign key(reservationId) references baklava.reservations(reservationId),
-    constraint `seatId_constraint`
+    constraint `seatId_constraint_tables`
         foreign key(seatId) references baklava.seatconfig(seatId),
     primary key(reservationId, seatId)
 );
@@ -26,9 +25,9 @@ create table if not exists baklava.reservationGuests (
     reservationId int(5) not null,
     userId int(5) not null,
     confirmed boolean not null default 0,
-    constraint `userId_constraint`
+    constraint `userId_constraint_guests`
         foreign key(userId) references baklava.users(userId),
-    constraint `reservationId_constraint`
+    constraint `reservationId_constraint_guests`
         foreign key(reservationId) references baklava.reservations(reservationId),
     primary key(reservationId, userId)
 );

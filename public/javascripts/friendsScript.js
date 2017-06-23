@@ -201,5 +201,3 @@ function fetchPending() {
     }
 }
 
-fetchPending();
-fetchFriends();

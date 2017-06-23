@@ -87,6 +87,7 @@ public class Friends extends Controller {
             connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace();
         }
         finally {
@@ -142,6 +143,7 @@ public class Friends extends Controller {
             connection.commit();
         }
         catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace();
         }
         finally {
@@ -198,6 +200,7 @@ public class Friends extends Controller {
 
         }
         catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace();
         }
         finally {
