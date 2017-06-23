@@ -276,8 +276,7 @@
                         <li id="profile"> <a href="/profile"><b style="font-size: 130%;
                             color: #f47441" id="profButton"> Profile </b></a>   </li>
                         @if(session.get("userType").equals("guest")) {
-                            <li id="home"> <a href="/home" ><b style="font-size: 130%;
-                                color: #f47441" id="homeButton"> Home </b></a></li>
+
                             <li id="restaurants"> <a href="/restaurants" ><b style="font-size: 130%;
                             color: #f47441" id="restButton"> Restaurants </b></a></li>
                             <li id="visits"> <a href="/visits" ><b style="font-size: 130%;
@@ -309,7 +308,7 @@
                                 color: #f47441" id="restButton"> My Restaurant </b></a></li>
                         }
                         @if(session.get("userType").equals("bidder") ||  session.get("userType").equals("chef") || session.get("userType").equals("waiter")
-                            || session.get("userType").equals("bartender") || session.get("userType").equals("guest"))  {
+                            || session.get("userType").equals("bartender"))  {
                         <li class="icon dropdown" id="notificationIcon" style="margin-right: 15px;">
                             <a data-toggle="dropdown" href="#" style="color:#f47441;font-size:18pt;" class="dropdown-toggle glyphicon glyphicon-bell "></a>
                             <div style="min-width: 55%;border-radius:5px;text-align: center" class="notifyNoBlock"><b id="notifyNo"></b></div>
