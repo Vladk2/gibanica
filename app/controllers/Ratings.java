@@ -26,14 +26,6 @@ public class Ratings extends Controller {
 
     public static Result visits() {
         if(session("userType").equals("guest")) {
-            Calendar currentTime = Calendar.getInstance();
-            System.out.println(currentTime.getTime());
-
-            Calendar startTime = Calendar.getInstance();
-
-            Calendar endTime = Calendar.getInstance();
-
-
 
             try (Connection connection = DB.getConnection()) {
                 /* PORED PODATAKA O RESTARANU, TREBA DA SE IZLISTAJU I PODACI O POSETI (to jos nije uradjeno) */
@@ -89,6 +81,8 @@ public class Ratings extends Controller {
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 String for_js_ratings = objectMapper.writeValueAsString(ratings);
+
+                System.out.println(for_js_ratings);
 
                 return ok(visits.render(session("connected"), restaurants, ratings, for_js_ratings));
             } catch (SQLException e) {

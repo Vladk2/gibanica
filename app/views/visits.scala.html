@@ -40,7 +40,7 @@
                                     <tbody>
                                     @for(restaurant <- restaurants) {
                                         <tr>
-                                            <td id="formsColumn">
+                                            <td id="@(restaurant.id + "formsColumn")">
                                                 @if(ratings.size == 0){
                                                     <form class="rating" id="@(restaurant.id + "rst")">
                                                         <fieldset class="fsets" id="@(restaurant.id + "fset")">
@@ -61,7 +61,7 @@
                                                     </form>
                                                 }
                                                 @for(rating <- ratings){
-                                                    @if(rating.get("restaurantId").trim().equals(restaurant.id)){
+                                                    @if(rating.get("restaurantId").trim().equals(restaurant.id.trim())){
                                                         @if(rating.get("rating").equals("0")){
                                                             <form class="rating" id="@(restaurant.id + "rst")">
                                                                 <fieldset class="fsets" id="@(restaurant.id + "fset")">
@@ -82,6 +82,26 @@
                                                             </form>
                                                         } else {
                                                             <p>You rated us with @rating.get("rating") stars. Thank you.</p>
+                                                        }
+                                                    } else {
+                                                        @if(restaurants.size > ratings.size){
+                                                            <form class="rating" id="@(restaurant.id + "rst")">
+                                                                <fieldset class="fsets" id="@(restaurant.id + "fset")">
+                                                                <div class="rate">
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s5")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s5")" title="text">5 stars</label>
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s4")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s4")" title="text">4 stars</label>
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s3")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s3")" title="text">3 stars</label>
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s2")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s2")" title="text">2 stars</label>
+                                                                    <input type="radio" class="stars" id="@(restaurant.id + "s1")" name="rate"/>
+                                                                    <label for="@(restaurant.id + "s1")" title="text">1 star</label>
+                                                                </div>
+                                                                </fieldset>
+                                                                    <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
+                                                            </form>
                                                         }
                                                     }
                                                 }
@@ -197,6 +217,9 @@
 
                         console.log(id);
 
+                        //$('#mealRating').show();
+                        //$('#serviceRating').show();
+
                         if (j != 0)
                             return;
                         else {
@@ -227,13 +250,14 @@
                                     $('#modal-id').append('<p><br>Thank you for rating your meal.</p>');
                                     //$("#rate_food_fset").prop("disabled", true);
                                     //$("#modal-id").append(response);
+                                    location.reload(location.host + '/visits');
                                 },
                                 error: function (error) {
                                     alert(error.responseText);
                                 }
 
                             });
-                            event.preventDefault();
+                            //event.preventDefault();
                         });
                     });
 
@@ -241,6 +265,10 @@
                        var id = $(this).attr('id');
 
                         console.log(id);
+
+                         //$('#serviceRating').show();
+                         //$('#mealRating').show();
+
 
                         if (k != 0)
                             return;
@@ -269,6 +297,7 @@
                                     //$("#rate_service_fset").prop("disabled", true);
                                     $('#serviceRating').hide();
                                     $('#modal-id').append('<p><br>Thank you for rating our service.</p>');
+                                    location.reload(location.host + '/visits');
                                     //$("#modal-id").append(response);
                                 },
                                 error: function (error) {
@@ -276,7 +305,7 @@
                                 }
 
                             });
-                            event.preventDefault();
+                            //event.preventDefault();
                         });
                     });
 
@@ -306,9 +335,10 @@
                                 data: JSON.stringify(form_),
                                 contentType: 'application/json',
                                 success: function () {
-                                    $('#' + id).remove();
-                                    $('formsColumn').append('<p>You rated us with ' + form_['rating'] +
-                                            'stars. Thank you.</p>');
+                                    $('#' + form_['form_id'] + 'rst').remove();
+                                    $('#' + form_['form_id'] + 'formsColumn').append(
+                                        '<p>You rated us with ' + form_['rating'] +
+                                            ' stars. Thank you.</p>');
                                     //$("#" + form_["form_id"] + "fset").prop("disabled", true);
                                 },
                                 error: function (error) {
@@ -324,7 +354,7 @@
                     $(".restNameVisits").on('click', function(event){
 
                         //ocisti modal pre svakog novog prikaza
-                        $("#modal-id").empty();
+
                         //$("#cow")[0].play();
 
                         var restaurant = $(this).attr('id');
@@ -334,6 +364,7 @@
                         if($('#' + id + 'rst').length)
                             alert('You have to rate our restaurant first.');
                         else{
+                            $("#modal-id").empty();
                             console.log('forma ne postoji');
 
                             $(".rating_food").attr('id', id + 'rate_food');
@@ -347,22 +378,38 @@
                                 "userEmail": "@userEmail"
                             };
 
+                            var check_meal = false;
+                            var check_service = false;
+
                             @for(obj <- ratings){
                                 if(request['restaurant'] === "@obj.get("restaurantId")"){
                                     @if(!obj.get("serviceRating").equals("0")){
                                         $('#serviceRating').hide();
-                                        $('#modal-id').append('<p>You gave us '
+                                        var p = '<p>You gave us '
                                                 + @obj.get("serviceRating") + ' stars for our service.' +
-                                                ' Thank you.</p><br><br>');
+                                                ' Thank you.</p><br><br>';
+                                        console.log(p);
+                                        $('#modal-id').append(p);
+                                        check_service = true;
                                     }
                                     @if(!obj.get("mealRating").equals("0")){
                                         $('#mealRating').hide();
-                                        $('#modal-id').append('<p>You rated your meal for this visit with '
-                                                + @obj.get("mealRating") + ' stars. Thank you.</p><br><br>');
+                                        var p = '<p>You rated your meal for this visit with '
+                                                + @obj.get("mealRating") + ' stars. Thank you.</p><br><br>';
+                                        console.log(p);
+                                        $('#modal-id').append(p);
+                                        check_meal = true;
                                     }
+
                                 }
 
                             }
+
+                            if(!check_meal)
+                                $('#mealRating').show();
+
+                            if(!check_service)
+                                $('#serviceRating').show();
 
                             $("#rateMealAndService").modal('toggle');
 
