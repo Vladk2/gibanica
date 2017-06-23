@@ -609,6 +609,7 @@ public class Reservations extends Controller {
                     e.printStackTrace();
                 }
             }
+            connection.setAutoCommit(true);
             connection.close();
 
             return ok("Order successfully created");
@@ -618,8 +619,139 @@ public class Reservations extends Controller {
         }
     }
 
-    public static Result inviteFriend() {
+    public static Result getReservations () {
+        String loggedIn = session("userId");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+        String email = session("connected");
 
+        ArrayList<Reservation> reservations = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement preparedStatement1 = null;
+        PreparedStatement preparedStatement2 = null;
+        PreparedStatement preparedStatement3 = null;
+        ResultSet resultSet1 = null;
+        ResultSet resultSet2 = null;
+        ResultSet resultSet3 = null;
+
+        try {
+            connection = DB.getConnection();
+
+            preparedStatement1 = connection.prepareStatement("select res.reservationId, res.restaurantId, rest.name, res.startTimestamp, res.endTimestamp " +
+                    "from baklava.reservations as res join baklava.restaurants as rest on res.restaurantId = rest.restaurantId " +
+                    "where userId = ?");
+            preparedStatement1.setInt(1, Integer.parseInt(loggedIn));
+            resultSet1 = preparedStatement1.executeQuery();
+            int reservationId = 0;
+            int seatCount = 0;
+            int restaurantId = 0;
+            String restaurantName = "";
+            Reservation res = null;
+            Timestamp start = null;
+            Timestamp end = null;
+            //ArrayList<VictualAndDrink> victualAndDrinks = null;
+
+            //petlja
+            while (resultSet1.next()) {
+                reservationId = resultSet1.getInt(1);
+                restaurantId = resultSet1.getInt(2);
+                restaurantName = resultSet1.getString(3);
+                start = resultSet1.getTimestamp(4);
+                end = resultSet1.getTimestamp(5);
+                preparedStatement2 = connection.prepareStatement("select count(*) from baklava.reservationSeats where reservationId = ?");
+                preparedStatement2.setInt(1, reservationId);
+                resultSet2 = preparedStatement2.executeQuery();
+                while (resultSet2.next()) {
+                    seatCount = resultSet2.getInt(1);
+                }
+                //victualAndDrinks = new ArrayList<>();
+
+                // preparedStatement3 = connection.prepareStatement("select victualDrinkId, quantity, name, price")
+
+                res = new Reservation(reservationId, Integer.parseInt(loggedIn), restaurantId, start, end,
+                        null, seatCount, restaurantName);
+                reservations.add(res);
+                resultSet2.close();
+                preparedStatement2.close();
+            }
+
+
+            System.out.println(Json.toJson(reservations));
+            return ok(Json.toJson(reservations));
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                connection.close();
+            } catch(Exception e) {}
+            try {
+                connection.close();
+            } catch(Exception e) {}
+        }
+        return internalServerError("nesto je otislo dovraga");
+
+    }
+
+    public static Result cancelReservation() {
+        String loggedIn = session("connected");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+        JsonNode jsonReq = request().body().asJson();
+        CancelReservation cancelReservation = Json.fromJson(jsonReq, CancelReservation.class);
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = DB.getConnection();
+            connection.setAutoCommit(false);
+
+            String[] queries = ("delete from baklava.reservationSeats where reservationId = ?;" +
+                    "delete from baklava.reservationGuests where reservationId = ?;" +
+                    "delete from baklava.orderVictualDrink where orderid in (select orderId from baklava.reservationOrders where reservationId = ?);" +
+                    "delete from baklava.reservationOrders where reservationid = ?;" +
+                    "delete from baklava.orders where orderid in (select orderId from baklava.reservationOrders where reservationId = ?);" +
+                    "delete from baklava.reservations where reservationId = ?").split(";");
+
+            for (String query : queries) {
+                preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setInt(1, cancelReservation.reservationId);
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+            }
+
+            connection.commit();
+
+            connection.close();
+
+            return ok("rezervacija ponistena");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                connection.rollback();
+                connection.setAutoCommit(true);
+                connection.close();
+            } catch (Exception e1) {}
+            return internalServerError("nesto se pokvarilo...");
+        }
+        finally {
+            try {
+                preparedStatement.close();
+            } catch (Exception e) {}
+            try {
+                connection.setAutoCommit(true);
+                connection.close();
+            } catch (Exception e) {}
+        }
+
+    }
+
+    public static Result inviteFriend() {
         return badRequest();
     }
 
