@@ -529,9 +529,13 @@ public class Bids extends Controller {
 
     private static ConcurrentHashMap<String, ActorRef> clients = new ConcurrentHashMap<String, ActorRef>();
     private static ConcurrentHashMap<String, ActorRef> connectedManagers = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, ActorRef> managerEdit = new ConcurrentHashMap<>();
 
     public static WebSocket<String> notifyManager() {
         return WebSocket.withActor(Bids.OffersPostman::props);
+    }
+    public static WebSocket<String> notifyEdit() {
+        return WebSocket.withActor(Bids.EditPostman::props);
     }
 
     public static class OffersPostman extends UntypedActor {
@@ -552,6 +556,11 @@ public class Bids extends Controller {
                 ObjectMapper objectMapper = new ObjectMapper();
                 HashMap<String, String> request_message = objectMapper.readValue(message.toString(), HashMap.class);
                 List<Notification> userNotifications = new ArrayList<>();
+                if(request_message.get("type").equals("editRest")){
+                    managerEdit.put(request_message.get("userId"), out);
+                    this.user = request_message.get("userMail");
+                    System.out.print("konektovao se " + request_message.get("userId"));
+                }
                 if(request_message.get("type").equals("restmanConnection")){
                     connectedManagers.put(request_message.get("userId"), out);
                     this.user = request_message.get("userMail");
@@ -613,6 +622,38 @@ public class Bids extends Controller {
 
         public void postStop() throws Exception {
             System.out.println("\nWebsocket closing for: " + this.user);
+            clients.remove(this.user);
+        }
+    }
+
+
+    public static class EditPostman extends UntypedActor {
+
+        public static Props props(ActorRef out) {
+            return Props.create(Bids.EditPostman.class, out);
+        }
+
+        private final ActorRef out;
+        private String user;
+
+        public EditPostman(ActorRef out) {
+            this.out = out;
+        }
+
+        public void onReceive(Object message) throws Exception {
+            if (message instanceof String) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                HashMap<String, String> request_message = objectMapper.readValue(message.toString(), HashMap.class);
+                if(request_message.get("type").equals("editRest")){
+                    managerEdit.put(request_message.get("userId"), out);
+                    this.user = request_message.get("userMail");
+                    System.out.print("konektovaoooo se " + request_message.get("userId"));
+                }
+            }
+        }
+
+        public void postStop() throws Exception {
+            System.out.println("\nWebsocket se zatvaaara: " + this.user);
             clients.remove(this.user);
         }
     }

@@ -821,7 +821,7 @@ public class Restaurants extends Controller {
         List<VictualAndDrink> menu = new ArrayList<>();
         List<RestSection> seats = new ArrayList<>();
         List<RestSection> sectors = new ArrayList<>();
-        String posX = ""; String posY = ""; String sectorColor = "";
+        String posX = ""; String posY = ""; String sectorColor = ""; int seatId = 0;
         double restSize=0; int noOfSectors=0;
         PreparedStatement stmt = null;
         if(!(userType.equals("rest-manager")) || loggedUser == null || verified.equals("0"))
@@ -855,12 +855,13 @@ public class Restaurants extends Controller {
                     posX = set3.getString(1);
                     posY = set3.getString(2);
                     sectorColor = set3.getString(3);
+                    seatId = set3.getInt(4);
                     for(Integer seat : rezervisani){
                         if(seat == set3.getInt(4))
                             imaRezervaciju = "reserved";
 
                     }
-                    RestSection seat = new RestSection(sectorColor, posX, posY, imaRezervaciju);
+                    RestSection seat = new RestSection(sectorColor, posX, posY, imaRezervaciju, seatId);
                     seats.add(seat);
 
                 }

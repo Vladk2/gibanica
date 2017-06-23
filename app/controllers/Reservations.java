@@ -1,6 +1,8 @@
 package controllers;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import models.*;
 import org.joda.time.DateTime;
 import play.data.DynamicForm;
@@ -354,7 +356,16 @@ public class Reservations extends Controller {
                 preparedStatement1.setInt(1, seatId);
                 preparedStatement1.setInt(2, reservationId);
                 preparedStatement1.executeUpdate();
+
+                RestSection rs = new RestSection();
+                rs.seatId = seatId;
+                for(ActorRef klijent : Bids.managerEdit.values()){
+                    ObjectMapper mapper = new ObjectMapper();
+                    String notifString = mapper.writeValueAsString(seatId);
+                    klijent.tell(notifString,  ActorRef.noSender());
+                }
             }
+
 
             connection.commit();
         }

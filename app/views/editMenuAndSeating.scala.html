@@ -69,7 +69,7 @@
                                 i = sizeSqrt
                             }
                         }
-                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor|@seat.status" class="divTableCell" style="cursor:pointer;background-color:
+                    <div id="seat:@seat.posX:@seat.posY:|@seat.sectionColor|@seat.status|@seat.seatId" class="divTableCell" style="cursor:pointer;background-color:
                     @seat.sectionColor;"></div>
                     @if(i == 1) {
                             <!-- DivTableRow end --> </div>
@@ -420,6 +420,40 @@
             }
             }
         });
+
+    });
+
+    var ws;
+    var root;
+    $(function() {
+
+        root2 = "ws:" + '//' + location.host + "/notifyEdit";
+        ws2 = new WebSocket(root, "protocolTwow");
+
+        ws2.onmessage = function (event) {
+
+            var notification = JSON.parse(event.data);
+            $(".divTableCell").each(function () {
+                var polje = $(this).attr('id').split("|");
+                if(polje[3] == event.data){
+                    $(this).css("opacity", 0.5);
+                    $(this).attr("id", polje[0] + "|" + polje[1] + "|" + "reserved" + "|" + polje[3]);
+                }
+            });
+
+
+        };
+
+
+        ws2.onopen = function (event) {
+            var connection_string = {
+                "type": "editRest",
+                "userId" : "@session.get("userId")",
+                "userMail": "@session.get("connected")"
+            };
+
+            ws2.send(JSON.stringify(connection_string));
+        };
 
     });
 
