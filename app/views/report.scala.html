@@ -1,4 +1,4 @@
-@(ocena: Double, data: List[Report], workers: List[User])
+@(ocena: Double, data: List[Report], workers: List[User], meals: List[VictualAndDrink])
 
 
 @home("Report") {
@@ -12,12 +12,21 @@
         <h4>Restaurant's rating: <b>@ocena</b></h4>
               <hr style="border-color:black">
               <h4>Employee's rating: <b id="workersRating"></b></h4>
-                  <select  id="selectWorker" class="form-control" name="adresa" style="width: 240px;display: inline-block" required>
+                  <select  id="selectWorker" class="form-control"  style="width: 240px;display: inline-block" required>
                   @for(worker <- workers) {
                       <option id="@worker.email">@worker.name @worker.surname (@worker.email)</option>
                   }
                   </select>
                     <button style="display:inline-block" id="goWorker" class="btn btn-warning">Go</button>
+
+              <hr style="border-color:black">
+              <h4>Food/drink rating: <b id="mealRating"></b></h4>
+              <select  id="selectMeal" class="form-control"  style="width: 240px;display: inline-block" required>
+              @for(meal <- meals) {
+                  <option id="@meal.name">@meal.name</option>
+              }
+              </select>
+              <button style="display:inline-block" id="goMeal" class="btn btn-warning">Go</button>
               <hr style="border-color:black">
               <h4>Visits chart:</h4>
               <svg id="chart" width="660" height="500"></svg>
@@ -40,6 +49,26 @@
             contentType: 'application/json',
             success: function (r) {
                 $("#workersRating").text(r.rating);
+
+            },
+            error: function () {
+
+
+            }
+        });
+
+    });
+
+    $("#goMeal").click(function () {
+        var selektovan = $("#selectMeal").val();
+
+        var meal ={"name" : selektovan};
+        $("#mealRating").text("0");
+        myJsRoutes.controllers.Restaurants.getMealRating().ajax({
+            data: JSON.stringify(meal),
+            contentType: 'application/json',
+            success: function (r) {
+                $("#mealRating").text(r.rating);
 
             },
             error: function () {

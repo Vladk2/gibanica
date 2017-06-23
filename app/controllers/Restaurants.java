@@ -159,6 +159,38 @@ public class Restaurants extends Controller {
         return ok(Json.toJson(r));
     }
 
+    public static Result getMealRating() throws SQLException {
+
+        JsonNode json = request().body().asJson();
+        VictualAndDrink vd = Json.fromJson(json, VictualAndDrink.class);
+        double ocena = 0;
+        try (Connection connection = DB.getConnection()) {
+
+            PreparedStatement stmt = null;
+
+            stmt = connection.prepareStatement("select rr.mealRating from restaurantsRating as rr left join orders as o on o.restaurantId = rr.restaurantId left join orderVictualDrink as ovd " +
+                    "on o.orderId = ovd.orderId left join victualsanddrinks as v on ovd.victualDrinkId = v.victualsAndDrinksId where v.name = ? and o.restaurantId = ?;");
+            stmt.setInt(2, myRestId);
+            stmt.setString(1, vd.name);
+
+            ResultSet result = stmt.executeQuery();
+            int n = 0;
+
+            while (result.next()) {
+                ocena += result.getInt(1);
+                n++;
+            }
+            ocena /= n;
+        }catch(SQLException sqle) {
+            sqle.printStackTrace();
+        }
+
+        Report r = new Report();
+        r.rating = ocena;
+
+        return ok(Json.toJson(r));
+    }
+
     public static Result report() throws Exception {
 
 
@@ -179,6 +211,7 @@ public class Restaurants extends Controller {
         int n=0;
         List<Report> raport = new ArrayList<>();
         List<User> workers = new ArrayList<>();
+        List<VictualAndDrink> meals = new ArrayList<>();
         try (Connection connection = DB.getConnection()) {
 
             PreparedStatement stmt = null;
@@ -204,6 +237,18 @@ public class Restaurants extends Controller {
             while (result.next()) {
                 User worker = new User(result.getString(1), result.getString(2), result.getString(3), result.getString(4));
                 workers.add(worker);
+
+            }
+
+            stmt = connection.prepareStatement("Select name from victualsAndDrinks where restaurantId = ?;");
+
+            stmt.setInt(1, myRestId);
+            result = stmt.executeQuery();
+
+            while (result.next()) {
+                VictualAndDrink vd = new VictualAndDrink();
+                vd.name=(result.getString(1));
+                meals.add(vd);
 
             }
 
@@ -252,7 +297,7 @@ public class Restaurants extends Controller {
         }
 
 
-        return ok(report.render(ocena_rest, raport, workers));
+        return ok(report.render(ocena_rest, raport, workers, meals));
     }
 
     public static Result addRestInfoAJAX() {

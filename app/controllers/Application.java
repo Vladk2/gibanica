@@ -40,7 +40,8 @@ public class Application extends Controller {
                 routes.javascript.Bids.editOffer(),
                 routes.javascript.Bids.acceptOffer(),
                 routes.javascript.Bids.seenNotifications(),
-                routes.javascript.Restaurants.getWorkersRating()
+                routes.javascript.Restaurants.getWorkersRating(),
+                routes.javascript.Restaurants.getMealRating()
                 )
         );
     }
