@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS baklava.visits(
   visitId INT(5) NOT NULL AUTO_INCREMENT,
   userId INT(5) NOT NULL,
   restaurantId INT(5) NOT NULL,
+  visitDate	DATE NOT  NULL,
   CONSTRAINT `visit_user`
   FOREIGN KEY (userId) REFERENCES baklava.users (userId),
   CONSTRAINT `visit_restaurant`

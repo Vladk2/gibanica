@@ -5,9 +5,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import models.*;
-import play.*;
 
 
 import play.data.DynamicForm;
@@ -22,6 +20,9 @@ import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 
@@ -31,6 +32,7 @@ public class Restaurants extends Controller {
     public static int addedRestSize;
     public static List<Restaurant> restaurants = new ArrayList<Restaurant>();
     public static boolean showMenuSeatPage = false;
+    public static int myRestId;
 
     @SuppressWarnings("Duplicates")
     public static Result restaurants() {
@@ -67,7 +69,7 @@ public class Restaurants extends Controller {
 
                 if((session("userType")).equals("rest-manager")) {
 
-
+                    myRestId = Integer.parseInt(myRestaurant.id);
                     ResultSet set2 = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = " +
                             "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
                             "\"" + loggedUser + "\"" + "));").executeQuery();
@@ -125,7 +127,133 @@ public class Restaurants extends Controller {
         }
     }
 
+    public static Result getWorkersRating() throws SQLException {
 
+        JsonNode json = request().body().asJson();
+        User worker = Json.fromJson(json, User.class);
+        double ocena = 0;
+        try (Connection connection = DB.getConnection()) {
+
+            PreparedStatement stmt = null;
+
+            stmt = connection.prepareStatement("select rr.serviceRating, u.name from restaurantsRating as rr left join orders as o on o.restaurantId = rr.restaurantId left join orderVictualDrink as ovd on " +
+                    "ovd.orderId = o.orderId left join workers as w on w.userId = ovd.workerId left join users as u on u.userId = w.userId where rr.restaurantId = ? and u.email = ?;");
+            stmt.setInt(1, myRestId);
+            stmt.setString(2, worker.email);
+
+            ResultSet result = stmt.executeQuery();
+            int n = 0;
+
+            while (result.next()) {
+                ocena += result.getInt(1);
+                n++;
+            }
+            ocena /= n;
+        }catch(SQLException sqle) {
+            sqle.printStackTrace();
+        }
+
+        Report r = new Report();
+        r.rating = ocena;
+
+        return ok(Json.toJson(r));
+    }
+
+    public static Result report() throws Exception {
+
+
+        String tip = session("userType");
+        String verified = session("verified");
+        String userId = session("userId");
+        String loggedUser = session("connected");
+        String myRestName = session("myRestName");
+        // ---- prikazi ovu stranicu samo ako je korisnik ulogovani i verifikovani rest-manager.
+        if (loggedUser == null || verified.equals("0"))
+            return redirect("/");
+        else if (!tip.equals("rest-manager"))
+            return redirect("/");
+        // ----------------------------
+
+        List<Notification> notifikacije = new ArrayList<>();
+        double ocena_rest=0;
+        int n=0;
+        List<Report> raport = new ArrayList<>();
+        List<User> workers = new ArrayList<>();
+        try (Connection connection = DB.getConnection()) {
+
+            PreparedStatement stmt = null;
+
+            stmt = connection.prepareStatement("Select rating from restaurantsRating where restaurantId = ?;");
+            stmt.setInt(1, myRestId);
+            ResultSet result = stmt.executeQuery();
+
+            while (result.next()) {
+              ocena_rest += result.getInt(1);
+              n++;
+
+            }
+            ocena_rest = ocena_rest / n;
+
+
+            stmt = connection.prepareStatement("Select name, surname, email, type from users as u left join workers as w on u.userId = w.userId where w.restaurantId" +
+                    " = (select restaurantId from restaurantManagers where userId = (select userId from users where email = ?));");
+
+            stmt.setString(1, loggedUser);
+            result = stmt.executeQuery();
+
+            while (result.next()) {
+                User worker = new User(result.getString(1), result.getString(2), result.getString(3), result.getString(4));
+                workers.add(worker);
+
+            }
+
+
+            stmt = connection.prepareStatement("Select visitDate from visits where restaurantId = ?;");
+            stmt.setInt(1, myRestId);
+            result = stmt.executeQuery();
+            List<String> datumi = new ArrayList<>();
+            List<String> sedmica = new ArrayList<>();
+
+            while (result.next()) {
+                datumi.add(result.getString(1));
+            }
+            SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat format2 = new SimpleDateFormat("EEE, MMM d");
+            Date date = new Date();
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+            c.add(Calendar.DATE, -7);
+            for(int i = 0; i < 7; i++){
+                c.add(Calendar.DATE, +1);
+                String dan = format1.format(c.getTime());
+                sedmica.add(dan);
+            }
+            for(String dan : sedmica){
+                int brPoseta = 0;
+                System.out.print("DAN " + myRestId);
+                for(String datum : datumi){
+                    System.out.print("\nDATUM  " + datum);
+                    if(dan.equals(datum)){
+                        brPoseta++;
+                    }
+                }
+                    Date date2 = format1.parse(dan);
+                    String dan2 = format2.format(date2);
+                    Report r = new Report(dan2, brPoseta);
+                    raport.add(r);
+                    ObjectMapper mapper = new ObjectMapper();
+                    String notifString = mapper.writeValueAsString(r);
+                    System.out.print("OHOH: " + notifString);
+
+            }
+
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+        }
+
+
+        return ok(report.render(ocena_rest, raport, workers));
+    }
 
     public static Result addRestInfoAJAX() {
         JsonNode json = request().body().asJson();

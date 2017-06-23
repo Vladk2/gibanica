@@ -168,8 +168,7 @@ public class Bids extends Controller {
         try (Connection connection = DB.getConnection()) {
 
             PreparedStatement stmt = null;
-            PreparedStatement stmt2 = null;
-            PreparedStatement stmtDate = null;
+
             stmt = connection.prepareStatement("Select message, notificationId from notifications where userId = ?;");
             stmt.setInt(1, Integer.parseInt(userId));
             ResultSet result = stmt.executeQuery();
