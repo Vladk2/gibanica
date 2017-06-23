@@ -1323,7 +1323,7 @@ public class Orders extends Controller {
 
     }
 
-    private static boolean saveNotification(String userId, String message){
+    public static boolean saveNotification(String userId, String message){
 
         Connection connection = null;
 
@@ -1349,8 +1349,8 @@ public class Orders extends Controller {
             e.printStackTrace();
             if(connection != null){
                 try {
-                    connection.close();
                     connection.rollback();
+                    connection.close();
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -1420,7 +1420,7 @@ public class Orders extends Controller {
         return internalServerError("Something strange happened");
     }
 
-    private static ConcurrentHashMap<String, ActorRef> clients_mail = new ConcurrentHashMap<String, ActorRef>();
+    public static ConcurrentHashMap<String, ActorRef> clients_mail = new ConcurrentHashMap<String, ActorRef>();
     private static ConcurrentHashMap<String, String> clients_id = new ConcurrentHashMap<String, String>();
 
     public static WebSocket<String> proceed() {

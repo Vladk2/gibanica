@@ -538,7 +538,7 @@ public class Restaurants extends Controller {
         StringJoiner sj = new StringJoiner(", ");
         for(ArrayList value : result.values()) {
             for (Object s : value) {
-                StringBuilder build = new StringBuilder("Insert into seatconfig (posX, posY, sectorColor, restaurantId) values ");
+                StringBuilder build = new StringBuilder("Insert into seatConfig (posX, posY, sectorColor, restaurantId) values ");
                 String elem = "(?, ?, ?, ?)";
                 sj.add(elem);
             }
@@ -562,7 +562,7 @@ public class Restaurants extends Controller {
                     String boja = deo2[1];
 
 
-                    insertSeat = connection.prepareStatement("Insert into seatconfig (posX, posY, sectorColor, restaurantId)" +
+                    insertSeat = connection.prepareStatement("Insert into seatConfig (posX, posY, sectorColor, restaurantId)" +
                             " values (?,?,?, ( select restaurantId from restaurants where name = ?));");
 
                     insertSeat.setString(1, posX);

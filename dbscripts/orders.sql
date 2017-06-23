@@ -29,17 +29,17 @@ CREATE TABLE IF NOT EXISTS baklava.orderVictualDrink (
   CONSTRAINT `order_ordUsrVDconstraint`
     FOREIGN KEY (orderId) REFERENCES baklava.orders (orderId),
   CONSTRAINT `victualDrink_ordUsrVDconstraint`
-    FOREIGN KEY (victualDrinkId) REFERENCES baklava.victualsanddrinks (victualsAndDrinksId),
+    FOREIGN KEY (victualDrinkId) REFERENCES baklava.victualsAndDrinks (victualsAndDrinksId),
   CONSTRAINT `cook_orderVDconstraint`
     FOREIGN KEY (workerId) REFERENCES baklava.workers (userId),
   PRIMARY KEY (orderId, victualDrinkId)
 );
 
 CREATE TABLE IF NOT EXISTS baklava.notificationOrders (
-  notificationId  INT(5)	NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  userId	  INT(5)	NOT NULL,
-  message	  VARCHAR(100)   NOT NULL,
-  seen		  BOOLEAN	NOT NULL,
+  notificationId  INT(5) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  userId	  INT(5) NOT NULL,
+  message	  VARCHAR(100)  NOT NULL,
+  seen BOOLEAN NOT NULL,
   CONSTRAINT `userId_in_notificationOrders`
   FOREIGN KEY (userId) REFERENCES baklava.users (userId)
 );
@@ -60,5 +60,5 @@ FROM baklava.orders AS o
   LEFT JOIN baklava.users AS u ON o.guestId = u.userId
   LEFT JOIN baklava.users AS uw ON o.waiterId = uw.userId
   LEFT JOIN baklava.orderVictualDrink AS ouvd ON o.orderId = ouvd.orderId
-  LEFT JOIN baklava.victualsanddrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId
+  LEFT JOIN baklava.victualsAndDrinks AS vd ON ouvd.victualDrinkId = vd.victualsAndDrinksId
 WHERE u.userId = 1;

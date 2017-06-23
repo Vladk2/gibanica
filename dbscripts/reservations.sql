@@ -16,7 +16,7 @@ create table if not exists baklava.reservationSeats (
     constraint `reservationId_constraint_tables`
         foreign key(reservationId) references baklava.reservations(reservationId),
     constraint `seatId_constraint_tables`
-        foreign key(seatId) references baklava.seatconfig(seatId),
+        foreign key(seatId) references baklava.seatConfig(seatId),
     primary key(reservationId, seatId)
 );
 
@@ -34,3 +34,16 @@ create table if not exists baklava.reservationGuests (
 
 -- treba i tabela za porudzbine, to kasnije
 -- userId, reservationId, orderId iz orders, boolean prepareBeforeArrival default 0
+
+create table if not exists baklava.reservationOrders (
+    reservationId int(5) not null,
+    userId int(5) not null,
+    orderId int(5) not null,
+    prepareBeforeArrival boolean not null default 0,
+    constraint `resIdContstraint`
+        foreign key(reservationId) references baklava.reservations(reservationId),
+    constraint `userIdConstraint`
+        foreign key(userId) references baklava.users(userId),
+    constraint `orderIdConstraint`
+        foreign key(orderId) references baklava.orders(orderId)
+);

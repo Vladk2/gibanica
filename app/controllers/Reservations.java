@@ -14,10 +14,12 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.reserve;
 
+import javax.swing.text.AbstractDocument;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by goran on 21.6.17..
@@ -205,7 +207,7 @@ public class Reservations extends Controller {
         try {
            connection = DB.getConnection();
 
-            preparedStatement3 = connection.prepareStatement("Select posX, posY, sectorColor, seatId from seatconfig where restaurantId = ?");
+            preparedStatement3 = connection.prepareStatement("Select posX, posY, sectorColor, seatId from seatConfig where restaurantId = ?");
             preparedStatement3.setInt(1, restaurantId);
 
             set3 = preparedStatement3.executeQuery();
@@ -220,7 +222,7 @@ public class Reservations extends Controller {
                 seats.add(seat);
                 seatsMap.put(seat.seatId, seat);
             }
-            preparedStatement4 = connection.prepareStatement("Select sectorName, sectorColor from sectornames where restaurantId = ?");
+            preparedStatement4 = connection.prepareStatement("Select sectorName, sectorColor from sectorNames where restaurantId = ?");
             preparedStatement4.setInt(1, restaurantId);
             set4 = preparedStatement4.executeQuery();
 
@@ -411,9 +413,210 @@ public class Reservations extends Controller {
             return notFound();
         }
 
-        return badRequest();
+        session("currentReservationRestaurantId", Integer.toString(restaurantId));
+        session("currentReservationReservationId", Integer.toString(reservationId));
+
+        List<VictualAndDrink> menu = new ArrayList<>();
+        try {
+            Connection connection = DB.getConnection();
+            PreparedStatement preparedStatement = null;
+
+            preparedStatement = connection.prepareStatement("Select name, description, price, type, restaurantId from victualsanddrinks where restaurantId = ?");
+            preparedStatement.setInt(1, restaurantId);
+
+            ResultSet result = preparedStatement.executeQuery();
+
+            while (result.next()) {
+                VictualAndDrink vd = new VictualAndDrink(result.getString(1),
+                        result.getString(2),
+                        result.getDouble(3), result.getString(4));
+                menu.add(vd);
+            }
+
+            result.close();
+            preparedStatement.close();
+            connection.close();
+
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ok(views.html.reserve4.render(userId, restaurantId,
+                reservationId, loggedIn, menu, new Order()));
     }
 
+
+    @SuppressWarnings("Duplicates")
+    public static Result createGuestOrder() {
+        String loggedIn = session("userId");
+        if (loggedIn == null) {
+            return redirect("/"); // nije ulogovan
+        }
+
+        String email = session("connected");
+
+        int reservationId = 0;
+        int restaurantId = 0;
+
+        try {
+            restaurantId = Integer.parseInt(session("currentReservationRestaurantId"));
+
+            reservationId = Integer.parseInt(session("currentReservationReservationId"));
+        } catch (Exception e) {return badRequest("no reservations in progress");}
+
+        try (Connection connection = DB.getConnection()){
+            connection.setAutoCommit(false);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode ajax_json = request().body().asJson();
+            Order request = objectMapper.convertValue(ajax_json, Order.class);
+
+            HashMap<String, String> ord_items = new HashMap<>();
+
+            List<String> order_items = new ArrayList<>();
+
+            // random konobar
+            PreparedStatement rndKonobar = connection.prepareStatement("" +
+                    "select userId from baklava.users where type = 'waiter' and userId in\n" +
+                    "    (select userId from workers where restaurantId = ?)\n" +
+                    "    order by rand() limit 1");
+            rndKonobar.setInt(1, restaurantId);
+
+            ResultSet setKonobar = rndKonobar.executeQuery();
+            int konobarId = 0;
+            while (setKonobar.next()) {
+                konobarId = setKonobar.getInt(1);
+            }
+            setKonobar.close();
+            rndKonobar.close();
+            System.out.println("random waiter: " + konobarId);
+
+            // vreme kreiranja porudzbine
+            java.util.Date current_datetime = new java.util.Date();
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            String sqlDate = formatter.format(current_datetime);
+            String sqlTime = new SimpleDateFormat("HH:MM:s").format(current_datetime);
+
+            String new_order = "Insert into orders (orderDate, orderTime, guestId, waiterId, restaurantId," +
+                    " price) values (?, ?, ?, ?, ?, ?);";
+
+            PreparedStatement pstmt = connection.prepareStatement(new_order);
+            pstmt.setString(1, sqlDate);
+            pstmt.setString(2, sqlTime);
+            pstmt.setString(3, loggedIn);
+            pstmt.setInt(4, konobarId);
+            pstmt.setInt(5, restaurantId);
+            pstmt.setBigDecimal(6, request.getPrice());
+
+            pstmt.execute();
+
+            // uzmi id porudzbine koja je tek povezana
+
+            String get_orderId = "Select orderId from orders where waiterId = ? and orderDate = ? and orderTime = ?";
+            PreparedStatement getId = connection.prepareCall(get_orderId);
+            getId.setInt(1, konobarId);
+            getId.setString(2, sqlDate);
+            getId.setString(3, sqlTime);
+
+            String orderId = "";
+
+            ResultSet resultSet = getId.executeQuery();
+
+            while(resultSet.next()){
+                orderId = resultSet.getString(1);
+            }
+
+            resultSet.close();
+            getId.close();
+
+            String new_query = "Insert into orderVictualDrink (orderId, victualDrinkId, isReady, accepted, workerId," +
+                    "quantity) values (?, (Select victualsAndDrinksId from victualsanddrinks where name = ?), " +
+                    "0, 0, ?, ?);";
+
+
+            int workerIdVictuals = 0;
+            int workerIdDrinks = 0;
+            for(int i = 0; i < request.getVictualsDrinks().size(); i++) {
+                if (request.getVictualsDrinks().get(i).get("type").equals("victual") && workerIdVictuals == 0) {
+                    //query za random kuvara
+                    PreparedStatement rndQuery = connection.prepareStatement("" +
+                            "select userId from baklava.users where type = 'chef' and userId in " +
+                            "    (select userId from workers where restaurantId = ?) " +
+                                    "    order by rand() limit 1");
+                    rndQuery.setInt(1, restaurantId);
+                    ResultSet rndSet = rndQuery.executeQuery();
+                    while (rndSet.next()) {
+                        workerIdVictuals = rndSet.getInt(1);
+                    }
+                    rndSet.close();
+                    rndQuery.close();
+                    System.out.println("random chef: " + workerIdVictuals);
+                    request.getVictualsDrinks().get(i).put("workerId", Integer.toString(workerIdVictuals));
+                }
+                else if (request.getVictualsDrinks().get(i).get("type").equals("drink") && workerIdDrinks == 0) {
+                    //query za random barmena
+                    PreparedStatement rndQuery = connection.prepareStatement("" +
+                            "select userId from baklava.users where type = 'bartender' and userId in " +
+                            "    (select userId from workers where restaurantId = ?) " +
+                            "    order by rand() limit 1");
+                    rndQuery.setInt(1, restaurantId);
+                    ResultSet rndSet = rndQuery.executeQuery();
+                    while (rndSet.next()) {
+                        workerIdDrinks = rndSet.getInt(1);
+                    }
+                    rndSet.close();
+                    rndQuery.close();
+                    System.out.println("random bartender: " + workerIdDrinks);
+                    request.getVictualsDrinks().get(i).put("workerId", Integer.toString(workerIdDrinks));
+                }
+
+                PreparedStatement preparedStatement1 = connection.prepareStatement(new_query);
+                preparedStatement1.setString(1, orderId);
+                preparedStatement1.setString(2, request.getVictualsDrinks().get(i).get("name"));
+                if (request.getVictualsDrinks().get(i).get("type").equals("victual")) {
+                    preparedStatement1.setInt(3, workerIdVictuals);
+                } else if (request.getVictualsDrinks().get(i).get("type").equals("drink")) {
+                    preparedStatement1.setInt(3, workerIdDrinks);
+                }
+                preparedStatement1.setString(4, request.getVictualsDrinks().get(i).get("quantity"));
+
+                preparedStatement1.execute();
+                preparedStatement1.close();
+            }
+
+            //popuni tabelu reservationOrders - reservationId, userId, orderId, PrepareBeforeArrival
+            PreparedStatement reservationOrders = connection.prepareStatement("insert into baklava.reservationOrders " +
+                    "(reservationId, userId, orderId) values (?, ?, ?)");
+            reservationOrders.setInt(1, reservationId);
+            reservationOrders.setString(2, loggedIn);
+            reservationOrders.setString(3, orderId);
+            reservationOrders.executeUpdate();
+
+            connection.commit();
+
+            System.out.println(request.getVictualsDrinks());
+
+            String notification_message = String.format("Order ID: %s\nThere are new orders waiting " +
+                    "for your confirmation.", request.getOrderId());
+            for(int i = 0; i < request.getVictualsDrinks().size(); i++) {
+                Orders.saveNotification(request.getVictualsDrinks().get(i).get("workerId"), notification_message);
+                try {
+                    for(Map.Entry<String, ActorRef> websocket : Orders.clients_mail.entrySet()){
+                        websocket.getValue().tell(notification_message, ActorRef.noSender());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            connection.close();
+
+            return ok("Order successfully created");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return internalServerError("nesto otislo dovraga");
+        }
+    }
 
     public static Result inviteFriend() {
 

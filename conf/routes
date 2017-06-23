@@ -24,6 +24,7 @@ GET         /reserve1/:restaurantId      controllers.Reservations.reserve1(resta
 POST        /reserve2                    controllers.Reservations.reserve2()
 POST        /reserve3                    controllers.Reservations.reserve3()
 GET         /reserve4                    controllers.Reservations.reserve4(userIdStr, restaurantIdStr, reservationIdStr)
+POST        /createGuestOrder            controllers.Reservations.createGuestOrder()
 POST        /inviteFriend                controllers.Reservations.inviteFriend()
 POST        /cancelInvite                controllers.Reservations.cancelInvite()
 

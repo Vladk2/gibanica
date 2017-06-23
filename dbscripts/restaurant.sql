@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS baklava.restaurants (
   size         INT(3)       NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS baklava.victualsanddrinks (
+CREATE TABLE IF NOT EXISTS baklava.victualsAndDrinks (
   victualsAndDrinksId INT(5)       NOT NULL PRIMARY KEY AUTO_INCREMENT,
   name                VARCHAR(100) NOT NULL,
   description         VARCHAR(100) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS baklava.victualsanddrinks (
   FOREIGN KEY (restaurantId) REFERENCES baklava.restaurants (restaurantId)
 );
 
-CREATE TABLE IF NOT EXISTS baklava.seatconfig (
+CREATE TABLE IF NOT EXISTS baklava.seatConfig (
   seatId INT(12)       NOT NULL PRIMARY KEY AUTO_INCREMENT,
   posX         VARCHAR(3)  NOT NULL,
   posY         VARCHAR(3)  NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS baklava.seatconfig (
   FOREIGN KEY (restaurantId) REFERENCES baklava.restaurants (restaurantId)
 );
 
-CREATE TABLE IF NOT EXISTS baklava.sectornames (
+CREATE TABLE IF NOT EXISTS baklava.sectorNames (
   sectorName   VARCHAR(25) NOT NULL,
   sectorColor  VARCHAR(15) NOT NULL,
   restaurantId INT(5)      NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS baklava.sectornames (
 
 -- veza za menadzere restorana
 
-CREATE TABLE IF NOT EXISTS baklava.restaurantmanagers (
+CREATE TABLE IF NOT EXISTS baklava.restaurantManagers (
   restaurantId INT(5) NOT NULL,
   userId       INT(5) NOT NULL,
   CONSTRAINT `user_id_in_restaurant_managers`

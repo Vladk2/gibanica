@@ -1,0 +1,304 @@
+@(userId: Int, restaurantId: Int, reservationId: Int, email: String, menu: List[VictualAndDrink], order: Order)
+@import java.math.BigInteger; var i = 1; var seatColor = "red"; var edit_or_create = "new";
+
+@home("Reserve a table") {
+    <i style="float: right;
+        margin-right: 40px;">logged in: <b>@email</b></i> <br> <br>
+
+    <center>
+        <h1>Create a new order</h1>
+
+        <br> <br>
+        <form>
+        <div class="col-sm-6 col-md-4 col-lg-8" >
+            <div class="col-sm-3 col-md-4 col-lg-4" >
+            </div>
+            <div class="col-sm-6 col-md-4 col-lg-4" style="text-align: center;">
+            </div>
+            <div class="col-sm-3 col-md-4 col-lg-4" >
+
+
+
+            </div>
+        </div>
+
+        <br><br><br>
+        <div class="col-lg-7" >
+            <br> <br>
+            <b style="align-content: center;font-size: medium"> FOOD MENU </b> <br> <br>
+            <div  style="height: 130px;
+                overflow: auto">
+                <table class="table-bordered" style="width: 450px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 150px">Victual Name</th>
+                            <th style="width: 260px">Victual Description</th>
+                            <th style="width: 60px">Victual(RSD)</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="vicList">
+                    @for(victual <- menu) {
+                        @if(victual.tip == "victual") {
+                            <tr style="cursor:pointer" about="@victual.price" class="orderFood"
+                            id="@victual.name.replaceAll("\\s+", "")" content="@victual.name" resource="victual">
+                                <td>@victual.name</td>
+                                <td>@victual.description</td>
+                                <td>@victual.price</td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <b style="align-content: center;font-size: medium"> DRINK MENU </b> <br> <br>
+            <div  style="height: 130px;
+                overflow: auto">
+                <table class="table-bordered" style="width: 450px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 150px">Drink Name</th>
+                            <th style="width: 260px">Drink Description</th>
+                            <th style="width: 60px">Price(RSD)</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="drinkList">
+                    @for(drink <- menu) {
+                        @if(drink.tip == "drink") {
+                            <tr style="cursor:pointer" about="@drink.price" class="orderFood"
+                            id="@drink.name.replaceAll("\\s+", "")" content="@drink.name" resource="drink">
+                                <td>@drink.name</td>
+                                <td>@drink.description</td>
+                                <td>@drink.price</td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <br> <br>
+        <b style="align-content: center;font-size: medium"> ORDER </b> <br> <br>
+        <div class="col-lg-5">
+            <table class="table-bordered table-striped" style="width: 300px;">
+                <thead>
+                    <tr>
+                        <th style="width: 150px">Name</th>
+                        <th style="width: 60px">Price (RSD)</th>
+                        <th style="width: 60px">Amount</th>
+
+                    </tr>
+                </thead>
+                <tbody id="orderList">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-lg-12">
+            <br> <br>
+                <button class="btn btn-warning btn-block " id="addOrder" style="width: 150px">
+                    <b>ADD ORDER</b>
+                </button>
+
+            <br> <br>
+        </div>
+        </form>
+
+        <script>
+                $(document).ready(function(){
+                    // promena boje dugmeta kad je na profilnoj
+                    $("#newOrderButton").css("color", "#ffb79b");
+
+                    $('.orderFood').on('click', function(e) {
+                        //name to add
+                        var name = $(this).attr('id');
+                        //console.log(name);
+                        //price to add
+                        var price = $(this).attr('about');
+                        //check if food is already in order list
+                        var check = false;
+                        var name_to_display = $(this).attr('content');
+
+                        //console.log($(this).attr('resource'));
+
+                        var item_type = 'victual';
+                        if($(this).attr('resource') === 'drink')
+                            item_type = 'drink';
+
+                        $("#orderList").each(function(){
+                            $(this).find('td').each(function(){
+                                if($(this).text() === name_to_display) {
+                                    var current_amount = $("#" + name + "amount").text();
+                                    $("#" + name + "amount").html(parseInt(current_amount) + 1);
+                                    check = true;
+                                }
+                            });
+                        });
+
+                        var row = "<tr class=\"removeFood\" style=\"cursor:pointer\" " +
+                                "content=\"" + name_to_display + "\" + resource=\"" + item_type + "\"> " +
+                                "<td>" + name_to_display + "</td>"
+                                + "<td>" + price + "</td>"
+                                + "<td id=\"" + name + "amount\">1</td>"
+                                + "<td style=\"display:none\">" + item_type
+                                + "</td></tr>";
+
+                        if(!check){
+                            $("#orderList").append(row);
+                        }
+
+                        e.preventDefault();
+                    });
+                    $(document).on('click', '.removeFood', function() {
+
+                        console.log($(this).attr('resource'));
+                        var request = {
+                            'orderId': '@order.getOrderId()',
+                            'name': $(this).attr('content')
+                        };
+
+                        $('#orderList').each(function() {
+                            var row = $(this);
+                            @if(edit_or_create == "edit"){
+                            // ajax poziv koji ce proveriti da li je stavka
+                            // sa porudzbine prihvacena
+                            $.ajax({
+                                type: "POST",
+                                url: "/checkOrderItem",
+                                data: JSON.stringify(request),
+                                contentType: 'application/json',
+                                success: function (response) {
+                                    var json_response = JSON.parse(response);
+                                    console.log(json_response['isAccepted']);
+                                    if(json_response['isAccepted'] === 'true'){
+                                        alert('This order is accepted and cannot be changed');
+                                    } else {
+                                        var item = $('#' + request['name'].replace(/\s/g,'') + 'amount');
+                                        if(parseInt(item.text()) > 1){
+                                            item.html(parseInt(item.text()) - 1);
+                                        } else {
+                                            item.parent().remove();
+                                        }
+                                    }
+                                },
+                                error: function (error) {
+                                    alert(error.responseText);
+                                }
+                            });
+                            return false;
+                            } else {
+                            // uklanjaj slobodno stavke sa porudzbine
+                            var item_dup = $('#' + request['name'].replace(/\s/g, '') + 'amount');
+                            if(parseInt(item_dup.text()) > 1){
+                                item_dup.html(parseInt(item_dup.text()) - 1);
+                            } else {
+                                item_dup.parent().remove();
+                            }
+                            }
+                        });
+                    });
+
+                    $("#addOrder, #editOrder").on('click', function(e){
+                        // order Id ce biti broj rezervacije gde se kreira porudzbina
+                        var type = 'new';
+                        if($(this).attr('id') === 'editOrder')
+                            type = 'edit';
+
+                        var order = {"type": type,
+                            "victualsDrinks": []
+                        };
+
+                        var orderId = '@order.getOrderId()';
+
+                        var bartenderId = $('#bartenders').val();
+                        var cookId = $('#cooks').val();
+                        var guestId = $('#guests').val();
+
+
+                        if('@edit_or_create' === 'new'){
+
+                            /* Iz comboboxa za kuvara/sankera uzmi vrednost i stavi za
+                             * svaku stavku u porudzbini */
+
+                            order['guestId'] = guestId;
+                            orderId = '';
+                        }
+                        else
+                            order['orderId'] = orderId;
+                        //workerId se prikuplja sa forme
+
+                        var global_price = 0.0;
+                        var prices = [];
+
+                        $("#orderList").each(function(){
+                            $(this).find('tr').each(function(){
+                                var i = 0;
+                                var item = {};
+                                var workerId = cookId;
+                                var type = "victual";
+                                if($(this).attr('resource') == 'drink'){
+                                    workerId = bartenderId;
+                                    type = "drink";
+                                }
+                                $(this).find('td').each(function(){
+                                    var item_price = 0.0;
+
+                                    if(i === 0){
+                                        item["name"] = $(this).text();
+                                    } else if(i === 1){
+                                        item["price"] = $(this).text();
+                                    } else if(i === 2){
+                                        item["quantity"] = $(this).text();
+                                        item_price = parseFloat(item["price"]) * parseInt(item["quantity"]);
+                                    }
+                                    item['workerId'] = workerId;
+                                    item['type'] = type;
+                                    prices.push(item_price);
+                                    i++;
+                                });
+                                order["victualsDrinks"].push(item);
+                            });
+                        });
+
+                        prices.forEach(function(element) {
+                            global_price += element;
+                        });
+
+                        order["price"] = global_price.toString();
+
+                        console.log(order);
+
+                        /*Object.keys(order).forEach(function() {
+                         var value = order["victualsDrinks"];
+                         console.log(value);
+                         });*/
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/createGuestOrder",
+                            data: JSON.stringify(order),
+                            contentType: 'application/json',
+                            success: function (response) {
+                                console.log("Created");
+                                console.log(order);
+                                alert(response);
+                                window.location.href = 'restaurants';
+                            },
+                            error: function (error) {
+                                alert(error.responseText);
+                            }
+
+                        });
+
+                        e.preventDefault();
+                    });
+                });
+        </script>
+
+    </center>
+
+
+}
