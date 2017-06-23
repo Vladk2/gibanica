@@ -40,7 +40,26 @@
                                     <tbody>
                                     @for(restaurant <- restaurants) {
                                         <tr>
-                                            <td>
+                                            <td id="formsColumn">
+                                                @if(ratings.size == 0){
+                                                    <form class="rating" id="@(restaurant.id + "rst")">
+                                                        <fieldset class="fsets" id="@(restaurant.id + "fset")">
+                                                        <div class="rate">
+                                                            <input type="radio" class="stars" id="@(restaurant.id + "s5")" name="rate"/>
+                                                            <label for="@(restaurant.id + "s5")" title="text">5 stars</label>
+                                                            <input type="radio" class="stars" id="@(restaurant.id + "s4")" name="rate"/>
+                                                            <label for="@(restaurant.id + "s4")" title="text">4 stars</label>
+                                                            <input type="radio" class="stars" id="@(restaurant.id + "s3")" name="rate"/>
+                                                            <label for="@(restaurant.id + "s3")" title="text">3 stars</label>
+                                                            <input type="radio" class="stars" id="@(restaurant.id + "s2")" name="rate"/>
+                                                            <label for="@(restaurant.id + "s2")" title="text">2 stars</label>
+                                                            <input type="radio" class="stars" id="@(restaurant.id + "s1")" name="rate"/>
+                                                            <label for="@(restaurant.id + "s1")" title="text">1 star</label>
+                                                        </div>
+                                                        </fieldset>
+                                                            <!--<input type="submit" name="save" value="Sacuvaj" /><br><br> -->
+                                                    </form>
+                                                }
                                                 @for(rating <- ratings){
                                                     @if(rating.get("restaurantId").trim().equals(restaurant.id)){
                                                         @if(rating.get("rating").equals("0")){
@@ -287,7 +306,10 @@
                                 data: JSON.stringify(form_),
                                 contentType: 'application/json',
                                 success: function () {
-                                    $("#" + form_["form_id"] + "fset").prop("disabled", true);
+                                    $('#' + id).remove();
+                                    $('formsColumn').append('<p>You rated us with ' + form_['rating'] +
+                                            'stars. Thank you.</p>');
+                                    //$("#" + form_["form_id"] + "fset").prop("disabled", true);
                                 },
                                 error: function (error) {
                                     alert(error.responseText);
@@ -306,8 +328,9 @@
                         //$("#cow")[0].play();
 
                         var restaurant = $(this).attr('id');
-                        var id = restaurant.substring(0, restaurant.length - 4);
 
+                        var id = restaurant.substring(0, restaurant.length - 4);
+                        console.log(id);
                         if($('#' + id + 'rst').length)
                             alert('You have to rate our restaurant first.');
                         else{
