@@ -765,6 +765,7 @@ public class Restaurants extends Controller {
         List<RestSection> sectors = new ArrayList<>();
         String posX = ""; String posY = ""; String sectorColor = "";
         double restSize=0; int noOfSectors=0;
+        PreparedStatement stmt = null;
         if(!(userType.equals("rest-manager")) || loggedUser == null || verified.equals("0"))
             return redirect("/");
 
@@ -779,16 +780,29 @@ public class Restaurants extends Controller {
                     menu.add(vd);
 
                 }
-                ResultSet set3 = connection.prepareStatement("Select posX, posY, sectorColor from seatconfig where restaurantId = " +
+                ResultSet set3 = connection.prepareStatement("Select posX, posY, sectorColor, seatId from seatconfig where restaurantId = " +
                         "(select restaurantId from restaurantmanagers where userId = (select userId from users where email = " +
                         "\"" + loggedUser + "\"" + "));").executeQuery();
-
+                List<Integer> rezervisani = new ArrayList<>();
+                String imaRezervaciju = "free";
                 while (set3.next()) {
+                    stmt = connection.prepareStatement("select seatId from baklava.reservationSeats where (reservationId in (select reservationId from reservations where restaurantId = ?));");
+                    stmt.setInt(1, myRestId);
+                    ResultSet result = stmt.executeQuery();
+                    imaRezervaciju = "free";
+                    while (result.next()) {
+                        rezervisani.add(result.getInt(1));
+                    }
                     restSize++;
                     posX = set3.getString(1);
                     posY = set3.getString(2);
                     sectorColor = set3.getString(3);
-                    RestSection seat = new RestSection(sectorColor, posX, posY, "free");
+                    for(Integer seat : rezervisani){
+                        if(seat == set3.getInt(4))
+                            imaRezervaciju = "reserved";
+
+                    }
+                    RestSection seat = new RestSection(sectorColor, posX, posY, imaRezervaciju);
                     seats.add(seat);
 
                 }

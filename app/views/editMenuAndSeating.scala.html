@@ -356,6 +356,14 @@
 
     });
 
+    $(".divTableCell").each(function () {
+        var polje = $(this).attr('id').split("|");
+        if(polje[2] == "reserved"){
+            $(this).css("opacity", 0.5);
+        }
+
+    });
+
     $(".divTableCell").click(function () {
         var this_id = $(this).attr('id');
         var new_id = this_id.split('|');
