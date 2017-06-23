@@ -1,4 +1,4 @@
-@(ocena: Double, data: List[Report], workers: List[User], meals: List[VictualAndDrink])
+@(ocena: Double, data: List[Report], workers: List[User], meals: List[VictualAndDrink], income: Double)
 
 
 @home("Report") {
@@ -10,6 +10,8 @@
           <div style="width: 50em">
               <hr style="border-color:black">
         <h4>Restaurant's rating: <b>@ocena</b></h4>
+              <hr style="border-color:black">
+              <h4>Restaurant's income: <b>@income RSD</b></h4>
               <hr style="border-color:black">
               <h4>Employee's rating: <b id="workersRating"></b></h4>
                   <select  id="selectWorker" class="form-control"  style="width: 240px;display: inline-block" required>
@@ -28,6 +30,7 @@
               </select>
               <button style="display:inline-block" id="goMeal" class="btn btn-warning">Go</button>
               <hr style="border-color:black">
+
               <h4>Visits chart:</h4>
               <svg id="chart" width="660" height="500"></svg>
           </div>

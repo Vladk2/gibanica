@@ -208,7 +208,9 @@ public class Restaurants extends Controller {
 
         List<Notification> notifikacije = new ArrayList<>();
         double ocena_rest=0;
+        double prihod=0;
         int n=0;
+        int nn=0;
         List<Report> raport = new ArrayList<>();
         List<User> workers = new ArrayList<>();
         List<VictualAndDrink> meals = new ArrayList<>();
@@ -227,6 +229,17 @@ public class Restaurants extends Controller {
             }
             ocena_rest = ocena_rest / n;
 
+
+            stmt = connection.prepareStatement("Select price from orders where restaurantId = ?;");
+            stmt.setInt(1, myRestId);
+            result = stmt.executeQuery();
+
+            while (result.next()) {
+                prihod += result.getInt(1);
+                nn++;
+
+            }
+            prihod /= nn;
 
             stmt = connection.prepareStatement("Select name, surname, email, type from users as u left join workers as w on u.userId = w.userId where w.restaurantId" +
                     " = (select restaurantId from restaurantManagers where userId = (select userId from users where email = ?));");
@@ -297,7 +310,7 @@ public class Restaurants extends Controller {
         }
 
 
-        return ok(report.render(ocena_rest, raport, workers, meals));
+        return ok(report.render(ocena_rest, raport, workers, meals, prihod));
     }
 
     public static Result addRestInfoAJAX() {
