@@ -619,6 +619,18 @@
                                 'date': dan, 'startTime': odKad, 'endTime': doKad,
                                 'workingSector': sektor, 'workerEmail': workerEmail
                             };
+                            myJsRoutes.controllers.Restaurants.addWorkTime().ajax({
+                                  data: JSON.stringify(worktime),
+                                  contentType: 'application/json',
+                                success: function () {
+                         $("#WorkTimeMessage").html("<div class='alert alert-success' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Success! </b> Working hours added! </div>");
+                              $("#WorkTimeMessage").show();
+                           },
+                           error: function() {
+                       $("#WorkTimeMessage").html("<div class='alert alert-danger' id='workTimeAdded'  > <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times; </a> <b> Oops! </b> Employee already works on that day! </div>");
+                          $("#WorkTimeMessage").show();
+                             }
+                          });
 
 
                         }
